@@ -5,13 +5,13 @@
 [worldserver]
 
 ########################################
-# My module configuration
+# ModZoneDifficulty
 ########################################
 #
-#    MyModule.Enable
-#        Description: Enable my module and print "Hello World" message at server start
+#    ModZoneDifficulty.Enable
+#        Description: Enable my module.
 #        Default:     0 - Disabled
 #                     1 - Enabled
 #
 
-MyModule.Enable = 0
+ModZoneDifficulty.Enable = 1
