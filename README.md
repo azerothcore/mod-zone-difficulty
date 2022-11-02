@@ -19,3 +19,8 @@ The output will be multiplied by the value you input in `HealingNerfValue` as it
 ```
 output = output * HealingNerfValue
 ```
+
+## Changing values
+
+You can edit the `zone_difficulty_info_content.sql` file to apply changes. They will be applied by the autoupdater the next time you restart your server.
+Alternatively, you may edit the `zone_difficulty_info` table in your `world` database and use the `reload config` command to reload the values.
