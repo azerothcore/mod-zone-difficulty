@@ -8,6 +8,14 @@
 #include "Chat.h"
 #include "ZoneDifficulty.h"
 
+enum Spells
+{
+    SPELL_BEACON_OF_LIGHT     = 53652, // Holy Light... each procs a different spell...
+    SPELL_BEACON_OF_LIGHT_2   = 53654, // Flash of Light, Holy Shock
+    SPELL_ANCESTRAL_AWAKENING = 52752,
+    SPELL_SWIFTMEND           = 18562
+};
+
 ZoneDifficulty* ZoneDifficulty::instance()
 {
     static ZoneDifficulty instance;
@@ -46,7 +54,7 @@ class mod_zone_difficulty_unitscript : public UnitScript
 public:
     mod_zone_difficulty_unitscript() : UnitScript("mod_zone_difficulty_unitscript") { }
 
-    void ModifyHealReceived(Unit* target, Unit* healer, uint32& heal, SpellInfo const* /*spellInfo*/) override
+    void ModifyHealReceived(Unit* target, Unit* healer, uint32& heal, SpellInfo const* spellInfo) override
     {
         if (!sZoneDifficulty->IsEnabled)
         {
@@ -55,6 +63,28 @@ public:
 
         if (target->IsPlayer())
         {
+            if (spellInfo)
+            {
+                switch (spellInfo->Id)
+                {
+                    case SPELL_BEACON_OF_LIGHT:
+                    case SPELL_BEACON_OF_LIGHT_2:
+                    case SPELL_ANCESTRAL_AWAKENING:
+                    case SPELL_SWIFTMEND:
+                        // Don't apply reductions to those spells, as they are procs
+                        // and the source spell is already nerfed.
+                        return;
+                    default:
+                        break;
+                }
+
+                // Skip spells not affected by vulnerability (potions) and bandages
+                if (spellInfo->HasAttribute(SPELL_ATTR0_NO_IMMUNITIES) || spellInfo->Mechanic == MECHANIC_BANDAGE)
+                {
+                    return;
+                }
+            }
+
             uint32 mapId = target->GetMapId();
             if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end())
             {
