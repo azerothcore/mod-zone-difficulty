@@ -16,7 +16,8 @@ enum Spells
     SPELL_BEACON_OF_LIGHT_2   = 53654, // Flash of Light, Holy Shock
     SPELL_ANCESTRAL_AWAKENING = 52752,
     SPELL_DIVINE_AEGIS        = 47753,
-    SPELL_SWIFTMEND           = 18562
+    SPELL_SWIFTMEND           = 18562,
+    SPELL_ANDOROV_HEALING     = 25516
 };
 
 ZoneDifficulty* ZoneDifficulty::instance()
@@ -133,12 +134,13 @@ public:
             {
                 switch (spellInfo->Id)
                 {
+                    // Don't apply reductions to those spells, as they are procs
+                    // and the source spell is already nerfed.
                     case SPELL_BEACON_OF_LIGHT:
                     case SPELL_BEACON_OF_LIGHT_2:
                     case SPELL_ANCESTRAL_AWAKENING:
                     case SPELL_SWIFTMEND:
-                        // Don't apply reductions to those spells, as they are procs
-                        // and the source spell is already nerfed.
+                    case SPELL_ANDOROV_HEALING: // Don't nerf this one so we don't alter the usual strategy.
                         return;
                     default:
                         break;
