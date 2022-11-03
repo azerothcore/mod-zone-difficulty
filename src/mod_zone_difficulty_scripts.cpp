@@ -17,7 +17,8 @@ enum Spells
     SPELL_ANCESTRAL_AWAKENING = 52752,
     SPELL_DIVINE_AEGIS        = 47753,
     SPELL_SWIFTMEND           = 18562,
-    SPELL_ANDOROV_HEALING     = 25516
+    SPELL_ANDOROV_HEALING     = 25516,
+    SPELL_GLYPH_OF_PWS        = 56160
 };
 
 ZoneDifficulty* ZoneDifficulty::instance()
