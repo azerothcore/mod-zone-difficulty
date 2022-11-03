@@ -67,7 +67,7 @@ public:
             return;
         }
 
-        if (target->IsPlayer())
+        if (target->IsPlayer() || target->IsPet() || target->IsGuardian())
         {
             uint32 mapId = target->GetMapId();
             if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end())
@@ -129,7 +129,7 @@ public:
             return;
         }
 
-        if (target->IsPlayer())
+        if (target->IsPlayer() || target->IsPet() || target->IsGuardian())
         {
             if (spellInfo)
             {
