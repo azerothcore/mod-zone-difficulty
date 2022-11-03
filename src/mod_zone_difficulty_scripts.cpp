@@ -77,6 +77,12 @@ public:
                         return;
                     }
 
+                    // Skip spells not affected by vulnerability (potions)
+                    if (spellInfo->HasAttribute(SPELL_ATTR0_NO_IMMUNITIES))
+                    {
+                        return;
+                    }
+
                     if (spellInfo->HasAura(SPELL_AURA_SCHOOL_ABSORB))
                     {
                         std::list<AuraEffect*> AuraEffectList  = target->GetAuraEffectsByType(SPELL_AURA_SCHOOL_ABSORB);
