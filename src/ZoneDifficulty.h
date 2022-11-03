@@ -19,6 +19,7 @@ public:
     static ZoneDifficulty* instance();
 
     void LoadMapDifficultySettings();
+    [[nondiscard]] bool IsValidNerfTarget(Unit* unit);
 
     bool IsEnabled{ false };
     bool IsDebugInfoEnabled{ false };

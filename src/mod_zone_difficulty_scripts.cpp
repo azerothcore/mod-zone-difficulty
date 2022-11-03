@@ -55,6 +55,11 @@ void ZoneDifficulty::LoadMapDifficultySettings()
     }
 }
 
+bool ZoneDifficulty::IsValidNerfTarget(Unit* target)
+{
+    return target->IsPlayer() || target->IsPet() || target->IsGuardian();
+}
+
 class mod_zone_difficulty_unitscript : public UnitScript
 {
 public:
@@ -67,7 +72,7 @@ public:
             return;
         }
 
-        if (target->IsPlayer() || target->IsPet() || target->IsGuardian())
+        if (sZoneDifficulty->IsValidNerfTarget(target))
         {
             uint32 mapId = target->GetMapId();
             if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end())
@@ -129,7 +134,7 @@ public:
             return;
         }
 
-        if (target->IsPlayer() || target->IsPet() || target->IsGuardian())
+        if (sZoneDifficulty->IsValidNerfTarget(target))
         {
             if (spellInfo)
             {
