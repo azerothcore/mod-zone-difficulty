@@ -15,3 +15,12 @@
 #
 
 ModZoneDifficulty.Enable = 1
+
+#
+#    ModZoneDifficulty.DebugInfo
+#        Description: Displays debug data for absorbs.
+#        Default:     0 - Disabled
+#                     1 - Enabled
+#
+
+ModZoneDifficulty.DebugInfo = 0

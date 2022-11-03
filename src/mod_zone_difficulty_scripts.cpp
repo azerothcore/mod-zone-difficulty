@@ -6,6 +6,8 @@
 #include "Player.h"
 #include "Config.h"
 #include "Chat.h"
+#include "SpellAuras.h"
+#include "SpellAuraEffects.h"
 #include "ZoneDifficulty.h"
 
 enum Spells
@@ -42,7 +44,8 @@ void ZoneDifficulty::LoadMapDifficultySettings()
 
             ZoneDifficultyData data;
             data.HealingNerfPct = (*result)[1].Get<float>();
-            data.Enabled = (*result)[2].Get<bool>();
+            data.AbsorbNerfPct = (*result)[2].Get<float>();
+            data.Enabled = (*result)[3].Get<bool>();
             sZoneDifficulty->ZoneDifficultyInfo[mapId] = data;
 
         } while (result->NextRow());
@@ -53,6 +56,57 @@ class mod_zone_difficulty_unitscript : public UnitScript
 {
 public:
     mod_zone_difficulty_unitscript() : UnitScript("mod_zone_difficulty_unitscript") { }
+
+    void OnAuraApply(Unit* target, Aura* aura) override
+    {
+        if (!sZoneDifficulty->IsEnabled)
+        {
+            return;
+        }
+
+        if (target->IsPlayer())
+        {
+            uint32 mapId = target->GetMapId();
+            if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end())
+            {
+                if (SpellInfo const* spellInfo = aura->GetSpellInfo())
+                {
+                    if (spellInfo->HasAura(SPELL_AURA_SCHOOL_ABSORB))
+                    {
+                        std::list<AuraEffect*> AuraEffectList  = target->GetAuraEffectsByType(SPELL_AURA_SCHOOL_ABSORB);
+
+                        for (AuraEffect* eff : AuraEffectList)
+                        {
+                            if (sZoneDifficulty->IsDebugInfoEnabled)
+                            {
+                                if (Player* player = target->ToPlayer()) // Pointless check? Perhaps.
+                                {
+                                    if (player->GetSession())
+                                    {
+                                        ChatHandler(target->ToPlayer()->GetSession()).PSendSysMessage("Spell: %s (%u) Base Value: %i", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, eff->GetAmount());
+                                    }
+                                }
+                            }
+
+                            int32 absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyInfo[target->GetMapId()].HealingNerfPct;
+                            eff->SetAmount(absorb);
+
+                            if (sZoneDifficulty->IsDebugInfoEnabled)
+                            {
+                                if (Player* player = target->ToPlayer()) // Pointless check? Perhaps.
+                                {
+                                    if (player->GetSession())
+                                    {
+                                        ChatHandler(target->ToPlayer()->GetSession()).PSendSysMessage("Spell: %s (%u) Post Nerf Value: %i", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, eff->GetAmount());
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     void ModifyHealReceived(Unit* target, Unit* healer, uint32& heal, SpellInfo const* spellInfo) override
     {
@@ -105,12 +159,14 @@ public:
     void OnAfterConfigLoad(bool reload) override
     {
         sZoneDifficulty->IsEnabled = sConfigMgr->GetOption<bool>("ModZoneDifficulty.Enable", false);
+        sZoneDifficulty->IsDebugInfoEnabled = sConfigMgr->GetOption<bool>("ModZoneDifficulty.DebugInfo", false);
         sZoneDifficulty->LoadMapDifficultySettings();
     }
 
     void OnStartup() override
     {
         sZoneDifficulty->IsEnabled = sConfigMgr->GetOption<bool>("ModZoneDifficulty.Enable", false);
+        sZoneDifficulty->IsDebugInfoEnabled = sConfigMgr->GetOption<bool>("ModZoneDifficulty.DebugInfo", false);
         sZoneDifficulty->LoadMapDifficultySettings();
     }
 };

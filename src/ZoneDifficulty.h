@@ -9,6 +9,7 @@
 struct ZoneDifficultyData
 {
     float HealingNerfPct;
+    float AbsorbNerfPct;
     bool Enabled;
 };
 
@@ -20,6 +21,7 @@ public:
     void LoadMapDifficultySettings();
 
     bool IsEnabled{ false };
+    bool IsDebugInfoEnabled{ false };
 
     typedef std::map<uint32, ZoneDifficultyData> ZoneDifficultyDataMap;
     ZoneDifficultyDataMap ZoneDifficultyInfo;
