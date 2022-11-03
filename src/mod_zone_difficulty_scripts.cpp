@@ -15,6 +15,7 @@ enum Spells
     SPELL_BEACON_OF_LIGHT     = 53652, // Holy Light... each procs a different spell...
     SPELL_BEACON_OF_LIGHT_2   = 53654, // Flash of Light, Holy Shock
     SPELL_ANCESTRAL_AWAKENING = 52752,
+    SPELL_DIVINE_AEGIS        = 47753,
     SPELL_SWIFTMEND           = 18562
 };
 
@@ -71,6 +72,11 @@ public:
             {
                 if (SpellInfo const* spellInfo = aura->GetSpellInfo())
                 {
+                    if (spellInfo->Id == SPELL_DIVINE_AEGIS)
+                    {
+                        return;
+                    }
+
                     if (spellInfo->HasAura(SPELL_AURA_SCHOOL_ABSORB))
                     {
                         std::list<AuraEffect*> AuraEffectList  = target->GetAuraEffectsByType(SPELL_AURA_SCHOOL_ABSORB);
