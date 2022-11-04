@@ -39,12 +39,6 @@ void ZoneDifficulty::LoadMapDifficultySettings()
         do
         {
             uint32 mapId = (*result)[0].Get<uint32>();
-            if (!sMapStore.LookupEntry(mapId))
-            {
-                LOG_ERROR("modules", "ModZoneDifficulty: Invalid map issued. Map {} does not exist. Skipping.", (*result)[0].Get<uint32>());
-                continue;
-            }
-
             ZoneDifficultyData data;
             data.HealingNerfPct = (*result)[1].Get<float>();
             data.AbsorbNerfPct = (*result)[2].Get<float>();
