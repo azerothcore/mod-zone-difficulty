@@ -10,6 +10,8 @@ struct ZoneDifficultyData
 {
     float HealingNerfPct;
     float AbsorbNerfPct;
+    float SpellDamageBuffPct;
+    float MeleeDamageBuffPct;
     bool Enabled;
 };
 

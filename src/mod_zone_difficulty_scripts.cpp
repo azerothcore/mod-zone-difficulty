@@ -31,7 +31,9 @@ void ZoneDifficulty::LoadMapDifficultySettings()
             ZoneDifficultyData data;
             data.HealingNerfPct = (*result)[1].Get<float>();
             data.AbsorbNerfPct = (*result)[2].Get<float>();
-            data.Enabled = (*result)[3].Get<bool>();
+            data.MeleeDamageBuffPct = (*result)[3].Get<float>();
+            data.SpellDamageBuffPct = (*result)[4].Get<float>();
+            data.Enabled = (*result)[5].Get<bool>();
             sZoneDifficulty->ZoneDifficultyInfo[mapId] = data;
 
         } while (result->NextRow());
@@ -162,6 +164,49 @@ public:
 
                     heal = heal * sZoneDifficulty->ZoneDifficultyInfo[target->GetMapId()].HealingNerfPct;
                 }
+            }
+        }
+    }
+
+    void ModifySpellDamageTaken(Unit* target, Unit* attacker, int32& damage, SpellInfo const* spellInfo) override
+    {
+        if (!sZoneDifficulty->IsEnabled)
+        {
+            return;
+        }
+
+        if (sZoneDifficulty->IsValidNerfTarget(target) && !attacker->IsPlayer())
+        {
+            if (spellInfo)
+            {
+                if (sZoneDifficulty->SpellNerfOverrides.find(spellInfo->Id) != sZoneDifficulty->SpellNerfOverrides.end())
+                {
+                    damage = damage * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id];
+                    return;
+                }
+            }
+
+            uint32 mapId = target->GetMapId();
+            if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end())
+            {
+                damage = damage * sZoneDifficulty->ZoneDifficultyInfo[target->GetMapId()].SpellDamageBuffPct;
+            }
+        }
+    }
+
+    void ModifyMeleeDamage(Unit* target, Unit* attacker, uint32& damage) override
+    {
+        if (!sZoneDifficulty->IsEnabled)
+        {
+            return;
+        }
+
+        if (sZoneDifficulty->IsValidNerfTarget(target) && !attacker->IsPlayer())
+        {
+            uint32 mapId = target->GetMapId();
+            if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end())
+            {
+                damage = damage * sZoneDifficulty->ZoneDifficultyInfo[target->GetMapId()].MeleeDamageBuffPct;
             }
         }
     }
