@@ -24,3 +24,21 @@ ModZoneDifficulty.Enable = 1
 #
 
 ModZoneDifficulty.DebugInfo = 0
+
+#
+#    ModZoneDifficulty.SpellBuff.OnlyBosses
+#        Description: Spell damage buffs will only affect bosses.
+#        Default:     0 - Disabled
+#                     1 - Enabled
+#
+
+ModZoneDifficulty.SpellBuff.OnlyBosses = 0
+
+#
+#    ModZoneDifficulty.MeleeBuff.OnlyBosses
+#        Description: Melee damage buffs will only affect bosses.
+#        Default:     0 - Disabled
+#                     1 - Enabled
+#
+
+ModZoneDifficulty.MeleeBuff.OnlyBosses = 0

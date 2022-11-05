@@ -8,6 +8,7 @@
 #include "Chat.h"
 #include "SpellAuras.h"
 #include "SpellAuraEffects.h"
+#include "Unit.h"
 #include "ZoneDifficulty.h"
 
 ZoneDifficulty* ZoneDifficulty::instance()
@@ -175,6 +176,14 @@ public:
             return;
         }
 
+        if (sConfigMgr->GetOption<bool>("ModZoneDifficulty.SpellBuff.OnlyBosses", false))
+        {
+            if (attacker->ToCreature() && !attacker->ToCreature()->IsDungeonBoss())
+            {
+                return;
+            }
+        }
+
         if (sZoneDifficulty->IsValidNerfTarget(target) && !attacker->IsPlayer())
         {
             if (spellInfo)
@@ -184,12 +193,34 @@ public:
                     damage = damage * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id];
                     return;
                 }
+
+                if (sZoneDifficulty->IsDebugInfoEnabled)
+                {
+                    if (Player* player = target->ToPlayer()) // Pointless check? Perhaps.
+                    {
+                        if (player->GetSession())
+                        {
+                            ChatHandler(target->ToPlayer()->GetSession()).PSendSysMessage("Spell: %s (%u) Before Nerf Value: %i (%f)", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, damage, sZoneDifficulty->ZoneDifficultyInfo[target->GetMapId()].SpellDamageBuffPct);
+                        }
+                    }
+                }
             }
 
             uint32 mapId = target->GetMapId();
             if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end())
             {
                 damage = damage * sZoneDifficulty->ZoneDifficultyInfo[target->GetMapId()].SpellDamageBuffPct;
+            }
+
+            if (sZoneDifficulty->IsDebugInfoEnabled)
+            {
+                if (Player* player = target->ToPlayer()) // Pointless check? Perhaps.
+                {
+                    if (player->GetSession())
+                    {
+                        ChatHandler(target->ToPlayer()->GetSession()).PSendSysMessage("Spell: %s (%u) Post Nerf Value: %i", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, damage);
+                    }
+                }
             }
         }
     }
@@ -199,6 +230,14 @@ public:
         if (!sZoneDifficulty->IsEnabled)
         {
             return;
+        }
+
+        if (sConfigMgr->GetOption<bool>("ModZoneDifficulty.MeleeBuff.OnlyBosses", false))
+        {
+            if (attacker->ToCreature() && !attacker->ToCreature()->IsDungeonBoss())
+            {
+                return;
+            }
         }
 
         if (sZoneDifficulty->IsValidNerfTarget(target) && !attacker->IsPlayer())
