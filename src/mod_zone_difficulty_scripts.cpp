@@ -10,17 +10,6 @@
 #include "SpellAuraEffects.h"
 #include "ZoneDifficulty.h"
 
-enum Spells
-{
-    SPELL_BEACON_OF_LIGHT     = 53652, // Holy Light... each procs a different spell...
-    SPELL_BEACON_OF_LIGHT_2   = 53654, // Flash of Light, Holy Shock
-    SPELL_ANCESTRAL_AWAKENING = 52752,
-    SPELL_DIVINE_AEGIS        = 47753,
-    SPELL_SWIFTMEND           = 18562,
-    SPELL_ANDOROV_HEALING     = 25516,
-    SPELL_GLYPH_OF_PWS        = 56160
-};
-
 ZoneDifficulty* ZoneDifficulty::instance()
 {
     static ZoneDifficulty instance;
