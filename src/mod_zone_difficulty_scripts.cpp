@@ -176,7 +176,7 @@ public:
             return;
         }
 
-        // Disclaimer: also affects boss adds.
+        // Disclaimer: also affects disables boss adds buff.
         if (sConfigMgr->GetOption<bool>("ModZoneDifficulty.SpellBuff.OnlyBosses", false))
         {
             if (attacker->ToCreature() && !attacker->ToCreature()->IsDungeonBoss())
@@ -233,7 +233,7 @@ public:
             return;
         }
 
-        // Disclaimer: also affects boss adds.
+        // Disclaimer: also affects disables boss adds buff.
         if (sConfigMgr->GetOption<bool>("ModZoneDifficulty.MeleeBuff.OnlyBosses", false))
         {
             if (attacker->ToCreature() && !attacker->ToCreature()->IsDungeonBoss())
