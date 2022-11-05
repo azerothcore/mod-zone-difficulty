@@ -24,3 +24,7 @@ output = output * HealingNerfValue
 
 You can edit the `zone_difficulty_info_content.sql` file to apply changes. They will be applied by the autoupdater the next time you restart your server.
 Alternatively, you may edit the `zone_difficulty_info` table in your `world` database and use the `reload config` command to reload the values.
+
+## Authors
+
+- [Nyeriah](https://github.com/Nyeriah)
