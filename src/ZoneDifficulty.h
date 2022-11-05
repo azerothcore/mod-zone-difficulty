@@ -26,6 +26,7 @@ public:
 
     typedef std::map<uint32, ZoneDifficultyData> ZoneDifficultyDataMap;
     ZoneDifficultyDataMap ZoneDifficultyInfo;
+    std::map<uint32, float> SpellNerfOverrides;
 
 };
 

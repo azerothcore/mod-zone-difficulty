@@ -47,6 +47,18 @@ void ZoneDifficulty::LoadMapDifficultySettings()
 
         } while (result->NextRow());
     }
+
+    if (QueryResult result = WorldDatabase.Query("SELECT * FROM zone_difficulty_spelloverrides"))
+    {
+        do
+        {
+            if ((*result)[2].Get<bool>())
+            {
+                sZoneDifficulty->SpellNerfOverrides[(*result)[0].Get<uint32>()] = (*result)[1].Get<uint32>();
+            }
+
+        } while (result->NextRow());
+    }
 }
 
 bool ZoneDifficulty::IsValidNerfTarget(Unit* target)
@@ -73,11 +85,6 @@ public:
             {
                 if (SpellInfo const* spellInfo = aura->GetSpellInfo())
                 {
-                    if (spellInfo->Id == SPELL_DIVINE_AEGIS)
-                    {
-                        return;
-                    }
-
                     // Skip spells not affected by vulnerability (potions)
                     if (spellInfo->HasAttribute(SPELL_ATTR0_NO_IMMUNITIES))
                     {
@@ -90,6 +97,11 @@ public:
 
                         for (AuraEffect* eff : AuraEffectList)
                         {
+                            if ((eff->GetAuraType() != SPELL_AURA_SCHOOL_ABSORB) || (eff->GetSpellInfo()->Id != spellInfo->Id))
+                            {
+                                continue;
+                            }
+
                             if (sZoneDifficulty->IsDebugInfoEnabled)
                             {
                                 if (Player* player = target->ToPlayer()) // Pointless check? Perhaps.
@@ -102,6 +114,12 @@ public:
                             }
 
                             int32 absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyInfo[target->GetMapId()].HealingNerfPct;
+
+                            if (sZoneDifficulty->SpellNerfOverrides.find(spellInfo->Id) != sZoneDifficulty->SpellNerfOverrides.end())
+                            {
+                                absorb = eff->GetAmount() * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id];
+                            }
+
                             eff->SetAmount(absorb);
 
                             if (sZoneDifficulty->IsDebugInfoEnabled)
@@ -132,20 +150,6 @@ public:
         {
             if (spellInfo)
             {
-                switch (spellInfo->Id)
-                {
-                    // Don't apply reductions to those spells, as they are procs
-                    // and the source spell is already nerfed.
-                    case SPELL_BEACON_OF_LIGHT:
-                    case SPELL_BEACON_OF_LIGHT_2:
-                    case SPELL_ANCESTRAL_AWAKENING:
-                    case SPELL_SWIFTMEND:
-                    case SPELL_ANDOROV_HEALING: // Don't nerf this one so we don't alter the usual strategy.
-                        return;
-                    default:
-                        break;
-                }
-
                 // Skip spells not affected by vulnerability (potions) and bandages
                 if (spellInfo->HasAttribute(SPELL_ATTR0_NO_IMMUNITIES) || spellInfo->Mechanic == MECHANIC_BANDAGE)
                 {
@@ -158,6 +162,15 @@ public:
             {
                 if (sZoneDifficulty->ZoneDifficultyInfo[target->GetMapId()].Enabled)
                 {
+                    if (spellInfo)
+                    {
+                        if (sZoneDifficulty->SpellNerfOverrides.find(mapId) != sZoneDifficulty->SpellNerfOverrides.end())
+                        {
+                            heal = heal * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id];
+                            return;
+                        }
+                    }
+
                     heal = heal * sZoneDifficulty->ZoneDifficultyInfo[target->GetMapId()].HealingNerfPct;
                 }
             }
