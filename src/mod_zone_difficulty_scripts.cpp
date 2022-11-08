@@ -24,6 +24,12 @@ void ZoneDifficulty::LoadMapDifficultySettings()
         return;
     }
 
+    // Default values for when there is no entry in the db for duels (index 0xFFFFFFFF)
+    ZoneDifficultyInfo[DUEL_INDEX].HealingNerfPct = 1
+    ZoneDifficultyInfo[DUEL_INDEX].AbsorbNerfPct = 1
+    ZoneDifficultyInfo[DUEL_INDEX].MeleeDamageBuffPct = 1
+    ZoneDifficultyInfo[DUEL_INDEX].SpellDamageBuffPct = 1
+
     if (QueryResult result = WorldDatabase.Query("SELECT * FROM zone_difficulty_info"))
     {
         do
@@ -72,8 +78,19 @@ public:
 
         if (sZoneDifficulty->IsValidNerfTarget(target))
         {
+            int32 absorb = 1
             uint32 mapId = target->GetMapId();
-            if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end())
+            //if the player who is responsible for the target is in a duel, apply values for PvP
+            if (target->GetAffectingPlayer()->duel && target->GetAffectingPlayer()->duel->State == DUEL_STATE_IN_PROGRESS))
+            {
+                absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX].HealingNerfPct;
+            }
+            else if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end())
+            {
+                absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyInfo[mapId].HealingNerfPct;
+            }
+
+            if !absorb = 1
             {
                 if (SpellInfo const* spellInfo = aura->GetSpellInfo())
                 {
@@ -105,8 +122,6 @@ public:
                                 }
                             }
 
-                            int32 absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyInfo[target->GetMapId()].HealingNerfPct;
-
                             if (sZoneDifficulty->SpellNerfOverrides.find(spellInfo->Id) != sZoneDifficulty->SpellNerfOverrides.end())
                             {
                                 absorb = eff->GetAmount() * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id];
@@ -131,6 +146,7 @@ public:
         }
     }
 
+
     void ModifyHealReceived(Unit* target, Unit* healer, uint32& heal, SpellInfo const* spellInfo) override
     {
         if (!sZoneDifficulty->IsEnabled)
@@ -152,7 +168,7 @@ public:
             uint32 mapId = target->GetMapId();
             if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end())
             {
-                if (sZoneDifficulty->ZoneDifficultyInfo[target->GetMapId()].Enabled)
+                if (sZoneDifficulty->ZoneDifficultyInfo[mapId].Enabled)
                 {
                     if (spellInfo)
                     {
@@ -163,8 +179,13 @@ public:
                         }
                     }
 
-                    heal = heal * sZoneDifficulty->ZoneDifficultyInfo[target->GetMapId()].HealingNerfPct;
+                    heal = heal * sZoneDifficulty->ZoneDifficultyInfo[mapId].HealingNerfPct;
                 }
+            }
+            //if the player who is responsible for the target is in a duel, apply values for PvP
+            else if (target->GetAffectingPlayer()->duel && target->GetAffectingPlayer()->duel->State == DUEL_STATE_IN_PROGRESS))
+            {
+                heal = heal * sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX].HealingNerfPct;
             }
         }
     }
@@ -207,10 +228,18 @@ public:
                 }
             }
 
-            uint32 mapId = target->GetMapId();
-            if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end())
+            if (!attacker->IsPlayer())
             {
-                damage = damage * sZoneDifficulty->ZoneDifficultyInfo[target->GetMapId()].SpellDamageBuffPct;
+                uint32 mapId = target->GetMapId();
+                if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end())
+                {
+                    damage = damage * sZoneDifficulty->ZoneDifficultyInfo[mapId].SpellDamageBuffPct;
+                }
+            }
+            //if the player who is responsible for the target is in a duel, apply values for PvP
+            else if (target->GetAffectingPlayer()->duel && target->GetAffectingPlayer()->duel->State == DUEL_STATE_IN_PROGRESS))
+            {
+                damage = damage * sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX].SpellDamageBuffPct;
             }
 
             if (sZoneDifficulty->IsDebugInfoEnabled)
@@ -242,12 +271,20 @@ public:
             }
         }
 
-        if (sZoneDifficulty->IsValidNerfTarget(target) && !attacker->IsPlayer())
+        if (sZoneDifficulty->IsValidNerfTarget(target))
         {
-            uint32 mapId = target->GetMapId();
-            if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end())
+            if (!attacker->IsPlayer())
             {
-                damage = damage * sZoneDifficulty->ZoneDifficultyInfo[target->GetMapId()].MeleeDamageBuffPct;
+                uint32 mapId = target->GetMapId();
+                if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end())
+                {
+                    damage = damage * sZoneDifficulty->ZoneDifficultyInfo[mapId].MeleeDamageBuffPct;
+                }
+            }
+            //if the player who is responsible for the target is in a duel, apply values for PvP
+            else if (target->GetAffectingPlayer()->duel && target->GetAffectingPlayer()->duel->State == DUEL_STATE_IN_PROGRESS))
+            {
+                damage = damage * sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX].MeleeDamageBuffPct;
             }
         }
     }

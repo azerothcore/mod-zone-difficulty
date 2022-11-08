@@ -15,6 +15,8 @@ struct ZoneDifficultyData
     bool Enabled;
 };
 
+DUEL_INDEX = 0xFFFFFFFF
+
 class ZoneDifficulty
 {
 public:
