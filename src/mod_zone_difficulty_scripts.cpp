@@ -25,10 +25,10 @@ void ZoneDifficulty::LoadMapDifficultySettings()
     }
 
     // Default values for when there is no entry in the db for duels (index 0xFFFFFFFF)
-    ZoneDifficultyInfo[DUEL_INDEX].HealingNerfPct = 1
-    ZoneDifficultyInfo[DUEL_INDEX].AbsorbNerfPct = 1
-    ZoneDifficultyInfo[DUEL_INDEX].MeleeDamageBuffPct = 1
-    ZoneDifficultyInfo[DUEL_INDEX].SpellDamageBuffPct = 1
+    ZoneDifficultyInfo[DUEL_INDEX].HealingNerfPct = 1;
+    ZoneDifficultyInfo[DUEL_INDEX].AbsorbNerfPct = 1;
+    ZoneDifficultyInfo[DUEL_INDEX].MeleeDamageBuffPct = 1;
+    ZoneDifficultyInfo[DUEL_INDEX].SpellDamageBuffPct = 1;
 
     if (QueryResult result = WorldDatabase.Query("SELECT * FROM zone_difficulty_info"))
     {
@@ -78,10 +78,10 @@ public:
 
         if (sZoneDifficulty->IsValidNerfTarget(target))
         {
-            int32 absorb = 1
+            float absorb = 1;
             uint32 mapId = target->GetMapId();
             //if the player who is responsible for the target is in a duel, apply values for PvP
-            if (target->GetAffectingPlayer()->duel && target->GetAffectingPlayer()->duel->State == DUEL_STATE_IN_PROGRESS))
+            if (target->GetAffectingPlayer()->duel && target->GetAffectingPlayer()->duel->State == DUEL_STATE_IN_PROGRESS)
             {
                 absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX].HealingNerfPct;
             }
