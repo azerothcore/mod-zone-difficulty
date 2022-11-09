@@ -90,7 +90,7 @@ public:
                 absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyInfo[mapId].HealingNerfPct;
             }
 
-            if !absorb = 1
+            if (!absorb = 1)
             {
                 if (SpellInfo const* spellInfo = aura->GetSpellInfo())
                 {
