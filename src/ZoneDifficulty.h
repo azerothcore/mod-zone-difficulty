@@ -24,7 +24,7 @@ public:
 
     void LoadMapDifficultySettings();
     [[nondiscard]] bool IsValidNerfTarget(Unit* unit);
-    [[nondiscard]] bool ShouldNerfAbsorb(uint32* mapId, Unit* target);
+    [[nondiscard]] bool ShouldNerfAbsorb(uint32 mapId, Unit* target);
 
     bool IsEnabled{ false };
     bool IsDebugInfoEnabled{ false };
