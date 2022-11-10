@@ -64,7 +64,7 @@ bool ZoneDifficulty::IsValidNerfTarget(Unit* target)
     return target->IsPlayer() || target->IsPet() || target->IsGuardian();
 }
 
-bool ZoneDifficulty::ShouldNerfAbsorb(uint32* mapId, Unit* target)
+bool ZoneDifficulty::ShouldNerfAbsorb(uint32 mapId, Unit* target)
 {
     if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end())
     {
