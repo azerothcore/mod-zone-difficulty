@@ -85,7 +85,7 @@ public:
             {
                 absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX].HealingNerfPct;
             }
-            else if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end()) || (!absorb = 1)
+            else if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end()) || (absorb != 1)
             {
                 if (SpellInfo const* spellInfo = aura->GetSpellInfo())
                 {
