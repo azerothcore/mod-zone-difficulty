@@ -68,13 +68,13 @@ bool ZoneDifficulty::ShouldNerfAbsorb(uint32* mapId, Unit* target)
 {
     if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end())
     {
-        return true
+        return true;
     }
     else if (target->GetAffectingPlayer()->duel && target->GetAffectingPlayer()->duel->State == DUEL_STATE_IN_PROGRESS)
     {
-        return true
+        return true;
     }
-    return false    // Is this required?
+    return false;    // Is this required?
 }
 
 class mod_zone_difficulty_unitscript : public UnitScript
@@ -82,7 +82,7 @@ class mod_zone_difficulty_unitscript : public UnitScript
 public:
     mod_zone_difficulty_unitscript() : UnitScript("mod_zone_difficulty_unitscript") { }
 
-void OnAuraApply(Unit* target, Aura* aura) override
+    void OnAuraApply(Unit* target, Aura* aura) override
     {
         if (!sZoneDifficulty->IsEnabled)
         {
