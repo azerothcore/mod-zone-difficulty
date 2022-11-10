@@ -64,12 +64,25 @@ bool ZoneDifficulty::IsValidNerfTarget(Unit* target)
     return target->IsPlayer() || target->IsPet() || target->IsGuardian();
 }
 
+bool ZoneDifficulty::ShouldNerfAbsorb(uint32* mapId, Unit* target)
+{
+    if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end())
+    {
+        return true
+    }
+    else if (target->GetAffectingPlayer()->duel && target->GetAffectingPlayer()->duel->State == DUEL_STATE_IN_PROGRESS)
+    {
+        return true
+    }
+    return false    // Is this required?
+}
+
 class mod_zone_difficulty_unitscript : public UnitScript
 {
 public:
     mod_zone_difficulty_unitscript() : UnitScript("mod_zone_difficulty_unitscript") { }
 
-    void OnAuraApply(Unit* target, Aura* aura) override
+void OnAuraApply(Unit* target, Aura* aura) override
     {
         if (!sZoneDifficulty->IsEnabled)
         {
@@ -78,14 +91,8 @@ public:
 
         if (sZoneDifficulty->IsValidNerfTarget(target))
         {
-            int32 absorb = 1;
             uint32 mapId = target->GetMapId();
-            //if the player who is responsible for the target is in a duel, apply values for PvP
-            if (target->GetAffectingPlayer()->duel && target->GetAffectingPlayer()->duel->State == DUEL_STATE_IN_PROGRESS)
-            {
-                absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX].HealingNerfPct;
-            }
-            else if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end()) || (absorb != 1)
+            if (sZoneDifficulty->ShouldNerfAbsorb(mapId,target))
             {
                 if (SpellInfo const* spellInfo = aura->GetSpellInfo())
                 {
@@ -116,14 +123,19 @@ public:
                                     }
                                 }
                             }
-                            if (absorb = 1)
-                            {
-                                absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyInfo[mapId].HealingNerfPct;
 
-                                if (sZoneDifficulty->SpellNerfOverrides.find(spellInfo->Id) != sZoneDifficulty->SpellNerfOverrides.end())
-                                {
-                                    absorb = eff->GetAmount() * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id];
-                                }
+                            if (target->GetAffectingPlayer()->duel && target->GetAffectingPlayer()->duel->State == DUEL_STATE_IN_PROGRESS)
+                            {
+                                int32 absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX].HealingNerfPct;
+                            }
+                            else
+                            {
+                                int32 absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyInfo[mapId].HealingNerfPct;
+                            }
+
+                            if (sZoneDifficulty->SpellNerfOverrides.find(spellInfo->Id) != sZoneDifficulty->SpellNerfOverrides.end())
+                            {
+                                absorb = eff->GetAmount() * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id];
                             }
 
                             eff->SetAmount(absorb);
@@ -182,7 +194,7 @@ public:
                 }
             }
             //if the player who is responsible for the target is in a duel, apply values for PvP
-            else if (target->GetAffectingPlayer()->duel && target->GetAffectingPlayer()->duel->State == DUEL_STATE_IN_PROGRESS))
+            else if (target->GetAffectingPlayer()->duel && target->GetAffectingPlayer()->duel->State == DUEL_STATE_IN_PROGRESS)
             {
                 heal = heal * sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX].HealingNerfPct;
             }
@@ -236,7 +248,7 @@ public:
                 }
             }
             //if the player who is responsible for the target is in a duel, apply values for PvP
-            else if (target->GetAffectingPlayer()->duel && target->GetAffectingPlayer()->duel->State == DUEL_STATE_IN_PROGRESS))
+            else if (target->GetAffectingPlayer()->duel && target->GetAffectingPlayer()->duel->State == DUEL_STATE_IN_PROGRESS)
             {
                 damage = damage * sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX].SpellDamageBuffPct;
             }
@@ -281,7 +293,7 @@ public:
                 }
             }
             //if the player who is responsible for the target is in a duel, apply values for PvP
-            else if (target->GetAffectingPlayer()->duel && target->GetAffectingPlayer()->duel->State == DUEL_STATE_IN_PROGRESS))
+            else if (target->GetAffectingPlayer()->duel && target->GetAffectingPlayer()->duel->State == DUEL_STATE_IN_PROGRESS)
             {
                 damage = damage * sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX].MeleeDamageBuffPct;
             }
