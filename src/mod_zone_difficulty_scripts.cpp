@@ -74,7 +74,7 @@ bool ZoneDifficulty::ShouldNerfAbsorb(uint32 mapId, Unit* target)
     {
         return true;
     }
-    return false;    // Is this required?
+    return false;
 }
 
 class mod_zone_difficulty_unitscript : public UnitScript
@@ -124,13 +124,15 @@ public:
                                 }
                             }
 
+                            int32 absorb
+
                             if (target->GetAffectingPlayer()->duel && target->GetAffectingPlayer()->duel->State == DUEL_STATE_IN_PROGRESS)
                             {
-                                int32 absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX].HealingNerfPct;
+                                absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX].HealingNerfPct;
                             }
                             else
                             {
-                                int32 absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyInfo[mapId].HealingNerfPct;
+                                absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyInfo[mapId].HealingNerfPct;
                             }
 
                             if (sZoneDifficulty->SpellNerfOverrides.find(spellInfo->Id) != sZoneDifficulty->SpellNerfOverrides.end())
