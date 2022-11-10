@@ -78,19 +78,14 @@ public:
 
         if (sZoneDifficulty->IsValidNerfTarget(target))
         {
-            float absorb = 1;
+            int32 absorb = 1;
             uint32 mapId = target->GetMapId();
             //if the player who is responsible for the target is in a duel, apply values for PvP
             if (target->GetAffectingPlayer()->duel && target->GetAffectingPlayer()->duel->State == DUEL_STATE_IN_PROGRESS)
             {
                 absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX].HealingNerfPct;
             }
-            else if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end())
-            {
-                absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyInfo[mapId].HealingNerfPct;
-            }
-
-            if (!absorb = 1)
+            else if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end()) || (!absorb = 1)
             {
                 if (SpellInfo const* spellInfo = aura->GetSpellInfo())
                 {
@@ -121,10 +116,14 @@ public:
                                     }
                                 }
                             }
-
-                            if (sZoneDifficulty->SpellNerfOverrides.find(spellInfo->Id) != sZoneDifficulty->SpellNerfOverrides.end())
+                            if (absorb = 1)
                             {
-                                absorb = eff->GetAmount() * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id];
+                                absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyInfo[mapId].HealingNerfPct;
+
+                                if (sZoneDifficulty->SpellNerfOverrides.find(spellInfo->Id) != sZoneDifficulty->SpellNerfOverrides.end())
+                                {
+                                    absorb = eff->GetAmount() * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id];
+                                }
                             }
 
                             eff->SetAmount(absorb);
