@@ -124,7 +124,7 @@ public:
                                 }
                             }
 
-                            int32 absorb
+                            int32 absorb = 0;
 
                             if (target->GetAffectingPlayer()->duel && target->GetAffectingPlayer()->duel->State == DUEL_STATE_IN_PROGRESS)
                             {
