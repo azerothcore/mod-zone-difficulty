@@ -23,7 +23,8 @@ public:
     static ZoneDifficulty* instance();
 
     void LoadMapDifficultySettings();
-    [[nondiscard]] bool IsValidNerfTarget(Unit* unit);
+    [[nondiscard]] bool IsValidNerfTarget(Unit* target);
+    [[nondiscard]] bool ShouldNerfInDuels(Unit* target);
     [[nondiscard]] bool ShouldNerfAbsorb(uint32 mapId, Unit* target);
 
     bool IsEnabled{ false };
@@ -33,6 +34,11 @@ public:
     ZoneDifficultyDataMap ZoneDifficultyInfo;
     std::map<uint32, float> SpellNerfOverrides;
 
+};
+
+enum ModDiffSettings
+{
+    SETTING_DUEL_DEBUFF = 0
 };
 
 #define sZoneDifficulty ZoneDifficulty::instance()

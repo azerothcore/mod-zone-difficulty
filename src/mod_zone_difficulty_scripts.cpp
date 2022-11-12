@@ -77,6 +77,31 @@ bool ZoneDifficulty::ShouldNerfAbsorb(uint32 mapId, Unit* target)
     return false;
 }
 
+bool ZoneDifficulty::ShouldNerfInDuels(Unit* target)
+{
+    if (!target->GetAffectingPlayer()->duel && target->GetAffectingPlayer()->duel->State == DUEL_STATE_IN_PROGRESS)
+    {
+        return false;
+    }
+
+    if (!target->GetAffectingPlayer()->duel->Opponent)
+    {
+        return false;
+    }
+
+    if (!target->GetAffectingPlayer()->duel->Opponent->GetPlayerSetting("mod-zone-difficulty", SETTING_DUEL_DEBUFF).value)
+    {
+        return false;
+    }
+
+    if (!target->GetAffectingPlayer()->GetPlayerSetting("mod-zone-difficulty", SETTING_DUEL_DEBUFF).value)
+    {
+        return false;
+    }
+
+    return true;
+}
+
 class mod_zone_difficulty_unitscript : public UnitScript
 {
 public:
@@ -92,7 +117,7 @@ public:
         if (sZoneDifficulty->IsValidNerfTarget(target))
         {
             uint32 mapId = target->GetMapId();
-            if (sZoneDifficulty->ShouldNerfAbsorb(mapId,target))
+            if (sZoneDifficulty->ShouldNerfAbsorb(mapId, target))
             {
                 if (SpellInfo const* spellInfo = aura->GetSpellInfo())
                 {
@@ -104,7 +129,7 @@ public:
 
                     if (spellInfo->HasAura(SPELL_AURA_SCHOOL_ABSORB))
                     {
-                        std::list<AuraEffect*> AuraEffectList  = target->GetAuraEffectsByType(SPELL_AURA_SCHOOL_ABSORB);
+                        std::list<AuraEffect*> AuraEffectList = target->GetAuraEffectsByType(SPELL_AURA_SCHOOL_ABSORB);
 
                         for (AuraEffect* eff : AuraEffectList)
                         {
@@ -125,12 +150,13 @@ public:
                             }
 
                             int32 absorb = 0;
-
-                            if (target->GetAffectingPlayer()->duel && target->GetAffectingPlayer()->duel->State == DUEL_STATE_IN_PROGRESS)
+                            //if the player who is responsible for the target is in a duel, apply values for PvP
+                            if (sZoneDifficulty->ShouldNerfInDuels(target))
                             {
                                 absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX].HealingNerfPct;
                             }
-                            else
+
+                            else if (sZoneDifficulty->SpellNerfOverrides.find(mapId) != sZoneDifficulty->SpellNerfOverrides.end())
                             {
                                 absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyInfo[mapId].HealingNerfPct;
                             }
@@ -196,7 +222,7 @@ public:
                 }
             }
             //if the player who is responsible for the target is in a duel, apply values for PvP
-            else if (target->GetAffectingPlayer()->duel && target->GetAffectingPlayer()->duel->State == DUEL_STATE_IN_PROGRESS)
+            else if (sZoneDifficulty->ShouldNerfInDuels(target))
             {
                 heal = heal * sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX].HealingNerfPct;
             }
@@ -250,7 +276,7 @@ public:
                 }
             }
             //if the player who is responsible for the target is in a duel, apply values for PvP
-            else if (target->GetAffectingPlayer()->duel && target->GetAffectingPlayer()->duel->State == DUEL_STATE_IN_PROGRESS)
+            else if (sZoneDifficulty->ShouldNerfInDuels(target))
             {
                 damage = damage * sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX].SpellDamageBuffPct;
             }
@@ -295,7 +321,7 @@ public:
                 }
             }
             //if the player who is responsible for the target is in a duel, apply values for PvP
-            else if (target->GetAffectingPlayer()->duel && target->GetAffectingPlayer()->duel->State == DUEL_STATE_IN_PROGRESS)
+            else if (sZoneDifficulty->ShouldNerfInDuels(target))
             {
                 damage = damage * sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX].MeleeDamageBuffPct;
             }
