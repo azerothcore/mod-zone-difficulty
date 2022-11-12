@@ -219,9 +219,9 @@ public:
             }
         }
 
-        if (sZoneDifficulty->IsValidNerfTarget(target) && !attacker->IsPlayer())
+        if (sZoneDifficulty->IsValidNerfTarget(target))
         {
-            if (spellInfo)
+            if (spellInfo && !attacker->IsPlayer())
             {
                 if (sZoneDifficulty->SpellNerfOverrides.find(spellInfo->Id) != sZoneDifficulty->SpellNerfOverrides.end())
                 {
