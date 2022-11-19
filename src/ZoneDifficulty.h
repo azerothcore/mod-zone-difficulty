@@ -23,9 +23,9 @@ public:
     static ZoneDifficulty* instance();
 
     void LoadMapDifficultySettings();
-    [[nondiscard]] bool IsValidNerfTarget(Unit* target);
-    [[nondiscard]] bool ShouldNerfInDuels(Unit* target);
-    [[nondiscard]] bool ShouldNerfAbsorb(uint32 mapId, Unit* target);
+    [[nodiscard]] bool IsValidNerfTarget(Unit* target);
+    [[nodiscard]] bool ShouldNerfInDuels(Unit* target);
+    [[nodiscard]] bool ShouldNerfAbsorb(uint32 mapId, Unit* target);
 
     bool IsEnabled{ false };
     bool IsDebugInfoEnabled{ false };
