@@ -77,24 +77,23 @@ bool ZoneDifficulty::ShouldNerfAbsorb(uint32 mapId, Unit* target)
     return false;
 }
 
+/*
+    Check if the target is in a duel while residing in the DUEL_AREA and their opponent is a valid object.
+    Used to determine when the duel-specific nerfs should be applied.
+*/
 bool ZoneDifficulty::ShouldNerfInDuels(Unit* target)
 {
+    if (target->GetAreaId() != DUEL_AREA)
+    {
+        return false;
+    }
+
     if (!target->GetAffectingPlayer()->duel && target->GetAffectingPlayer()->duel->State == DUEL_STATE_IN_PROGRESS)
     {
         return false;
     }
 
     if (!target->GetAffectingPlayer()->duel->Opponent)
-    {
-        return false;
-    }
-
-    if (!target->GetAffectingPlayer()->duel->Opponent->GetPlayerSetting("mod-zone-difficulty", SETTING_DUEL_DEBUFF).value)
-    {
-        return false;
-    }
-
-    if (!target->GetAffectingPlayer()->GetPlayerSetting("mod-zone-difficulty", SETTING_DUEL_DEBUFF).value)
     {
         return false;
     }
@@ -150,7 +149,6 @@ public:
                             }
 
                             int32 absorb = 0;
-                            //if the player who is responsible for the target is in a duel, apply values for PvP
                             if (sZoneDifficulty->ShouldNerfInDuels(target))
                             {
                                 absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX].HealingNerfPct;
@@ -221,7 +219,6 @@ public:
                     heal = heal * sZoneDifficulty->ZoneDifficultyInfo[mapId].HealingNerfPct;
                 }
             }
-            //if the player who is responsible for the target is in a duel, apply values for PvP
             else if (sZoneDifficulty->ShouldNerfInDuels(target))
             {
                 heal = heal * sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX].HealingNerfPct;
@@ -275,7 +272,6 @@ public:
                     damage = damage * sZoneDifficulty->ZoneDifficultyInfo[mapId].SpellDamageBuffPct;
                 }
             }
-            //if the player who is responsible for the target is in a duel, apply values for PvP
             else if (sZoneDifficulty->ShouldNerfInDuels(target))
             {
                 damage = damage * sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX].SpellDamageBuffPct;
@@ -320,7 +316,6 @@ public:
                     damage = damage * sZoneDifficulty->ZoneDifficultyInfo[mapId].MeleeDamageBuffPct;
                 }
             }
-            //if the player who is responsible for the target is in a duel, apply values for PvP
             else if (sZoneDifficulty->ShouldNerfInDuels(target))
             {
                 damage = damage * sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX].MeleeDamageBuffPct;

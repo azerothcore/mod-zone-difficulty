@@ -16,6 +16,7 @@ struct ZoneDifficultyData
 };
 
 int DUEL_INDEX = 0x7FFFFFFF;
+int DUEL_AREA = 2401;       // Forbidding Sea (Arathi Highlands)
 
 class ZoneDifficulty
 {
@@ -34,11 +35,6 @@ public:
     ZoneDifficultyDataMap ZoneDifficultyInfo;
     std::map<uint32, float> SpellNerfOverrides;
 
-};
-
-enum ModDiffSettings
-{
-    SETTING_DUEL_DEBUFF = 0
 };
 
 #define sZoneDifficulty ZoneDifficulty::instance()
