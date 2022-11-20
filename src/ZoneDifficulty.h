@@ -15,8 +15,8 @@ struct ZoneDifficultyData
     bool Enabled;
 };
 
-int DUEL_INDEX = 0x7FFFFFFF;
-uint32 DUEL_AREA = 2401;       // Forbidding Sea (Arathi Highlands)
+const uint32 DUEL_INDEX = 0x7FFFFFFF;
+const uint32 DUEL_AREA = 2401;       // Forbidding Sea (Arathi Highlands)
 
 class ZoneDifficulty
 {
