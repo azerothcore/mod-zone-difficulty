@@ -88,7 +88,12 @@ bool ZoneDifficulty::ShouldNerfInDuels(Unit* target)
         return false;
     }
 
-    if (!target->GetAffectingPlayer()->duel && target->GetAffectingPlayer()->duel->State == DUEL_STATE_IN_PROGRESS)
+    if (!target->GetAffectingPlayer()->duel)
+    {
+        return false;
+    }
+
+    if (target->GetAffectingPlayer()->duel->State != DUEL_STATE_IN_PROGRESS)
     {
         return false;
     }
