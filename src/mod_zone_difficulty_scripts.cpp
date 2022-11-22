@@ -25,23 +25,24 @@ void ZoneDifficulty::LoadMapDifficultySettings()
     }
 
     // Default values for when there is no entry in the db for duels (index 0xFFFFFFFF)
-    ZoneDifficultyInfo[DUEL_INDEX].HealingNerfPct = 1;
-    ZoneDifficultyInfo[DUEL_INDEX].AbsorbNerfPct = 1;
-    ZoneDifficultyInfo[DUEL_INDEX].MeleeDamageBuffPct = 1;
-    ZoneDifficultyInfo[DUEL_INDEX].SpellDamageBuffPct = 1;
+    ZoneDifficultyInfo[DUEL_INDEX][0].HealingNerfPct = 1;
+    ZoneDifficultyInfo[DUEL_INDEX][0].AbsorbNerfPct = 1;
+    ZoneDifficultyInfo[DUEL_INDEX][0].MeleeDamageBuffPct = 1;
+    ZoneDifficultyInfo[DUEL_INDEX][0].SpellDamageBuffPct = 1;
 
     if (QueryResult result = WorldDatabase.Query("SELECT * FROM zone_difficulty_info"))
     {
         do
         {
             uint32 mapId = (*result)[0].Get<uint32>();
+            uint32 phaseMask = (*result)[1].Get<uint32>();
             ZoneDifficultyData data;
-            data.HealingNerfPct = (*result)[1].Get<float>();
-            data.AbsorbNerfPct = (*result)[2].Get<float>();
-            data.MeleeDamageBuffPct = (*result)[3].Get<float>();
-            data.SpellDamageBuffPct = (*result)[4].Get<float>();
-            data.Enabled = (*result)[5].Get<bool>();
-            sZoneDifficulty->ZoneDifficultyInfo[mapId] = data;
+            data.HealingNerfPct = (*result)[2].Get<float>();
+            data.AbsorbNerfPct = (*result)[3].Get<float>();
+            data.MeleeDamageBuffPct = (*result)[4].Get<float>();
+            data.SpellDamageBuffPct = (*result)[5].Get<float>();
+            data.Enabled = (*result)[6].Get<bool>();
+            sZoneDifficulty->ZoneDifficultyInfo[mapId][phaseMask] = data;
 
         } while (result->NextRow());
     }
@@ -68,11 +69,26 @@ bool ZoneDifficulty::ShouldNerfAbsorb(uint32 mapId, Unit* target)
 {
     if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end())
     {
-        return true;
+        uint32 phaseMask = target->GetPhaseMask()
+        //iterate over all values in the key [mapId][$a]
+        for_each (ZoneDifficultyInfo.begin, ZoneDifficultyInfo.end, [](uint32 a)
+        {
+            if (a & phaseMask)
+            {
+                return true;
+            }
+        }
     }
     else if (target->GetAffectingPlayer()->duel && target->GetAffectingPlayer()->duel->State == DUEL_STATE_IN_PROGRESS)
     {
-        return true;
+        //iterate over all values in the key [mapId][$a]
+        for_each (ZoneDifficultyInfo.begin, ZoneDifficultyInfo.end, [](uint32 a)
+        {
+            if (a & phaseMask)
+            {
+                return true;
+            }
+        }
     }
     return false;
 }

@@ -31,7 +31,7 @@ public:
     bool IsEnabled{ false };
     bool IsDebugInfoEnabled{ false };
 
-    typedef std::map<uint32, ZoneDifficultyData> ZoneDifficultyDataMap;
+    typedef std::map<uint32, std::map<uint32, ZoneDifficultyData> > ZoneDifficultyDataMap;
     ZoneDifficultyDataMap ZoneDifficultyInfo;
     std::map<uint32, float> SpellNerfOverrides;
 
