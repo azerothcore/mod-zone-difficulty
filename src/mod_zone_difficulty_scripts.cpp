@@ -67,13 +67,21 @@ bool ZoneDifficulty::IsValidNerfTarget(Unit* target)
 
 bool ZoneDifficulty::ShouldNerfAbsorb(uint32 mapId, Unit* target)
 {
+    // Check if there is an entry for the mapid at all
     if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end())
     {
         uint32 phaseMask = target->GetPhaseMask()
-        //iterate over all values in the key [mapId][$a]
-        for_each (ZoneDifficultyInfo.begin, ZoneDifficultyInfo.end, [](uint32 a)
+
+        // Check if 0 is assigned as a phase to cover all phases
+        if ZoneDifficultyInfo[mapId][0])
         {
-            if (a & phaseMask)
+            return true;
+        }
+
+        // Check all $key in [mapId][$key] if they match the target's visible phases
+        for (auto const& [key, value] : ZoneDifficultyInfo[mapId])
+        {
+            if (key & phaseMask)
             {
                 return true;
             }
@@ -81,10 +89,18 @@ bool ZoneDifficulty::ShouldNerfAbsorb(uint32 mapId, Unit* target)
     }
     else if (target->GetAffectingPlayer()->duel && target->GetAffectingPlayer()->duel->State == DUEL_STATE_IN_PROGRESS)
     {
-        //iterate over all values in the key [mapId][$a]
-        for_each (ZoneDifficultyInfo.begin, ZoneDifficultyInfo.end, [](uint32 a)
+        uint32 phaseMask = target->GetPhaseMask()
+
+        // Check if 0 is assigned as a phase to cover all phases
+        if ZoneDifficultyInfo[mapId][0])
         {
-            if (a & phaseMask)
+            return true;
+        }
+
+        // Check all $key in [mapId][$key] if they match the target's visible phases
+        for (auto const& [key, value] : ZoneDifficultyInfo[mapId])
+        {
+            if (key & phaseMask)
             {
                 return true;
             }
