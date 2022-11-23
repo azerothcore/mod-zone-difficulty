@@ -70,7 +70,7 @@ bool ZoneDifficulty::ShouldNerfAbsorb(uint32 mapId, Unit* target)
     // Check if there is an entry for the mapid at all
     if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end())
     {
-        uint32 phaseMask = target->GetPhaseMask()
+        uint32 phaseMask = target->GetPhaseMask();
 
         // Check if 0 is assigned as a phase to cover all phases
         if ZoneDifficultyInfo[mapId][0])
@@ -89,7 +89,7 @@ bool ZoneDifficulty::ShouldNerfAbsorb(uint32 mapId, Unit* target)
     }
     else if (target->GetAffectingPlayer()->duel && target->GetAffectingPlayer()->duel->State == DUEL_STATE_IN_PROGRESS)
     {
-        uint32 phaseMask = target->GetPhaseMask()
+        uint32 phaseMask = target->GetPhaseMask();
 
         // We can not check `if ZoneDifficultyInfo[DUEL_INDEX]` because it has default values
 
