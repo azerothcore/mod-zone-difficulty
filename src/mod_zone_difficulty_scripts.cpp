@@ -73,13 +73,13 @@ bool ZoneDifficulty::ShouldNerfAbsorb(uint32 mapId, Unit* target)
         uint32 phaseMask = target->GetPhaseMask();
 
         // Check if 0 is assigned as a phase to cover all phases
-        if (ZoneDifficultyInfo[mapId][0])
+        if (sZoneDifficulty->ZoneDifficultyInfo[mapId].find(0) != sZoneDifficulty->ZoneDifficultyInfo[mapId].end())
         {
             return true;
         }
 
         // Check all $key in [mapId][$key] if they match the target's visible phases
-        for (auto const& [key, value] : ZoneDifficultyInfo[mapId])
+        for (auto const& [key, value] : sZoneDifficulty->ZoneDifficultyInfo[mapId])
         {
             if (key & phaseMask)
             {
@@ -94,13 +94,13 @@ bool ZoneDifficulty::ShouldNerfAbsorb(uint32 mapId, Unit* target)
         // We can not check `if ZoneDifficultyInfo[DUEL_INDEX]` because it has default values
 
         // Check if 0 is assigned as a phase to cover all phases
-        if (ZoneDifficultyInfo[DUEL_INDEX][0])
+        if (sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX].find(0) != sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX].end())
         {
             return true;
         }
 
         // Check all $key in [mapId][$key] if they match the target's visible phases
-        for (auto const& [key, value] : ZoneDifficultyInfo[mapId])
+        for (auto const& [key, value] : sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX])
         {
             if (key & phaseMask)
             {
@@ -186,15 +186,14 @@ public:
                                     }
                                 }
                             }
-
+                            uint32 phaseFirstMatch;
                             int32 absorb = 0;
                             if (sZoneDifficulty->ShouldNerfInDuels(target))
                             {
-                                uint32 phaseFirstMatch;
                                 uint32 phaseMask = target->GetPhaseMask();
 
                                 // Check if 0 is assigned as a phase to cover all phases
-                                if (ZoneDifficultyInfo[DUEL_INDEX][0])
+                                if (sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX].find(0) != sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX].end())
                                 {
                                     phaseFirstMatch = 0;
                                 }
@@ -202,7 +201,7 @@ public:
                                 // Check all $key in [DUEL_INDEX][$key] if they match the target's visible phases
                                 else
                                 {
-                                    for (auto const& [key, value] : ZoneDifficultyInfo[DUEL_INDEX])
+                                    for (auto const& [key, value] : sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX])
                                     {
                                         if (key & phaseMask)
                                         {
@@ -216,11 +215,10 @@ public:
 
                             else if (sZoneDifficulty->SpellNerfOverrides.find(mapId) != sZoneDifficulty->SpellNerfOverrides.end())
                             {
-                                uint32 phaseFirstMatch;
                                 uint32 phaseMask = target->GetPhaseMask();
 
                                 // Check if 0 is assigned as a phase to cover all phases
-                                if (ZoneDifficultyInfo[mapId][0])
+                                if (sZoneDifficulty->ZoneDifficultyInfo[mapId].find(0) != sZoneDifficulty->ZoneDifficultyInfo[mapId].end())
                                 {
                                     phaseFirstMatch = 0;
                                 }
@@ -228,19 +226,18 @@ public:
                                 // Check all $key in [mapId][$key] if they match the target's visible phases
                                 else
                                 {
-                                    for (auto const& [key, value] : ZoneDifficultyInfo[mapId])
+                                    for (auto const& [key, value] : sZoneDifficulty->ZoneDifficultyInfo[mapId])
                                     {
                                         if (key & phaseMask)
-                                            {
-                                                phaseFirstMatch = key;
-                                                break;
-                                            }
+                                        {
+                                            phaseFirstMatch = key;
+                                            break;
                                         }
                                     }
                                 }
-
-                                absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyInfo[mapId][phaseFirstMatch].HealingNerfPct;
                             }
+                            absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyInfo[mapId][phaseFirstMatch].HealingNerfPct;
+
 
                             if (sZoneDifficulty->SpellNerfOverrides.find(spellInfo->Id) != sZoneDifficulty->SpellNerfOverrides.end())
                             {
@@ -267,97 +264,114 @@ public:
     }
 
 
-    void ModifyHealReceived(Unit* target, Unit* healer, uint32& heal, SpellInfo const* spellInfo) override
+void ModifyHealReceived(Unit* target, Unit* healer, uint32& heal, SpellInfo const* spellInfo) override
+{
+    if (!sZoneDifficulty->IsEnabled)
     {
-        if (!sZoneDifficulty->IsEnabled)
-        {
-            return;
-        }
-
-        if (sZoneDifficulty->IsValidNerfTarget(target))
-        {
-            if (spellInfo)
-            {
-                // Skip spells not affected by vulnerability (potions) and bandages
-                if (spellInfo->HasAttribute(SPELL_ATTR0_NO_IMMUNITIES) || spellInfo->Mechanic == MECHANIC_BANDAGE)
-                {
-                    return;
-                }
-            }
-
-            uint32 mapId = target->GetMapId();
-            if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end())
-            {
-                if (sZoneDifficulty->ZoneDifficultyInfo[mapId].Enabled)
-                {
-                    if (spellInfo)
-                    {
-                        if (sZoneDifficulty->SpellNerfOverrides.find(mapId) != sZoneDifficulty->SpellNerfOverrides.end())
-                        {
-                            heal = heal * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id];
-                            return;
-                        }
-                    }
-
-                    heal = heal * sZoneDifficulty->ZoneDifficultyInfo[mapId].HealingNerfPct;
-                }
-            }
-            else if (sZoneDifficulty->ShouldNerfInDuels(target))
-            {
-                heal = heal * sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX].HealingNerfPct;
-            }
-        }
+        return;
     }
 
-    void ModifySpellDamageTaken(Unit* target, Unit* attacker, int32& damage, SpellInfo const* spellInfo) override
+    if (sZoneDifficulty->IsValidNerfTarget(target))
     {
-        if (!sZoneDifficulty->IsEnabled)
+        if (spellInfo)
         {
-            return;
-        }
-
-        // Disclaimer: also affects disables boss adds buff.
-        if (sConfigMgr->GetOption<bool>("ModZoneDifficulty.SpellBuff.OnlyBosses", false))
-        {
-            if (attacker->ToCreature() && !attacker->ToCreature()->IsDungeonBoss())
+            // Skip spells not affected by vulnerability (potions) and bandages
+            if (spellInfo->HasAttribute(SPELL_ATTR0_NO_IMMUNITIES) || spellInfo->Mechanic == MECHANIC_BANDAGE)
             {
                 return;
             }
         }
 
-        if (sZoneDifficulty->IsValidNerfTarget(target))
+        uint32 mapId = target->GetMapId();
+        if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end())
         {
-            if (spellInfo && !attacker->IsPlayer())
+            if (spellInfo)
             {
-                if (sZoneDifficulty->SpellNerfOverrides.find(spellInfo->Id) != sZoneDifficulty->SpellNerfOverrides.end())
+                if (sZoneDifficulty->SpellNerfOverrides.find(mapId) != sZoneDifficulty->SpellNerfOverrides.end())
                 {
-                    damage = damage * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id];
+                    heal = heal * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id];
                     return;
                 }
+            }
 
-                if (sZoneDifficulty->IsDebugInfoEnabled)
+            uint32 phaseFirstMatch;
+            uint32 phaseMask = target->GetPhaseMask();
+            // Check if 0 is assigned as a phase to cover all phases
+            if (sZoneDifficulty->ZoneDifficultyInfo[mapId].find(0) != sZoneDifficulty->ZoneDifficultyInfo[mapId].end())
+            {
+                phaseFirstMatch = 0;
+            }
+
+            // Check all $key in [DUEL_INDEX][$key] if they match the target's visible phases
+            else
+            {
+                for (auto const& [key, value] : sZoneDifficulty->ZoneDifficultyInfo[mapId])
                 {
-                    if (Player* player = target->ToPlayer()) // Pointless check? Perhaps.
+                    if (key & phaseMask)
                     {
-                        if (player->GetSession())
-                        {
-                            ChatHandler(target->ToPlayer()->GetSession()).PSendSysMessage("Spell: %s (%u) Before Nerf Value: %i (%f)", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, damage, sZoneDifficulty->ZoneDifficultyInfo[target->GetMapId()].SpellDamageBuffPct);
-                        }
+                        phaseFirstMatch = key;
+                        break;
                     }
                 }
             }
-
-            if (!attacker->IsPlayer())
+            if (sZoneDifficulty->ZoneDifficultyInfo[mapId][phaseMask].Enabled)
             {
-                uint32 mapId = target->GetMapId();
-                if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end())
+                heal = heal * sZoneDifficulty->ZoneDifficultyInfo[mapId][phaseFirstMatch].HealingNerfPct;
+            }
+        }
+
+        else if (sZoneDifficulty->ShouldNerfInDuels(target))
+        {
+            uint32 phaseFirstMatch;
+            uint32 phaseMask = target->GetPhaseMask();
+
+            // Check if 0 is assigned as a phase to cover all phases
+            if (sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX].find(0) != sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX].end())
+            {
+                phaseFirstMatch = 0;
+            }
+
+            // Check all $key in [DUEL_INDEX][$key] if they match the target's visible phases
+            else
+            {
+                for (auto const& [key, value] : sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX])
                 {
-                    damage = damage * sZoneDifficulty->ZoneDifficultyInfo[mapId].SpellDamageBuffPct;
+                    if (key & phaseMask)
+                    {
+                        phaseFirstMatch = key;
+                        break;
+                    }
                 }
             }
-            else if (sZoneDifficulty->ShouldNerfInDuels(target))
+            heal = heal * sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX][phaseFirstMatch].HealingNerfPct;
+        }
+    }
+}
+
+void ModifySpellDamageTaken(Unit* target, Unit* attacker, int32& damage, SpellInfo const* spellInfo) override
+{
+    if (!sZoneDifficulty->IsEnabled)
+    {
+        return;
+    }
+
+    // Disclaimer: also affects disables boss adds buff.
+    if (sConfigMgr->GetOption<bool>("ModZoneDifficulty.SpellBuff.OnlyBosses", false))
+    {
+        if (attacker->ToCreature() && !attacker->ToCreature()->IsDungeonBoss())
+        {
+            return;
+        }
+    }
+
+    if (sZoneDifficulty->IsValidNerfTarget(target))
+    {
+        if (spellInfo && !attacker->IsPlayer())
+        {
+            if (sZoneDifficulty->SpellNerfOverrides.find(spellInfo->Id) != sZoneDifficulty->SpellNerfOverrides.end())
             {
-                damage = damage * sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX].SpellDamageBuffPct;
+                damage = damage * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id];
+                return;
             }
 
             if (sZoneDifficulty->IsDebugInfoEnabled)
@@ -366,45 +380,155 @@ public:
                 {
                     if (player->GetSession())
                     {
-                        ChatHandler(target->ToPlayer()->GetSession()).PSendSysMessage("Spell: %s (%u) Post Nerf Value: %i", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, damage);
+                        ChatHandler(target->ToPlayer()->GetSession()).PSendSysMessage("Spell: %s (%u) Before Nerf Value: %i (%f)", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, damage, sZoneDifficulty->ZoneDifficultyInfo[target->GetMapId()].SpellDamageBuffPct);
                     }
                 }
             }
         }
+
+        if (!attacker->IsPlayer())
+        {
+            uint32 mapId = target->GetMapId();
+            if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end())
+            {
+                uint32 phaseFirstMatch;
+                uint32 phaseMask = target->GetPhaseMask();
+                // Check if 0 is assigned as a phase to cover all phases
+                if (sZoneDifficulty->ZoneDifficultyInfo[mapId].find(0) != sZoneDifficulty->ZoneDifficultyInfo[mapId].end())
+                {
+                    phaseFirstMatch = 0;
+                }
+
+                // Check all $key in [DUEL_INDEX][$key] if they match the target's visible phases
+                else
+                {
+                    for (auto const& [key, value] : sZoneDifficulty->ZoneDifficultyInfo[mapId])
+                    {
+                        if (key & phaseMask)
+                        {
+                            phaseFirstMatch = key;
+                            break;
+                        }
+                    }
+                }
+
+                damage = damage * sZoneDifficulty->ZoneDifficultyInfo[mapId][phaseFirstMatch].SpellDamageBuffPct;
+            }
+        }
+        else if (sZoneDifficulty->ShouldNerfInDuels(target))
+        {
+            uint32 phaseFirstMatch;
+            uint32 phaseMask = target->GetPhaseMask();
+
+            // Check if 0 is assigned as a phase to cover all phases
+            if (sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX].find(0) != sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX].end())
+            {
+                phaseFirstMatch = 0;
+            }
+
+            // Check all $key in [DUEL_INDEX][$key] if they match the target's visible phases
+            else
+            {
+                for (auto const& [key, value] : sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX])
+                {
+                    if (key & phaseMask)
+                    {
+                        phaseFirstMatch = key;
+                        break;
+                    }
+                }
+            }
+
+            damage = damage * sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX][phaseFirstMatch].SpellDamageBuffPct;
+        }
+
+        if (sZoneDifficulty->IsDebugInfoEnabled)
+        {
+            if (Player* player = target->ToPlayer()) // Pointless check? Perhaps.
+            {
+                if (player->GetSession())
+                {
+                    ChatHandler(target->ToPlayer()->GetSession()).PSendSysMessage("Spell: %s (%u) Post Nerf Value: %i", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, damage);
+                }
+            }
+        }
+    }
+}
+
+void ModifyMeleeDamage(Unit* target, Unit* attacker, uint32& damage) override
+{
+    if (!sZoneDifficulty->IsEnabled)
+    {
+        return;
     }
 
-    void ModifyMeleeDamage(Unit* target, Unit* attacker, uint32& damage) override
+    // Disclaimer: also affects disables boss adds buff.
+    if (sConfigMgr->GetOption<bool>("ModZoneDifficulty.MeleeBuff.OnlyBosses", false))
     {
-        if (!sZoneDifficulty->IsEnabled)
+        if (attacker->ToCreature() && !attacker->ToCreature()->IsDungeonBoss())
         {
             return;
         }
+    }
 
-        // Disclaimer: also affects disables boss adds buff.
-        if (sConfigMgr->GetOption<bool>("ModZoneDifficulty.MeleeBuff.OnlyBosses", false))
+    if (sZoneDifficulty->IsValidNerfTarget(target))
+    {
+        if (!attacker->IsPlayer())
         {
-            if (attacker->ToCreature() && !attacker->ToCreature()->IsDungeonBoss())
+            uint32 mapId = target->GetMapId();
+            if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end())
             {
-                return;
+                uint32 phaseFirstMatch;
+                uint32 phaseMask = target->GetPhaseMask();
+                // Check if 0 is assigned as a phase to cover all phases
+                if (sZoneDifficulty->ZoneDifficultyInfo[mapId].find(0) != sZoneDifficulty->ZoneDifficultyInfo[mapId].end())
+                {
+                    phaseFirstMatch = 0;
+                }
+
+                // Check all $key in [DUEL_INDEX][$key] if they match the target's visible phases
+                else
+                {
+                    for (auto const& [key, value] : sZoneDifficulty->ZoneDifficultyInfo[mapId])
+                    {
+                        if (key & phaseMask)
+                        {
+                            phaseFirstMatch = key;
+                            break;
+                        }
+                    }
+                }
+
+                damage = damage * sZoneDifficulty->ZoneDifficultyInfo[mapId][phaseFirstMatch].MeleeDamageBuffPct;
             }
         }
-
-        if (sZoneDifficulty->IsValidNerfTarget(target))
+        else if (sZoneDifficulty->ShouldNerfInDuels(target))
         {
-            if (!attacker->IsPlayer())
+            uint32 phaseFirstMatch;
+            uint32 phaseMask = target->GetPhaseMask();
+
+            // Check if 0 is assigned as a phase to cover all phases
+            if (sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX].find(0) != sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX].end())
             {
-                uint32 mapId = target->GetMapId();
-                if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end())
+                phaseFirstMatch = 0;
+            }
+
+            // Check all $key in [DUEL_INDEX][$key] if they match the target's visible phases
+            else
+            {
+                for (auto const& [key, value] : sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX])
                 {
-                    damage = damage * sZoneDifficulty->ZoneDifficultyInfo[mapId].MeleeDamageBuffPct;
+                    if (key & phaseMask)
+                    {
+                        phaseFirstMatch = key;
+                        break;
+                    }
                 }
             }
-            else if (sZoneDifficulty->ShouldNerfInDuels(target))
-            {
-                damage = damage * sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX].MeleeDamageBuffPct;
-            }
+            damage = damage * sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX][phaseFirstMatch].MeleeDamageBuffPct;
         }
     }
+}
 };
 
 class mod_zone_difficulty_worldscript : public WorldScript
