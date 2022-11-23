@@ -112,9 +112,9 @@ bool ZoneDifficulty::ShouldNerfAbsorb(uint32 mapId, Unit* target)
 }
 
 /*
-    Check if the target is in a duel while residing in the DUEL_AREA and their opponent is a valid object.
-    Used to determine when the duel-specific nerfs should be applied.
-*/
+ *  Check if the target is in a duel while residing in the DUEL_AREA and their opponent is a valid object.
+ *  Used to determine when the duel-specific nerfs should be applied.
+ */
 bool ZoneDifficulty::ShouldNerfInDuels(Unit* target)
 {
     if (target->GetAreaId() != DUEL_AREA)
@@ -190,12 +190,56 @@ public:
                             int32 absorb = 0;
                             if (sZoneDifficulty->ShouldNerfInDuels(target))
                             {
-                                absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX].HealingNerfPct;
+                                uint32 phaseFirstMatch;
+                                uint32 phaseMask = target->GetPhaseMask();
+
+                                // Check if 0 is assigned as a phase to cover all phases
+                                if (ZoneDifficultyInfo[DUEL_INDEX][0])
+                                {
+                                    phaseFirstMatch = 0;
+                                }
+
+                                // Check all $key in [DUEL_INDEX][$key] if they match the target's visible phases
+                                else
+                                {
+                                    for (auto const& [key, value] : ZoneDifficultyInfo[DUEL_INDEX])
+                                    {
+                                        if (key & phaseMask)
+                                        {
+                                            phaseFirstMatch = key;
+                                            break;
+                                        }
+                                    }
+                                }
+                                absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX][phaseFirstMatch].HealingNerfPct;
                             }
 
                             else if (sZoneDifficulty->SpellNerfOverrides.find(mapId) != sZoneDifficulty->SpellNerfOverrides.end())
                             {
-                                absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyInfo[mapId].HealingNerfPct;
+                                uint32 phaseFirstMatch;
+                                uint32 phaseMask = target->GetPhaseMask();
+
+                                // Check if 0 is assigned as a phase to cover all phases
+                                if (ZoneDifficultyInfo[mapId][0])
+                                {
+                                    phaseFirstMatch = 0;
+                                }
+
+                                // Check all $key in [mapId][$key] if they match the target's visible phases
+                                else
+                                {
+                                    for (auto const& [key, value] : ZoneDifficultyInfo[mapId])
+                                    {
+                                        if (key & phaseMask)
+                                            {
+                                                phaseFirstMatch = key;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+
+                                absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyInfo[mapId][phaseFirstMatch].HealingNerfPct;
                             }
 
                             if (sZoneDifficulty->SpellNerfOverrides.find(spellInfo->Id) != sZoneDifficulty->SpellNerfOverrides.end())
