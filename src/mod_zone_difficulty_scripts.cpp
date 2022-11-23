@@ -73,7 +73,7 @@ bool ZoneDifficulty::ShouldNerfAbsorb(uint32 mapId, Unit* target)
         uint32 phaseMask = target->GetPhaseMask();
 
         // Check if 0 is assigned as a phase to cover all phases
-        if ZoneDifficultyInfo[mapId][0])
+        if (ZoneDifficultyInfo[mapId][0])
         {
             return true;
         }
@@ -94,7 +94,7 @@ bool ZoneDifficulty::ShouldNerfAbsorb(uint32 mapId, Unit* target)
         // We can not check `if ZoneDifficultyInfo[DUEL_INDEX]` because it has default values
 
         // Check if 0 is assigned as a phase to cover all phases
-        if ZoneDifficultyInfo[DUEL_INDEX][0])
+        if (ZoneDifficultyInfo[DUEL_INDEX][0])
         {
             return true;
         }
