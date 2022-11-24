@@ -24,18 +24,25 @@ void ZoneDifficulty::LoadMapDifficultySettings()
         return;
     }
 
+    // Default values for when there is no entry in the db for duels (index 0xFFFFFFFF)
+    ZoneDifficultyInfo[DUEL_INDEX][0].HealingNerfPct = 1;
+    ZoneDifficultyInfo[DUEL_INDEX][0].AbsorbNerfPct = 1;
+    ZoneDifficultyInfo[DUEL_INDEX][0].MeleeDamageBuffPct = 1;
+    ZoneDifficultyInfo[DUEL_INDEX][0].SpellDamageBuffPct = 1;
+
     if (QueryResult result = WorldDatabase.Query("SELECT * FROM zone_difficulty_info"))
     {
         do
         {
             uint32 mapId = (*result)[0].Get<uint32>();
+            uint32 phaseMask = (*result)[1].Get<uint32>();
             ZoneDifficultyData data;
-            data.HealingNerfPct = (*result)[1].Get<float>();
-            data.AbsorbNerfPct = (*result)[2].Get<float>();
-            data.MeleeDamageBuffPct = (*result)[3].Get<float>();
-            data.SpellDamageBuffPct = (*result)[4].Get<float>();
-            data.Enabled = (*result)[5].Get<bool>();
-            sZoneDifficulty->ZoneDifficultyInfo[mapId] = data;
+            data.HealingNerfPct = (*result)[2].Get<float>();
+            data.AbsorbNerfPct = (*result)[3].Get<float>();
+            data.MeleeDamageBuffPct = (*result)[4].Get<float>();
+            data.SpellDamageBuffPct = (*result)[5].Get<float>();
+            data.Enabled = (*result)[6].Get<bool>();
+            sZoneDifficulty->ZoneDifficultyInfo[mapId][phaseMask] = data;
 
         } while (result->NextRow());
     }
@@ -56,6 +63,65 @@ void ZoneDifficulty::LoadMapDifficultySettings()
 bool ZoneDifficulty::IsValidNerfTarget(Unit* target)
 {
     return target->IsPlayer() || target->IsPet() || target->IsGuardian();
+}
+
+/*
+ *  Check if the target is in a duel while residing in the DUEL_AREA and their opponent is a valid object.
+ *  Used to determine when the duel-specific nerfs should be applied.
+ */
+bool ZoneDifficulty::ShouldNerfInDuels(Unit* target)
+{
+    if (target->GetAreaId() != DUEL_AREA)
+    {
+        return false;
+    }
+
+    if (!target->GetAffectingPlayer()->duel)
+    {
+        return false;
+    }
+
+    if (target->GetAffectingPlayer()->duel->State != DUEL_STATE_IN_PROGRESS)
+    {
+        return false;
+    }
+
+    if (!target->GetAffectingPlayer()->duel->Opponent)
+    {
+        return false;
+    }
+
+    return true;
+}
+
+/*
+ *  Find the lowest phase for the target's mapId, which has a db entry for the target's map
+ *  and at least partly matches the target's phase.
+ *  `mapId` can be the id of a map or `DUEL_INDEX` to use the duel specific settings.
+ *  Return -1 if none found.
+ */
+int32 ZoneDifficulty::GetLowestMatchingPhase(uint32 mapId, uint32 phaseMask)
+{
+    // Check if there is an entry for the mapid at all
+    if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end())
+    {
+
+        // Check if 0 is assigned as a phase to cover all phases
+        if (sZoneDifficulty->ZoneDifficultyInfo[mapId].find(0) != sZoneDifficulty->ZoneDifficultyInfo[mapId].end())
+        {
+            return 0;
+        }
+
+        // Check all $key in [mapId][$key] if they match the target's visible phases
+        for (auto const& [key, value] : sZoneDifficulty->ZoneDifficultyInfo[mapId])
+        {
+            if (key & phaseMask)
+            {
+                return key;
+            }
+        }
+    }
+    return -1
 }
 
 class mod_zone_difficulty_unitscript : public UnitScript
@@ -100,13 +166,14 @@ public:
                                 {
                                     if (player->GetSession())
                                     {
-                                        ChatHandler(target->ToPlayer()->GetSession()).PSendSysMessage("Spell: %s (%u) Base Value: %i", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, eff->GetAmount());
+                                        ChatHandler(player->GetSession()).PSendSysMessage("Spell: %s (%u) Base Value: %i", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, eff->GetAmount());
                                     }
                                 }
                             }
 
-                            int32 absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyInfo[target->GetMapId()].HealingNerfPct;
+                            int32 absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyInfo[mapId].HealingNerfPct;
 
+                            //This check must be first and skip the rest to override everything else.
                             if (sZoneDifficulty->SpellNerfOverrides.find(spellInfo->Id) != sZoneDifficulty->SpellNerfOverrides.end())
                             {
                                 absorb = eff->GetAmount() * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id];
@@ -120,7 +187,7 @@ public:
                                 {
                                     if (player->GetSession())
                                     {
-                                        ChatHandler(target->ToPlayer()->GetSession()).PSendSysMessage("Spell: %s (%u) Post Nerf Value: %i", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, eff->GetAmount());
+                                        ChatHandler(player->GetSession()).PSendSysMessage("Spell: %s (%u) Post Nerf Value: %i", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, eff->GetAmount());
                                     }
                                 }
                             }
@@ -152,8 +219,9 @@ public:
             uint32 mapId = target->GetMapId();
             if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end())
             {
-                if (sZoneDifficulty->ZoneDifficultyInfo[target->GetMapId()].Enabled)
+                if (sZoneDifficulty->ZoneDifficultyInfo[mapId].Enabled)
                 {
+                    //This check must be first and skip the rest to override everything else.
                     if (spellInfo)
                     {
                         if (sZoneDifficulty->SpellNerfOverrides.find(mapId) != sZoneDifficulty->SpellNerfOverrides.end())
@@ -163,7 +231,7 @@ public:
                         }
                     }
 
-                    heal = heal * sZoneDifficulty->ZoneDifficultyInfo[target->GetMapId()].HealingNerfPct;
+                    heal = heal * sZoneDifficulty->ZoneDifficultyInfo[mapId].HealingNerfPct;
                 }
             }
         }
@@ -189,6 +257,7 @@ public:
         {
             if (spellInfo)
             {
+                //This check must be first and skip the rest to override everything else.
                 if (sZoneDifficulty->SpellNerfOverrides.find(spellInfo->Id) != sZoneDifficulty->SpellNerfOverrides.end())
                 {
                     damage = damage * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id];
@@ -201,7 +270,7 @@ public:
                     {
                         if (player->GetSession())
                         {
-                            ChatHandler(target->ToPlayer()->GetSession()).PSendSysMessage("Spell: %s (%u) Before Nerf Value: %i (%f)", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, damage, sZoneDifficulty->ZoneDifficultyInfo[target->GetMapId()].SpellDamageBuffPct);
+                            ChatHandler(player->GetSession()).PSendSysMessage("Spell: %s (%u) Before Nerf Value: %i (%f)", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, damage, sZoneDifficulty->ZoneDifficultyInfo[target->GetMapId()].SpellDamageBuffPct);
                         }
                     }
                 }
@@ -210,7 +279,7 @@ public:
             uint32 mapId = target->GetMapId();
             if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end())
             {
-                damage = damage * sZoneDifficulty->ZoneDifficultyInfo[target->GetMapId()].SpellDamageBuffPct;
+                damage = damage * sZoneDifficulty->ZoneDifficultyInfo[mapId].SpellDamageBuffPct;
             }
 
             if (sZoneDifficulty->IsDebugInfoEnabled)
@@ -219,7 +288,7 @@ public:
                 {
                     if (player->GetSession())
                     {
-                        ChatHandler(target->ToPlayer()->GetSession()).PSendSysMessage("Spell: %s (%u) Post Nerf Value: %i", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, damage);
+                        ChatHandler(player->GetSession()).PSendSysMessage("Spell: %s (%u) Post Nerf Value: %i", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, damage);
                     }
                 }
             }
@@ -247,7 +316,7 @@ public:
             uint32 mapId = target->GetMapId();
             if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end())
             {
-                damage = damage * sZoneDifficulty->ZoneDifficultyInfo[target->GetMapId()].MeleeDamageBuffPct;
+                damage = damage * sZoneDifficulty->ZoneDifficultyInfo[mapId].MeleeDamageBuffPct;
             }
         }
     }
