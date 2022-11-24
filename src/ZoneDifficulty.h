@@ -15,18 +15,13 @@ struct ZoneDifficultyData
     bool Enabled;
 };
 
-const uint32 DUEL_INDEX = 0x7FFFFFFF;
-const uint32 DUEL_AREA = 2401;       // Forbidding Sea (Arathi Highlands)
-
 class ZoneDifficulty
 {
 public:
     static ZoneDifficulty* instance();
 
     void LoadMapDifficultySettings();
-    [[nodiscard]] bool IsValidNerfTarget(Unit* target);
-    [[nodiscard]] bool ShouldNerfInDuels(Unit* target);
-    [[nodiscard]] bool ShouldNerfAbsorb(uint32 mapId, Unit* target);
+    [[nondiscard]] bool IsValidNerfTarget(Unit* unit);
 
     bool IsEnabled{ false };
     bool IsDebugInfoEnabled{ false };
