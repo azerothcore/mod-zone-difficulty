@@ -8,5 +8,5 @@ CREATE TABLE `zone_difficulty_info` (
 	`SpellDmgBuffValue` FLOAT NOT NULL DEFAULT 1,
     `Enabled` TINYINT DEFAULT 1,
 	`Comment` TEXT,
-	PRIMARY KEY (`MapID`), (`Phase`)
+	PRIMARY KEY (`MapID`, `PhaseMask`)
 );
