@@ -281,7 +281,7 @@ public:
             }
         }
 
-        if (sZoneDifficulty->IsValidNerfTarget(target) && !attacker->IsPlayer())
+        if (sZoneDifficulty->IsValidNerfTarget(target))
         {
             uint32 mapId = target->GetMapId();
             uint32 phaseMask = target->GetPhaseMask();
@@ -345,7 +345,7 @@ public:
             }
         }
 
-        if (sZoneDifficulty->IsValidNerfTarget(target) && !attacker->IsPlayer())
+        if (sZoneDifficulty->IsValidNerfTarget(target))
         {
             uint32 mapId = target->GetMapId();
             uint32 phaseMask = target->GetPhaseMask();
