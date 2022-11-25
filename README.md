@@ -19,7 +19,7 @@ VALUES
 The output will be multiplied by the value you input in `HealingNerfValue` as it follows:
 
 Using `MapId` 2147483647 will be used for all targets in duels while they're in the zone hardcoded as `DUEL_AREA` (default 2402: Forbidding Sea, Wetlands).
-
+PhaseMask must be 0 for Duels.
 ```
 output = output * HealingNerfValue
 ```

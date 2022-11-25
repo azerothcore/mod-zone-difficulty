@@ -44,6 +44,12 @@ void ZoneDifficulty::LoadMapDifficultySettings()
             data.Enabled = (*result)[6].Get<bool>();
             sZoneDifficulty->ZoneDifficultyInfo[mapId][phaseMask] = data;
 
+            // duels do not check for phases. Only 0 is allowed.
+            if (mapId == DUEL_INDEX && phaseMask != 0)
+            {
+                LOG_ERROR("mod-zone-difficulty", "Table `zone_difficulty_info` for criteria (duel mapId: {}) has wrong value ({}), must be 0 for duels.", mapId, phaseMask);
+            }
+
         } while (result->NextRow());
     }
 
@@ -139,62 +145,76 @@ public:
         if (sZoneDifficulty->IsValidNerfTarget(target))
         {
             uint32 mapId = target->GetMapId();
-            if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end())
-            {
-                if (SpellInfo const* spellInfo = aura->GetSpellInfo())
+            bool nerfInDuel = sZoneDifficulty->ShouldNerfInDuels(target);
+
+                //Check if the map of the target is subject of a nerf at all OR if the target is subject of a nerf in a duel
+                if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end() || nerfInDuel)
                 {
-                    // Skip spells not affected by vulnerability (potions)
-                    if (spellInfo->HasAttribute(SPELL_ATTR0_NO_IMMUNITIES))
+                    if (SpellInfo const* spellInfo = aura->GetSpellInfo())
                     {
-                        return;
-                    }
-
-                    if (spellInfo->HasAura(SPELL_AURA_SCHOOL_ABSORB))
-                    {
-                        std::list<AuraEffect*> AuraEffectList  = target->GetAuraEffectsByType(SPELL_AURA_SCHOOL_ABSORB);
-
-                        for (AuraEffect* eff : AuraEffectList)
+                        // Skip spells not affected by vulnerability (potions)
+                        if (spellInfo->HasAttribute(SPELL_ATTR0_NO_IMMUNITIES))
                         {
-                            if ((eff->GetAuraType() != SPELL_AURA_SCHOOL_ABSORB) || (eff->GetSpellInfo()->Id != spellInfo->Id))
-                            {
-                                continue;
-                            }
+                            return;
+                        }
 
-                            if (sZoneDifficulty->IsDebugInfoEnabled)
+                        if (spellInfo->HasAura(SPELL_AURA_SCHOOL_ABSORB))
+                        {
+                            std::list<AuraEffect*> AuraEffectList = target->GetAuraEffectsByType(SPELL_AURA_SCHOOL_ABSORB);
+
+                            for (AuraEffect* eff : AuraEffectList)
                             {
-                                if (Player* player = target->ToPlayer()) // Pointless check? Perhaps.
+                                if ((eff->GetAuraType() != SPELL_AURA_SCHOOL_ABSORB) || (eff->GetSpellInfo()->Id != spellInfo->Id))
                                 {
-                                    if (player->GetSession())
+                                    continue;
+                                }
+
+                                if (sZoneDifficulty->IsDebugInfoEnabled)
+                                {
+                                    if (Player* player = target->ToPlayer()) // Pointless check? Perhaps.
                                     {
-                                        ChatHandler(player->GetSession()).PSendSysMessage("Spell: %s (%u) Base Value: %i", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, eff->GetAmount());
+                                        if (player->GetSession())
+                                        {
+                                            ChatHandler(player->GetSession()).PSendSysMessage("Spell: %s (%u) Base Value: %i", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, eff->GetAmount());
+                                        }
                                     }
                                 }
-                            }
 
-                            int32 absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyInfo[mapId].HealingNerfPct;
-
-                            //This check must be first and skip the rest to override everything else.
-                            if (sZoneDifficulty->SpellNerfOverrides.find(spellInfo->Id) != sZoneDifficulty->SpellNerfOverrides.end())
-                            {
-                                absorb = eff->GetAmount() * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id];
-                            }
-
-                            eff->SetAmount(absorb);
-
-                            if (sZoneDifficulty->IsDebugInfoEnabled)
-                            {
-                                if (Player* player = target->ToPlayer()) // Pointless check? Perhaps.
+                                int32 absorb;
+                                uint32 phaseMask = target->GetPhaseMask();
+                                int matchingPhase = sZoneDifficulty->GetLowestMatchingPhase(mapId, phaseMask);
+                                if (sZoneDifficulty->ZoneDifficultyInfo[mapId][matchingPhase].Enabled && matchingPhase != -1)
                                 {
-                                    if (player->GetSession())
+                                    absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyInfo[mapId][matchingPhase].HealingNerfPct;
+                                }
+                                else if (nerfInDuel)
+                                {
+                                    absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX][0].HealingNerfPct;
+                                }
+
+
+                                    //This check must be last and override duel and map adjustments
+                                    if (sZoneDifficulty->SpellNerfOverrides.find(spellInfo->Id) != sZoneDifficulty->SpellNerfOverrides.end())
                                     {
-                                        ChatHandler(player->GetSession()).PSendSysMessage("Spell: %s (%u) Post Nerf Value: %i", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, eff->GetAmount());
+                                        absorb = eff->GetAmount() * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id];
+                                    }
+
+                                    eff->SetAmount(absorb);
+
+                                    if (sZoneDifficulty->IsDebugInfoEnabled)
+                                    {
+                                        if (Player* player = target->ToPlayer()) // Pointless check? Perhaps.
+                                        {
+                                            if (player->GetSession())
+                                            {
+                                                ChatHandler(player->GetSession()).PSendSysMessage("Spell: %s (%u) Post Nerf Value: %i", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, eff->GetAmount());
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
                 }
-            }
         }
     }
 
@@ -217,21 +237,29 @@ public:
             }
 
             uint32 mapId = target->GetMapId();
-            if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end())
+            bool nerfInDuel = sZoneDifficulty->ShouldNerfInDuels(target);
+            //Check if the map of the target is subject of a nerf at all OR if the target is subject of a nerf in a duel
+            if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end() || sZoneDifficulty->ShouldNerfInDuels(target))
             {
-                if (sZoneDifficulty->ZoneDifficultyInfo[mapId].Enabled)
+                //This check must be first and skip the rest to override everything else.
+                if (spellInfo)
                 {
-                    //This check must be first and skip the rest to override everything else.
-                    if (spellInfo)
+                    if (sZoneDifficulty->SpellNerfOverrides.find(mapId) != sZoneDifficulty->SpellNerfOverrides.end())
                     {
-                        if (sZoneDifficulty->SpellNerfOverrides.find(mapId) != sZoneDifficulty->SpellNerfOverrides.end())
-                        {
-                            heal = heal * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id];
-                            return;
-                        }
+                        heal = heal * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id];
+                        return;
                     }
+                 }
 
-                    heal = heal * sZoneDifficulty->ZoneDifficultyInfo[mapId].HealingNerfPct;
+                uint32 phaseMask = target->GetPhaseMask();
+                int matchingPhase = sZoneDifficulty->GetLowestMatchingPhase(mapId, phaseMask);
+                if (sZoneDifficulty->ZoneDifficultyInfo[mapId][matchingPhase].Enabled && matchingPhase != -1)
+                {
+                    heal = heal * sZoneDifficulty->ZoneDifficultyInfo[mapId][matchingPhase].HealingNerfPct;
+                }
+                else if (nerfInDuel)
+                {
+                    heal = heal * sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX][0].HealingNerfPct;
                 }
             }
         }
@@ -255,6 +283,9 @@ public:
 
         if (sZoneDifficulty->IsValidNerfTarget(target) && !attacker->IsPlayer())
         {
+            uint32 mapId = target->GetMapId();
+            uint32 phaseMask = target->GetPhaseMask();
+            int32 matchingPhase = sZoneDifficulty->GetLowestMatchingPhase(mapId, phaseMask);
             if (spellInfo)
             {
                 //This check must be first and skip the rest to override everything else.
@@ -270,16 +301,19 @@ public:
                     {
                         if (player->GetSession())
                         {
-                            ChatHandler(player->GetSession()).PSendSysMessage("Spell: %s (%u) Before Nerf Value: %i (%f)", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, damage, sZoneDifficulty->ZoneDifficultyInfo[target->GetMapId()].SpellDamageBuffPct);
+                            ChatHandler(player->GetSession()).PSendSysMessage("Spell: %s (%u) Before Nerf Value: %i (%f)", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, damage, sZoneDifficulty->ZoneDifficultyInfo[mapId][matchingPhase].SpellDamageBuffPct);
                         }
                     }
                 }
             }
 
-            uint32 mapId = target->GetMapId();
-            if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end())
+            if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end() && matchingPhase != -1)
             {
-                damage = damage * sZoneDifficulty->ZoneDifficultyInfo[mapId].SpellDamageBuffPct;
+                damage = damage * sZoneDifficulty->ZoneDifficultyInfo[mapId][matchingPhase].SpellDamageBuffPct;
+            }
+            else if (sZoneDifficulty->ShouldNerfInDuels(target))
+            {
+                damage = damage * sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX][0].SpellDamageBuffPct;
             }
 
             if (sZoneDifficulty->IsDebugInfoEnabled)
@@ -314,10 +348,16 @@ public:
         if (sZoneDifficulty->IsValidNerfTarget(target) && !attacker->IsPlayer())
         {
             uint32 mapId = target->GetMapId();
-            if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end())
-            {
-                damage = damage * sZoneDifficulty->ZoneDifficultyInfo[mapId].MeleeDamageBuffPct;
-            }
+            uint32 phaseMask = target->GetPhaseMask();
+                int matchingPhase = sZoneDifficulty->GetLowestMatchingPhase(mapId, phaseMask);
+                if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end() && matchingPhase != -1)
+                {
+                    damage = damage * sZoneDifficulty->ZoneDifficultyInfo[mapId][matchingPhase].MeleeDamageBuffPct;
+                }
+                else if (sZoneDifficulty->ShouldNerfInDuels(target))
+                {
+                    damage = damage * sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX][0].MeleeDamageBuffPct;
+                }
         }
     }
 };
