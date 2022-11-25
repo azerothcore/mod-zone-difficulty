@@ -218,7 +218,7 @@ public:
         }
     }
 
-    void ModifyHealReceived(Unit* target, Unit* healer, uint32& heal, SpellInfo const* spellInfo) override
+    void ModifyHealReceived(Unit* target, Unit* /*healer*/ , uint32& heal, SpellInfo const* spellInfo) override
     {
         if (!sZoneDifficulty->IsEnabled)
         {
