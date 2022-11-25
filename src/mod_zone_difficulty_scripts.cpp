@@ -47,7 +47,7 @@ void ZoneDifficulty::LoadMapDifficultySettings()
             // duels do not check for phases. Only 0 is allowed.
             if (mapId == DUEL_INDEX && phaseMask != 0)
             {
-                LOG_ERROR("mod-zone-difficulty", "Table `zone_difficulty_info` for criteria (duel mapId: {}) has wrong value ({}), must be 0 for duels.", mapId, phaseMask);
+                LOG_ERROR("sql.sql", "Table `zone_difficulty_info` for criteria (duel mapId: {}) has wrong value ({}), must be 0 for duels.", mapId, phaseMask);
             }
 
         } while (result->NextRow());
@@ -349,15 +349,15 @@ public:
         {
             uint32 mapId = target->GetMapId();
             uint32 phaseMask = target->GetPhaseMask();
-                int matchingPhase = sZoneDifficulty->GetLowestMatchingPhase(mapId, phaseMask);
-                if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end() && matchingPhase != -1)
-                {
-                    damage = damage * sZoneDifficulty->ZoneDifficultyInfo[mapId][matchingPhase].MeleeDamageBuffPct;
-                }
-                else if (sZoneDifficulty->ShouldNerfInDuels(target))
-                {
-                    damage = damage * sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX][0].MeleeDamageBuffPct;
-                }
+            int matchingPhase = sZoneDifficulty->GetLowestMatchingPhase(mapId, phaseMask);
+            if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end() && matchingPhase != -1)
+            {
+                damage = damage * sZoneDifficulty->ZoneDifficultyInfo[mapId][matchingPhase].MeleeDamageBuffPct;
+            }
+            else if (sZoneDifficulty->ShouldNerfInDuels(target))
+            {
+                damage = damage * sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX][0].MeleeDamageBuffPct;
+            }
         }
     }
 };
