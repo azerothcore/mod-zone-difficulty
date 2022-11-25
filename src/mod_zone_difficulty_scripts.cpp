@@ -121,7 +121,7 @@ int32 ZoneDifficulty::GetLowestMatchingPhase(uint32 mapId, uint32 phaseMask)
             }
         }
     }
-    return -1
+    return -1;
 }
 
 class mod_zone_difficulty_unitscript : public UnitScript
