@@ -367,7 +367,7 @@ class mod_zone_difficulty_worldscript : public WorldScript
 public:
     mod_zone_difficulty_worldscript() : WorldScript("mod_zone_difficulty_worldscript") { }
 
-    void OnAfterConfigLoad(bool reload) override
+    void OnAfterConfigLoad(bool /*reload*/) override
     {
         sZoneDifficulty->IsEnabled = sConfigMgr->GetOption<bool>("ModZoneDifficulty.Enable", false);
         sZoneDifficulty->IsDebugInfoEnabled = sConfigMgr->GetOption<bool>("ModZoneDifficulty.DebugInfo", false);
