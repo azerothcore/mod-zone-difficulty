@@ -185,11 +185,11 @@ public:
                                 int matchingPhase = sZoneDifficulty->GetLowestMatchingPhase(mapId, phaseMask);
                                 if (sZoneDifficulty->ZoneDifficultyInfo[mapId][matchingPhase].Enabled && matchingPhase != -1)
                                 {
-                                    absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyInfo[mapId][matchingPhase].HealingNerfPct;
+                                    absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyInfo[mapId][matchingPhase].AbsorbNerfPct;
                                 }
                                 else if (nerfInDuel)
                                 {
-                                    absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX][0].HealingNerfPct;
+                                    absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX][0].AbsorbNerfPct;
                                 }
 
 
@@ -367,7 +367,7 @@ class mod_zone_difficulty_worldscript : public WorldScript
 public:
     mod_zone_difficulty_worldscript() : WorldScript("mod_zone_difficulty_worldscript") { }
 
-    void OnAfterConfigLoad(bool reload) override
+    void OnAfterConfigLoad(bool /*reload*/) override
     {
         sZoneDifficulty->IsEnabled = sConfigMgr->GetOption<bool>("ModZoneDifficulty.Enable", false);
         sZoneDifficulty->IsDebugInfoEnabled = sConfigMgr->GetOption<bool>("ModZoneDifficulty.DebugInfo", false);
