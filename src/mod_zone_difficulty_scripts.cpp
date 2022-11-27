@@ -6,6 +6,7 @@
 #include "Player.h"
 #include "Config.h"
 #include "Chat.h"
+#include "Pet.h"
 #include "SpellAuras.h"
 #include "SpellAuraEffects.h"
 #include "StringConvert.h"
@@ -395,10 +396,37 @@ public:
             }
         }
     }
+
     void OnMapChanged(Player* player)
     {
-
+        uint32 mapId = player->GetMapId();
+        if (sZoneDifficulty->DisallowedBuffs.find(mapId) != sZoneDifficulty->DisallowedBuffs.end())
+        {
+            for (auto aura : sZoneDifficulty->DisallowedBuffs[mapId])
+            {
+                if (player->HasAura(aura))
+                {
+                    player->RemoveAura(aura);
+                }
+            }
+        }
     }
+
+    void OnPetAddToWorld(Pet* pet)
+    {
+        uint32 mapId = pet->GetMapId();
+        if (sZoneDifficulty->DisallowedBuffs.find(mapId) != sZoneDifficulty->DisallowedBuffs.end())
+        {
+            for (auto aura : sZoneDifficulty->DisallowedBuffs[mapId])
+            {
+                if (pet->HasAura(aura))
+                {
+                    pet->RemoveAura(aura);
+                }
+            }
+        }
+    }
+
 };
 
 class mod_zone_difficulty_worldscript : public WorldScript
