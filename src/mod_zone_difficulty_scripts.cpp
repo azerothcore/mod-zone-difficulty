@@ -87,7 +87,7 @@ void ZoneDifficulty::LoadMapDifficultySettings()
                     }
 
                     uint32 spell;
-                    if (spell = Acore::StringTo<uint32>(token).value())
+                    if ((spell = Acore::StringTo<uint32>(token).value()))
                     {
                         debuffs.push_back(spell);
                     }
