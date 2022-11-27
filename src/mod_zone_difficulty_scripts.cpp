@@ -396,8 +396,14 @@ public:
             }
         }
     }
+};
 
-    void OnMapChanged(Player* player)
+class mod_zone_difficulty_playerscript : public PlayerScript
+{
+public:
+    mod_zone_difficulty_playerscript() : PlayerScript("mod_zone_difficulty_playerscript") { }
+
+    void OnMapChanged(Player* player) override
     {
         uint32 mapId = player->GetMapId();
         if (sZoneDifficulty->DisallowedBuffs.find(mapId) != sZoneDifficulty->DisallowedBuffs.end())
@@ -411,8 +417,14 @@ public:
             }
         }
     }
+};
 
-    void OnPetAddToWorld(Pet* pet)
+class mod_zone_difficulty_petscript : public PetScript
+{
+public:
+    mod_zone_difficulty_petscript() : PetScript("mod_zone_difficulty_petscript") { }
+
+    void OnPetAddToWorld(Pet* pet) override
     {
         uint32 mapId = pet->GetMapId();
         if (sZoneDifficulty->DisallowedBuffs.find(mapId) != sZoneDifficulty->DisallowedBuffs.end())
@@ -426,7 +438,6 @@ public:
             }
         }
     }
-
 };
 
 class mod_zone_difficulty_worldscript : public WorldScript
