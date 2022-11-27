@@ -405,12 +405,13 @@ public:
 
     void OnMapChanged(Player* player) override
     {
+        ChatHandler(player->GetSession()).PSendSysMessage("OnMapChanged fired.");
         uint32 mapId = player->GetMapId();
         if (sZoneDifficulty->DisallowedBuffs.find(mapId) != sZoneDifficulty->DisallowedBuffs.end())
         {
             for (auto aura : sZoneDifficulty->DisallowedBuffs[mapId])
             {
-                    player->RemoveAura(aura);
+                player->RemoveAura(aura);
             }
         }
     }
@@ -423,12 +424,15 @@ public:
 
     void OnPetAddToWorld(Pet* pet) override
     {
+        ChatHandler(pet->GetAffectingPlayer()->GetSession()).PSendSysMessage("OnPetAdded fired.");
         uint32 mapId = pet->GetMapId();
         if (sZoneDifficulty->DisallowedBuffs.find(mapId) != sZoneDifficulty->DisallowedBuffs.end())
         {
+            ChatHandler(pet->GetAffectingPlayer()->GetSession()).PSendSysMessage("Checking map %u.", mapId);
             for (auto aura : sZoneDifficulty->DisallowedBuffs[mapId])
             {
-                pet->RemoveAura(aura);
+                ChatHandler(pet->GetAffectingPlayer()->GetSession()).PSendSysMessage("Removing aura %u from %s.", aura, pet->GetName());
+                pet->RemoveAurasDueToSpell(aura);
             }
         }
     }
@@ -458,5 +462,7 @@ public:
 void AddModZoneDifficultyScripts()
 {
     new mod_zone_difficulty_unitscript();
+    new mod_zone_difficulty_playerscript();
+    new mod_zone_difficulty_petscript();
     new mod_zone_difficulty_worldscript();
 }
