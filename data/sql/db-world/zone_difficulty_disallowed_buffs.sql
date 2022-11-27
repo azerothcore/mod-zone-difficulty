@@ -9,4 +9,4 @@ CREATE TABLE `zone_difficulty_disallowed_buffs` (
 
 DELETE FROM `zone_difficulty_disallowed_buffs`;
 INSERT INTO `zone_difficulty_disallowed_buffs` (`MapID`, `DisallowedBuffs`, `Enabled`, `Comment`) VALUES
-(531, '22888, 24425', 1, 'Forbid in AQ40: Rallying Cry of the Dragonslayer, Spirit of Zandalar');
+(531, '22888 24425', 1, 'Forbid in AQ40: Rallying Cry of the Dragonslayer, Spirit of Zandalar');

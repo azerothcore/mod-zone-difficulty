@@ -64,6 +64,33 @@ void ZoneDifficulty::LoadMapDifficultySettings()
 
         } while (result->NextRow());
     }
+    if (QueryResult result = WorldDatabase.Query("SELECT * FROM zone_difficulty_disallowed_buffs"))
+    {
+        do
+        {
+            if ((*result)[2]).Get<bool>())
+            {
+                std::vector<std::string_view> tokens = Acore::Tokenize(*result)[1], ' ', false);
+
+
+                for (auto token : tokens)
+                {
+                    if (token.empty())
+                    {
+                        continue;
+                    }
+                    if (Optional<uint32> mapid = Acore::StringTo<uint32>(tokens))
+                    {
+                        sZoneDifficulty->DisallowedBuffs[(*result)[0].Get<uint32>()].push_back(*mapid);
+                    }
+                    else
+                    {
+                        LOG_ERROR("sql.sql", "Disable aura '{}' for map {} is invalid, skipped.", areaStr, mapid);
+                    }
+                }
+            }
+        } while (result->NextRow());
+    }
 }
 
 bool ZoneDifficulty::IsValidNerfTarget(Unit* target)
@@ -359,6 +386,10 @@ public:
                 damage = damage * sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX][0].MeleeDamageBuffPct;
             }
         }
+    }
+    void OnMapChanged(Player* player)
+    {
+
     }
 };
 
