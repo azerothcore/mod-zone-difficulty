@@ -410,10 +410,7 @@ public:
         {
             for (auto aura : sZoneDifficulty->DisallowedBuffs[mapId])
             {
-                if (player->HasAura(aura))
-                {
                     player->RemoveAura(aura);
-                }
             }
         }
     }
@@ -431,10 +428,7 @@ public:
         {
             for (auto aura : sZoneDifficulty->DisallowedBuffs[mapId])
             {
-                if (pet->HasAura(aura))
-                {
-                    pet->RemoveAura(aura);
-                }
+                pet->RemoveAura(aura);
             }
         }
     }
