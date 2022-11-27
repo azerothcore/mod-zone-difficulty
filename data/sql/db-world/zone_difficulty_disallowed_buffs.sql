@@ -1,9 +1,9 @@
 DROP TABLE IF EXISTS `zone_difficulty_disallowed_buffs`;
 CREATE TABLE `zone_difficulty_disallowed_buffs` (
     `MapID` INT NOT NULL DEFAULT 0,
-    `DisallowedBuffs` STRING NOT NULL DEFAULT "",
+    `DisallowedBuffs` TEXT,
     `Enabled` TINYINT DEFAULT 1,
-	`Comment` TEXT DEFAULT "",
+	`Comment` TEXT,
     PRIMARY KEY (`MapID`)
 );
 
