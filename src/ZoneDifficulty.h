@@ -34,7 +34,7 @@ public:
     typedef std::map<uint32, std::map<uint32, ZoneDifficultyData> > ZoneDifficultyDataMap;
     ZoneDifficultyDataMap ZoneDifficultyInfo;
     std::map<uint32, float> SpellNerfOverrides;
-    typedef std::map<uint32, std::map<uint32, uint32> > ZoneDifficultyDisablesMap;
+    typedef std::map<uint32, std::vector<uint32> > ZoneDifficultyDisablesMap;
     ZoneDifficultyDisablesMap DisallowedBuffs;
 
 };
