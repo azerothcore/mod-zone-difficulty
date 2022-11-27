@@ -59,7 +59,7 @@ void ZoneDifficulty::LoadMapDifficultySettings()
         {
             if ((*result)[2].Get<bool>())
             {
-                sZoneDifficulty->SpellNerfOverrides[(*result)[0].Get<uint32>()] = (*result)[1].Get<uint32>();
+                sZoneDifficulty->SpellNerfOverrides[(*result)[0].Get<uint32>()] = (*result)[1].Get<float>();
             }
 
         } while (result->NextRow());
