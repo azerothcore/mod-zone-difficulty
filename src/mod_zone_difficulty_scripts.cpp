@@ -405,7 +405,6 @@ public:
 
     void OnMapChanged(Player* player) override
     {
-        ChatHandler(player->GetSession()).PSendSysMessage("OnMapChanged fired.");
         uint32 mapId = player->GetMapId();
         if (sZoneDifficulty->DisallowedBuffs.find(mapId) != sZoneDifficulty->DisallowedBuffs.end())
         {
@@ -424,16 +423,13 @@ public:
 
     void OnPetAddToWorld(Pet* pet) override
     {
-        ChatHandler(pet->GetAffectingPlayer()->GetSession()).PSendSysMessage("OnPetAdded fired.");
         uint32 mapId = pet->GetMapId();
         if (sZoneDifficulty->DisallowedBuffs.find(mapId) != sZoneDifficulty->DisallowedBuffs.end())
         {
-            ChatHandler(pet->GetAffectingPlayer()->GetSession()).PSendSysMessage("Checking map %u.", mapId);
             pet->m_Events.AddEventAtOffset([mapId, pet]()
             {
                 for (uint32 aura : sZoneDifficulty->DisallowedBuffs[mapId])
                 {
-                    ChatHandler(pet->GetAffectingPlayer()->GetSession()).PSendSysMessage("Removing aura %u from %s.", aura, pet->GetName());
                     pet->RemoveAurasDueToSpell(aura);
                 }
             }, 2s);
