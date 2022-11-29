@@ -429,11 +429,14 @@ public:
         if (sZoneDifficulty->DisallowedBuffs.find(mapId) != sZoneDifficulty->DisallowedBuffs.end())
         {
             ChatHandler(pet->GetAffectingPlayer()->GetSession()).PSendSysMessage("Checking map %u.", mapId);
-            for (auto aura : sZoneDifficulty->DisallowedBuffs[mapId])
+            pet->m_Events.AddEventAtOffset([mapId, pet]()
             {
-                ChatHandler(pet->GetAffectingPlayer()->GetSession()).PSendSysMessage("Removing aura %u from %s.", aura, pet->GetName());
-                pet->RemoveAurasDueToSpell(aura);
-            }
+                for (uint32 aura : sZoneDifficulty->DisallowedBuffs[mapId])
+                {
+                    ChatHandler(pet->GetAffectingPlayer()->GetSession()).PSendSysMessage("Removing aura %u from %s.", aura, pet->GetName());
+                    pet->RemoveAurasDueToSpell(aura);
+                }
+            }, 2s);
         }
     }
 };
