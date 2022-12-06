@@ -118,6 +118,11 @@ bool ZoneDifficulty::ShouldNerfInDuels(Unit* target)
         return false;
     }
 
+    if (!target->GetAffectingPlayer())
+    {
+        return false;
+    }
+
     if (!target->GetAffectingPlayer()->duel)
     {
         return false;
