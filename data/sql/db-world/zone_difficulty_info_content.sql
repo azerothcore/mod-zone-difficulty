@@ -11,6 +11,6 @@ INSERT INTO `zone_difficulty_info` (`MapId`, `PhaseMask`, `HealingNerfValue`, `A
 (30, 0, '0.80', '0.80', '0.70', '0.70', 1, 'AV Healing 20% / Absorb 20% / 30% physical & spell damage nerf'),
 (489, 0, '0.80', '0.80', '0.70', '0.70', 1, 'WSG Healing 20% / Absorb 20% / 30% physical & spell damage nerf'),
 (529, 0, '0.80', '0.80', '0.70', '0.70', 1, 'AB Healing 20% / Absorb 20% / 30% physical & spell damage nerf'),
-(556, 0, '0.80', '0.80', '0.70', '0.70', 1, 'EotS Healing 20% / Absorb 20% / 30% physical & spell damage nerf'),
+(566, 0, '0.80', '0.80', '0.70', '0.70', 1, 'EotS Healing 20% / Absorb 20% / 30% physical & spell damage nerf'),
 -- Duels in Forbidding Sea (Wetlands)
 (2147483647, 0, '0.80', '0.80', '0.70', '0.70', 1, 'Zone 2402 Duel Healing 20% / Absorb 20% Nerf / 30% physical & spell damage nerf');
