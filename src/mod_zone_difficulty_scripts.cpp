@@ -305,6 +305,50 @@ public:
         }
     }
 
+    void ModifyPeriodicDamageAurasTick(Unit* target, Unit* attacker, uint32& damage) override
+    {
+        if (!sZoneDifficulty->IsEnabled)
+        {
+            return;
+        }
+
+        // Disclaimer: also affects disables boss adds buff.
+        if (sConfigMgr->GetOption<bool>("ModZoneDifficulty.SpellBuff.OnlyBosses", false))
+        {
+            if (attacker->ToCreature() && !attacker->ToCreature()->IsDungeonBoss())
+            {
+                return;
+            }
+        }
+
+        if (sZoneDifficulty->IsValidNerfTarget(target))
+        {
+            uint32 mapId = target->GetMapId();
+            uint32 phaseMask = target->GetPhaseMask();
+            int32 matchingPhase = sZoneDifficulty->GetLowestMatchingPhase(mapId, phaseMask);
+
+            if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end() && matchingPhase != -1)
+            {
+                damage = damage * sZoneDifficulty->ZoneDifficultyInfo[mapId][matchingPhase].SpellDamageBuffPct;
+            }
+            else if (sZoneDifficulty->ShouldNerfInDuels(target))
+            {
+                damage = damage * sZoneDifficulty->ZoneDifficultyInfo[DUEL_INDEX][0].SpellDamageBuffPct;
+            }
+
+            if (sZoneDifficulty->IsDebugInfoEnabled)
+            {
+                if (Player* player = target->ToPlayer()) // Pointless check? Perhaps.
+                {
+                    if (player->GetSession())
+                    {
+                        ChatHandler(player->GetSession()).PSendSysMessage("A dot tick was altered. Post Nerf Value: %i", damage);
+                    }
+                }
+            }
+        }
+    }
+
     void ModifySpellDamageTaken(Unit* target, Unit* attacker, int32& damage, SpellInfo const* spellInfo) override
     {
         if (!sZoneDifficulty->IsEnabled)
