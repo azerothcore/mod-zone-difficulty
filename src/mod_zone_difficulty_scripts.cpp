@@ -118,12 +118,9 @@ bool ZoneDifficulty::ShouldNerfInDuels(Unit* target)
         return false;
     }
 
-    if (target->ToTempSummon())
+    if (target->ToTempSummon() && target->ToTempSummon()->GetSummoner())
     {
-        if (target->ToTempSummon()->GetSummoner())
-        {
-            target = target->ToTempSummon()->GetSummoner()->ToUnit();
-        }
+        target = target->ToTempSummon()->GetSummoner()->ToUnit();
     }
 
     if (!target->GetAffectingPlayer())
