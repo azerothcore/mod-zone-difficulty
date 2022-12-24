@@ -310,9 +310,27 @@ public:
         }
     }
 
-    void ModifyPeriodicDamageAurasTick(Unit* target, Unit* attacker, uint32& damage) override
+    void ModifyPeriodicDamageAurasTick(Unit* target, Unit* attacker, uint32& damage, SpellInfo const* spellInfo) override
     {
         if (!sZoneDifficulty->IsEnabled)
+        {
+            return;
+        }
+
+        bool isDot = false;
+
+        if (spellInfo)
+        {
+            for (auto const& eff : spellInfo->GetEffects())
+            {
+                if (eff.ApplyAuraName == SPELL_AURA_PERIODIC_DAMAGE || eff.ApplyAuraName == SPELL_AURA_PERIODIC_DAMAGE_PERCENT)
+                {
+                    isDot = true;
+                }
+            }
+        }
+
+        if (!isDot)
         {
             return;
         }
