@@ -332,6 +332,17 @@ public:
             uint32 phaseMask = target->GetPhaseMask();
             int32 matchingPhase = sZoneDifficulty->GetLowestMatchingPhase(mapId, phaseMask);
 
+            if (sZoneDifficulty->IsDebugInfoEnabled)
+            {
+                if (Player* player = attacker->ToPlayer())
+                {
+                    if (player->GetSession())
+                    {
+                        ChatHandler(player->GetSession()).PSendSysMessage("A dot tick was altered. Pre Nerf Value: %i", damage);
+                    }
+                }
+            }
+
             if (sZoneDifficulty->ZoneDifficultyInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyInfo.end() && matchingPhase != -1)
             {
                 damage = damage * sZoneDifficulty->ZoneDifficultyInfo[mapId][matchingPhase].SpellDamageBuffPct;
@@ -343,7 +354,7 @@ public:
 
             if (sZoneDifficulty->IsDebugInfoEnabled)
             {
-                if (Player* player = target->ToPlayer()) // Pointless check? Perhaps.
+                if (Player* player = attacker->ToPlayer())
                 {
                     if (player->GetSession())
                     {
