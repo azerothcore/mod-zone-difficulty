@@ -3,16 +3,24 @@
 
 #include "Player.h"
 #include "Config.h"
+#include "InstanceScript.h"
 #include "ScriptMgr.h"
 #include "ScriptedGossip.h"
 
-struct ZoneDifficultyData
+struct ZoneDifficultyNerfData
 {
     float HealingNerfPct;
     float AbsorbNerfPct;
     float SpellDamageBuffPct;
     float MeleeDamageBuffPct;
     bool Enabled;
+};
+
+struct ZoneDifficultyHardmodeData
+{
+    bool HardmodeOn;
+    bool CompletedEncounterOnNormal;
+    int32 HighestEncounterOnHard;
 };
 
 const int32 DUEL_INDEX = 0x7FFFFFFF;
@@ -31,12 +39,13 @@ public:
     bool IsEnabled{ false };
     bool IsDebugInfoEnabled{ false };
 
-    typedef std::map<uint32, std::map<uint32, ZoneDifficultyData> > ZoneDifficultyDataMap;
-    ZoneDifficultyDataMap ZoneDifficultyInfo;
+    typedef std::map<uint32, std::map<uint32, ZoneDifficultyNerfData> > ZoneDifficultyNerfDataMap;
+    ZoneDifficultyNerfDataMap ZoneDifficultyNerfInfo;
     std::map<uint32, float> SpellNerfOverrides;
     typedef std::map<uint32, std::vector<uint32> > ZoneDifficultyDisablesMap;
     ZoneDifficultyDisablesMap DisallowedBuffs;
-
+    typedef std::vector<ZoneDifficultyHardmodeData> ZoneDifficultyHardmodeDataMap;
+    ZoneDifficultyHardmodeDataMap HardmodeInstanceData;
 };
 
 #define sZoneDifficulty ZoneDifficulty::instance()
