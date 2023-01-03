@@ -557,30 +557,35 @@ public:
             LOG_ERROR("sql.sql", "Try turn on");
             bool CanTurnOn = true;
             // Was a single encounter completed on normal mode?
-            if (sZoneDifficulty->HardmodeInstanceData[player->GetMap()->GetInstanceId()].CompletedEncounterOnNormal != true)
-            {
-                CanTurnOn = false;
-                LOG_ERROR("sql.sql", "CompletedEncounterOnNormal");
-            }
+            ZoneDifficultyHardmodeData data = sZoneDifficulty->HardmodeInstanceData[player->GetMap()->GetInstanceId()];
+                if (data && data.CompletedEncounterOnNormal != true)
+                {
+                    LOG_ERROR("sql.sql", "CompletedEncounterOnNormal");
+                    CanTurnOn = false;
+                }
 
             if (!player->GetInstanceScript() || !player->GetInstanceScript()->IsEncounterInProgress())
             {
-                CanTurnOn = false;
                 LOG_ERROR("sql.sql", "IsEncounterInProgress");
+                CanTurnOn = false;
             }
 
             if (CanTurnOn == true)
             {
-                sZoneDifficulty->HardmodeInstanceData[player->GetMap()->GetInstanceId()].HardmodeOn = true;
                 LOG_ERROR("sql.sql", "Turn on");
+                sZoneDifficulty->HardmodeInstanceData[player->GetMap()->GetInstanceId()].HardmodeOn = true;
             }
 
             CloseGossipMenuFor(player);
         }
         else if (action == 101)
         {
-            sZoneDifficulty->HardmodeInstanceData[player->GetMap()->GetInstanceId()].HardmodeOn = false;
-            LOG_ERROR("sql.sql", "Turn off");
+            ZoneDifficultyHardmodeData data = sZoneDifficulty->HardmodeInstanceData[player->GetMap()->GetInstanceId()];
+                LOG_ERROR("sql.sql", "Turn off");
+            if (data.HardmodeOn)
+            {
+                data.HardmodeOn = false;
+            }
             CloseGossipMenuFor(player);
         }
 
