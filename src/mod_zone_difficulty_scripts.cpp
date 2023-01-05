@@ -542,6 +542,7 @@ public:
     {
         LOG_ERROR("sql.sql", "Encounter completed");
         // todo: Apparently this doesn't fire.
+        // Must set CompletedEncounterOnNormal to true, if the encounter wasn't in hardmode.
     }
 };
 
@@ -556,36 +557,41 @@ public:
         {
             LOG_ERROR("sql.sql", "Try turn on");
             bool CanTurnOn = true;
-            // Was a single encounter completed on normal mode?
-            ZoneDifficultyHardmodeData data = sZoneDifficulty->HardmodeInstanceData[player->GetMap()->GetInstanceId()];
-                if (data && data.CompletedEncounterOnNormal != true)
-                {
-                    LOG_ERROR("sql.sql", "CompletedEncounterOnNormal");
-                    CanTurnOn = false;
-                }
 
-            if (!player->GetInstanceScript() || !player->GetInstanceScript()->IsEncounterInProgress())
+            // Forbid turning harmode on ...
+            // ...if a single encounter was completed on normal mode
+            if (sZoneDifficulty->HardmodeInstanceData.find(player->GetMap()->GetInstanceId()) != sZoneDifficulty->HardmodeInstanceData.end())
+            {
+                LOG_ERROR("sql.sql", "CompletedEncounterOnNormal");
+                if (sZoneDifficulty->HardmodeInstanceData[player->GetMap()->GetInstanceId()].CompletedEncounterOnNormal == true)
+                {
+                    CanTurnOn = false;
+                    // todo: Give Feedback
+                }
+            }
+            // ... if there is an encounter in progress
+            else if (!player->GetInstanceScript() || !player->GetInstanceScript()->IsEncounterInProgress())
             {
                 LOG_ERROR("sql.sql", "IsEncounterInProgress");
                 CanTurnOn = false;
+                // todo: Give Feedback
             }
 
             if (CanTurnOn == true)
             {
-                LOG_ERROR("sql.sql", "Turn on");
+                LOG_ERROR("sql.sql", "Turn on hardmode for id {}", player->GetMap()->GetInstanceId());
                 sZoneDifficulty->HardmodeInstanceData[player->GetMap()->GetInstanceId()].HardmodeOn = true;
+                // todo: Give Feedback
             }
 
-            CloseGossipMenuFor(player);
-        }
+                CloseGossipMenuFor(player);
+            }
         else if (action == 101)
         {
+            LOG_ERROR("sql.sql", "Turn off hardmode for id {}", player->GetMap()->GetInstanceId());
             ZoneDifficultyHardmodeData data = sZoneDifficulty->HardmodeInstanceData[player->GetMap()->GetInstanceId()];
-                LOG_ERROR("sql.sql", "Turn off");
-            if (data.HardmodeOn)
-            {
-                data.HardmodeOn = false;
-            }
+            sZoneDifficulty->HardmodeInstanceData[player->GetMap()->GetInstanceId()].HardmodeOn = false;
+            // todo: Give Feedback
             CloseGossipMenuFor(player);
         }
 
@@ -595,6 +601,7 @@ public:
     bool OnGossipHello(Player* player, Creature* creature) override
     {
         LOG_ERROR("sql.sql", "567");
+        int32 npctext = NPC_TEXT_OTHER;
         if (Group* group = player->GetGroup())
         {
             LOG_ERROR("sql.sql", "570");
@@ -603,9 +610,14 @@ public:
                 LOG_ERROR("sql.sql", "573");
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Please Chromie, let us re-experience how all the things really happened back then. (Hard mode)", GOSSIP_SENDER_MAIN, 100);
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, "I think we will be fine with the cinematic version from here. (Normal mode)", GOSSIP_SENDER_MAIN, 101);
+                npctext = NPC_TEXT_LEADER;
+            }
+            else
+            {
+                //todo: Leave a message that only the leader can do this
             }
         }
-        SendGossipMenuFor(player, 91301, creature);
+        SendGossipMenuFor(player, npctext, creature);
         return true;
     }
 };

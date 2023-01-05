@@ -25,6 +25,8 @@ struct ZoneDifficultyHardmodeData
 
 const int32 DUEL_INDEX = 0x7FFFFFFF;
 const int32 DUEL_AREA = 2402;       // Forbidding Sea (Wetlands)
+const int32 NPC_TEXT_LEADER = 91301;
+const int32 NPC_TEXT_OTHER = 91302;
 
 class ZoneDifficulty
 {
@@ -44,7 +46,7 @@ public:
     std::map<uint32, float> SpellNerfOverrides;
     typedef std::map<uint32, std::vector<uint32> > ZoneDifficultyDisablesMap;
     ZoneDifficultyDisablesMap DisallowedBuffs;
-    typedef std::vector<ZoneDifficultyHardmodeData> ZoneDifficultyHardmodeDataMap;
+    typedef std::map<uint32, ZoneDifficultyHardmodeData> ZoneDifficultyHardmodeDataMap;
     ZoneDifficultyHardmodeDataMap HardmodeInstanceData;
 };
 
