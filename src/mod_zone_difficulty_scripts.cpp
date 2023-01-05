@@ -562,15 +562,15 @@ public:
             // ...if a single encounter was completed on normal mode
             if (sZoneDifficulty->HardmodeInstanceData.find(player->GetMap()->GetInstanceId()) != sZoneDifficulty->HardmodeInstanceData.end())
             {
-                LOG_ERROR("sql.sql", "CompletedEncounterOnNormal");
                 if (sZoneDifficulty->HardmodeInstanceData[player->GetMap()->GetInstanceId()].CompletedEncounterOnNormal == true)
                 {
+                    LOG_ERROR("sql.sql", "CompletedEncounterOnNormal");
                     CanTurnOn = false;
                     // todo: Give Feedback
                 }
             }
             // ... if there is an encounter in progress
-            else if (!player->GetInstanceScript() || !player->GetInstanceScript()->IsEncounterInProgress())
+            else if (player->GetInstanceScript() && player->GetInstanceScript()->IsEncounterInProgress())
             {
                 LOG_ERROR("sql.sql", "IsEncounterInProgress");
                 CanTurnOn = false;
@@ -601,7 +601,7 @@ public:
     bool OnGossipHello(Player* player, Creature* creature) override
     {
         LOG_ERROR("sql.sql", "567");
-        int32 npctext = NPC_TEXT_OTHER;
+        uint32 npctext = NPC_TEXT_OTHER;
         if (Group* group = player->GetGroup())
         {
             LOG_ERROR("sql.sql", "570");
