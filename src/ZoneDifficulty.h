@@ -34,6 +34,7 @@ public:
 
     void LoadMapDifficultySettings();
     [[nodiscard]] bool IsValidNerfTarget(Unit* target);
+    [[nodiscard]] bool VectorContains(std::vector<uint32> vec, uint32 element);
     [[nodiscard]] bool ShouldNerfInDuels(Unit* target);
     [[nodiscard]] int32 GetLowestMatchingPhase(uint32 mapId, uint32 phaseMask);
 
@@ -50,6 +51,8 @@ public:
     typedef std::map<uint32, std::vector<uint32> > ZoneDifficultyHardmodeLootMap;
     ZoneDifficultyHardmodeLootMap HardmodeCreatureLoot;
     ZoneDifficultyHardmodeLootMap HardmodeGameobjectLoot;
+    typedef std::map<uint32, std::vector<ObjectGuid> > ZoneDifficultyHardmodeGameobjectsMap;
+    ZoneDifficultyHardmodeGameobjectsMap HardmodeGameobjectsGUIDMap;
 };
 
 #define sZoneDifficulty ZoneDifficulty::instance()
