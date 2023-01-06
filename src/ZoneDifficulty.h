@@ -20,7 +20,6 @@ struct ZoneDifficultyHardmodeData
 {
     bool HardmodeOn;
     bool CompletedEncounterOnNormal;
-    int32 HighestEncounterOnHard;
 };
 
 const int32 DUEL_INDEX = 0x7FFFFFFF;
