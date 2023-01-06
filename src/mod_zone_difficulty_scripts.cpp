@@ -544,11 +544,19 @@ class mod_zone_difficulty_globalscript : public GlobalScript
 public:
     mod_zone_difficulty_globalscript() : GlobalScript("mod_zone_difficulty_globalscript") { }
 
-    void OnAfterUpdateEncounterState(Map* /*map*/, EncounterCreditType /*type*/, uint32 /*creditEntry*/, Unit* /*source*/, Difficulty /*difficulty_fixed*/, DungeonEncounterList const* /*encounters*/, uint32 /*dungeonCompleted*/, bool /*updated*/) override
+    void OnAfterUpdateEncounterState(Map* map, EncounterCreditType /*type*/, uint32 /*creditEntry*/, Unit* /*source*/, Difficulty /*difficulty_fixed*/, DungeonEncounterList const* /*encounters*/, uint32 /*dungeonCompleted*/, bool /*updated*/) override
     {
         LOG_ERROR("sql.sql", "Encounter completed");
         // todo: Apparently this doesn't fire.
         // Must set CompletedEncounterOnNormal to true, if the encounter wasn't in hardmode.
+        if (sZoneDifficulty->HardmodeInstanceData.find(map->GetInstanceId()) != sZoneDifficulty->HardmodeInstanceData.end())
+        {
+            if (sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].HardmodeOn == true)
+            {
+                return;
+            }
+        }
+        sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].CompletedEncounterOnNormal = true;
     }
 };
 
