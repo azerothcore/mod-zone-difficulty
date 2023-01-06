@@ -106,13 +106,14 @@ void ZoneDifficulty::LoadMapDifficultySettings()
         {
             uint32 mapId = (*result)[0].Get<uint32>();
             uint32 entry = (*result)[1].Get<uint32>();
-            if uint32 objecttype (*result)[2].Get<int16>() == 1)
+            uint32 objecttype = (*result)[2].Get<int16>();
+            if (objecttype == 1)
             {
-                sZoneDifficulty->HardmodeCreatureLoot[mapId].push_back(entry);
+            sZoneDifficulty->HardmodeCreatureLoot[mapId].push_back(entry);
             }
             else if (objecttype == 2)
             {
-                sZoneDifficulty->HardmodeGameObjectLoot[mapId].push_back(entry);
+                sZoneDifficulty->HardmodeGameobjectLoot[mapId].push_back(entry);
             }
             else
             {
@@ -121,7 +122,7 @@ void ZoneDifficulty::LoadMapDifficultySettings()
 
             if (mapId <= 0 || entry <= 0)
             {
-                LOG_ERROR("sql.sql", "Table `zone_difficulty_loot_objects` for criteria MapId: {} OR Entry: {} has wrong value. Must be > 0.", mapId, Entry);
+                LOG_ERROR("sql.sql", "Table `zone_difficulty_loot_objects` for criteria MapId: {} OR Entry: {} has wrong value. Must be > 0.", mapId, entry);
             }
 
         } while (result->NextRow());
@@ -624,8 +625,8 @@ public:
                 // todo: Give Feedback
             }
 
-                CloseGossipMenuFor(player);
-            }
+            CloseGossipMenuFor(player);
+        }
         else if (action == 101)
         {
             LOG_ERROR("sql.sql", "Turn off hardmode for id {}", player->GetMap()->GetInstanceId());
