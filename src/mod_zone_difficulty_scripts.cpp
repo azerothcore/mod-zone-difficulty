@@ -100,6 +100,32 @@ void ZoneDifficulty::LoadMapDifficultySettings()
             }
         } while (result->NextRow());
     }
+    if (QueryResult result = WorldDatabase.Query("SELECT * FROM zone_difficulty_loot_objects"))
+    {
+        do
+        {
+            uint32 mapId = (*result)[0].Get<uint32>();
+            uint32 entry = (*result)[1].Get<uint32>();
+            if uint32 objecttype (*result)[2].Get<int16>() == 1)
+            {
+                sZoneDifficulty->HardmodeCreatureLoot[mapId].push_back(entry);
+            }
+            else if (objecttype == 2)
+            {
+                sZoneDifficulty->HardmodeGameObjectLoot[mapId].push_back(entry);
+            }
+            else
+            {
+                LOG_ERROR("sql.sql", "Table `zone_difficulty_loot_objects` objecttype: has wrong value ({}), must be 1 for creatures or 2 for gameobjects.", objecttype);
+            }
+
+            if (mapId <= 0 || entry <= 0)
+            {
+                LOG_ERROR("sql.sql", "Table `zone_difficulty_loot_objects` for criteria MapId: {} OR Entry: {} has wrong value. Must be > 0.", mapId, Entry);
+            }
+
+        } while (result->NextRow());
+    }
 }
 
 bool ZoneDifficulty::IsValidNerfTarget(Unit* target)
@@ -603,7 +629,7 @@ public:
         else if (action == 101)
         {
             LOG_ERROR("sql.sql", "Turn off hardmode for id {}", player->GetMap()->GetInstanceId());
-            ZoneDifficultyHardmodeData data = sZoneDifficulty->HardmodeInstanceData[player->GetMap()->GetInstanceId()];
+            ZoneDifficultyHardmodeInstData data = sZoneDifficulty->HardmodeInstanceData[player->GetMap()->GetInstanceId()];
             sZoneDifficulty->HardmodeInstanceData[player->GetMap()->GetInstanceId()].HardmodeOn = false;
             // todo: Give Feedback
             CloseGossipMenuFor(player);
