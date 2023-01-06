@@ -537,8 +537,14 @@ public:
         sZoneDifficulty->IsDebugInfoEnabled = sConfigMgr->GetOption<bool>("ModZoneDifficulty.DebugInfo", false);
         sZoneDifficulty->LoadMapDifficultySettings();
     }
+};
 
-    void OnAfterUpdateEncounterState(Map* map, EncounterCreditType type, uint32 creditEntry, Unit* source, Difficulty difficulty_fixed, DungeonEncounterList const* encounters, uint32 dungeonCompleted, bool updated)
+class mod_zone_difficulty_globalscript : public GlobalScript
+{
+public:
+    mod_zone_difficulty_globalscript() : GlobalScript("mod_zone_difficulty_globalscript") { }
+
+    void OnAfterUpdateEncounterState(Map* /*map*/, EncounterCreditType /*type*/, uint32 /*creditEntry*/, Unit* /*source*/, Difficulty /*difficulty_fixed*/, DungeonEncounterList const* /*encounters*/, uint32 /*dungeonCompleted*/, bool /*updated*/) override
     {
         LOG_ERROR("sql.sql", "Encounter completed");
         // todo: Apparently this doesn't fire.
@@ -629,5 +635,6 @@ void AddModZoneDifficultyScripts()
     new mod_zone_difficulty_playerscript();
     new mod_zone_difficulty_petscript();
     new mod_zone_difficulty_worldscript();
+    new mod_zone_difficulty_globalscript();
     new mod_zone_difficulty_dungeonmaster();
 }
