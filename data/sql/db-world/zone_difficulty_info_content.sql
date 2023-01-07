@@ -13,7 +13,7 @@ INSERT INTO `zone_difficulty_info` (`MapId`, `PhaseMask`, `HealingNerfValue`, `A
 (529, 0, '0.80', '0.80', '0.70', '0.70', 1, 'AB Healing 20% / Absorb 20% / 30% physical & spell damage nerf'),
 (566, 0, '0.80', '0.80', '0.70', '0.70', 1, 'EotS Healing 20% / Absorb 20% / 30% physical & spell damage nerf'),
 -- arenas
-(529, 0, '0.80', '0.80', '0.70', '0.70', 1, 'Ring of Trials Healing 20% / Absorb 20% / 30% physical & spell damage nerf'),
+(559, 0, '0.80', '0.80', '0.70', '0.70', 1, 'Ring of Trials Healing 20% / Absorb 20% / 30% physical & spell damage nerf'),
 (562, 0, '0.80', '0.80', '0.70', '0.70', 1, 'Blades Edge Arena  Healing 20% / Absorb 20% / 30% physical & spell damage nerf'),
 (572, 0, '0.80', '0.80', '0.70', '0.70', 1, 'Ruins of Lordaeron Healing 20% / Absorb 20% / 30% physical & spell damage nerf'),
 (617, 0, '0.80', '0.80', '0.70', '0.70', 1, 'Dalaran Arena Healing 20% / Absorb 20% / 30% physical & spell damage nerf'),
