@@ -608,7 +608,7 @@ public:
 
         // is the creature in the list of entries to receive improved loot?
         uint32 mapId = creature->GetMap()->GetId();
-        if (sZoneDifficulty->VectorContains(sZoneDifficulty->HardmodeCreatureLoot[mapId], creature->GetEntry()))
+        if !(sZoneDifficulty->VectorContains(sZoneDifficulty->HardmodeCreatureLoot[mapId], creature->GetEntry()))
         {
             return;
         }
@@ -641,7 +641,7 @@ public:
 
         // is the go in the list of entries to receive improved loot?
         uint32 mapId = go->GetMap()->GetId();
-        if (sZoneDifficulty->VectorContains(sZoneDifficulty->HardmodeCreatureLoot[mapId], go->GetEntry()))
+        if !(sZoneDifficulty->VectorContains(sZoneDifficulty->HardmodeGameobjectLoot[mapId], go->GetEntry()))
         {
             return;
         }
