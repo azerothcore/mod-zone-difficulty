@@ -542,12 +542,12 @@ public:
         if (sZoneDifficulty->DisallowedBuffs.find(mapId) != sZoneDifficulty->DisallowedBuffs.end())
         {
             pet->m_Events.AddEventAtOffset([mapId, pet]()
-            {
-                for (uint32 aura : sZoneDifficulty->DisallowedBuffs[mapId])
                 {
-                    pet->RemoveAurasDueToSpell(aura);
-                }
-            }, 2s);
+                    for (uint32 aura : sZoneDifficulty->DisallowedBuffs[mapId])
+                    {
+                        pet->RemoveAurasDueToSpell(aura);
+                    }
+                }, 2s);
         }
     }
 };
@@ -576,6 +576,11 @@ class mod_zone_difficulty_globalscript : public GlobalScript
 {
 public:
     mod_zone_difficulty_globalscript() : GlobalScript("mod_zone_difficulty_globalscript") { }
+
+    void OnInstanceIdRemoved(uint32 instanceId)
+    {
+        LOG_ERROR("sql.sql", "OnInstanceIdRemoved: {}", instanceId);
+    }
 
     void OnAfterUpdateEncounterState(Map* map, EncounterCreditType /*type*/, uint32 /*creditEntry*/, Unit* /*source*/, Difficulty /*difficulty_fixed*/, DungeonEncounterList const* /*encounters*/, uint32 /*dungeonCompleted*/, bool /*updated*/) override
     {
@@ -608,7 +613,7 @@ public:
 
         // is the creature in the list of entries to receive improved loot?
         uint32 mapId = creature->GetMap()->GetId();
-        if !(sZoneDifficulty->VectorContains(sZoneDifficulty->HardmodeCreatureLoot[mapId], creature->GetEntry()))
+        if (!sZoneDifficulty->VectorContains(sZoneDifficulty->HardmodeCreatureLoot[mapId], creature->GetEntry()))
         {
             return;
         }
@@ -641,7 +646,7 @@ public:
 
         // is the go in the list of entries to receive improved loot?
         uint32 mapId = go->GetMap()->GetId();
-        if !(sZoneDifficulty->VectorContains(sZoneDifficulty->HardmodeGameobjectLoot[mapId], go->GetEntry()))
+        if (!sZoneDifficulty->VectorContains(sZoneDifficulty->HardmodeGameobjectLoot[mapId], go->GetEntry()))
         {
             return;
         }
