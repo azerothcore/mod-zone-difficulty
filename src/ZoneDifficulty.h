@@ -34,6 +34,7 @@ public:
 
     void LoadMapDifficultySettings();
     void SaveHardmodeInstanceData(uint32 instanceId);
+    void LoadHardmodeInstanceData();
     [[nodiscard]] bool IsValidNerfTarget(Unit* target);
     [[nodiscard]] bool VectorContains(std::vector<uint32> vec, uint32 element);
     [[nodiscard]] bool ShouldNerfInDuels(Unit* target);

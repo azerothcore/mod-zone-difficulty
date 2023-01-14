@@ -7,6 +7,7 @@
 #include "Config.h"
 #include "Chat.h"
 #include "GridNotifiers.h"
+#include "MapMgr.h"
 #include "Pet.h"
 #include "SpellAuras.h"
 #include "SpellAuraEffects.h"
@@ -130,6 +131,41 @@ void ZoneDifficulty::LoadMapDifficultySettings()
     }
 }
 
+/* Loads the HardmodeInstanceData from the database.
+*  Fetch from zone_difficulty_instance_saves.
+*  `InstanceID` INT NOT NULL DEFAULT 0,
+*  `HardmodeOn` TINYINT NOT NULL DEFAULT 0,
+*  `HardmodePossible` TINYINT NOT NULL DEFAULT 1,
+*
+*  Exclude data not in the IDs stored in GetInstanceIDs() and delete
+*  zone_difficulty_instance_saves for instances that no longer exist.
+*/
+void ZoneDifficulty::LoadHardmodeInstanceData()
+{
+    if (QueryResult result = CharacterDatabase.Query("SELECT * FROM zone_difficulty_instance_saves"))
+    {
+        std::vector<bool> instanceIDs = sMapMgr->GetInstanceIDs();
+        do
+        {
+            uint32 instanceId = (*result)[0].Get<uint32>();
+            bool HardmodeOn = (*result)[1].Get<bool>();
+            bool CompletedEncounterOnNormal = (*result)[2].Get<bool>();
+
+            if (instanceIDs[instanceId] == true)
+            {
+                sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodeOn = HardmodeOn;
+                sZoneDifficulty->HardmodeInstanceData[instanceId].CompletedEncounterOnNormal = CompletedEncounterOnNormal;
+            }
+            else
+            {
+                CharacterDatabase.Execute("DELETE FROM zone_difficulty_instance_saves WHERE InstanceID = %u", instanceId);
+            }
+
+
+        } while (result->NextRow());
+    }
+}
+
 bool ZoneDifficulty::IsValidNerfTarget(Unit* target)
 {
     return target->IsPlayer() || target->IsPet() || target->IsGuardian();
@@ -216,7 +252,7 @@ int32 ZoneDifficulty::GetLowestMatchingPhase(uint32 mapId, uint32 phaseMask)
  *  `HardmodeOn` TINYINT NOT NULL DEFAULT 0,
  *  `HardmodePossible` TINYINT NOT NULL DEFAULT 1,
  */
- void ZoneDifficulty::SaveHardmodeInstanceData(uint32 instanceId)
+void ZoneDifficulty::SaveHardmodeInstanceData(uint32 instanceId)
 {
     if (sZoneDifficulty->HardmodeInstanceData.find(instanceId) == sZoneDifficulty->HardmodeInstanceData.end())
     {
@@ -587,6 +623,7 @@ public:
         sZoneDifficulty->IsEnabled = sConfigMgr->GetOption<bool>("ModZoneDifficulty.Enable", false);
         sZoneDifficulty->IsDebugInfoEnabled = sConfigMgr->GetOption<bool>("ModZoneDifficulty.DebugInfo", false);
         sZoneDifficulty->LoadMapDifficultySettings();
+        sZoneDifficulty->LoadHardmodeInstanceData();
     }
 };
 
@@ -602,7 +639,7 @@ public:
             sZoneDifficulty->HardmodeInstanceData.erase(instanceId);
         }
 
-            CharacterDatabase.Execute("DELETE FROM zone_difficulty_instance_saves WHERE InstanceID = %u;", instanceId);
+        CharacterDatabase.Execute("DELETE FROM zone_difficulty_instance_saves WHERE InstanceID = %u;", instanceId);
     }
 
     void OnAfterUpdateEncounterState(Map* map, EncounterCreditType /*type*/, uint32 /*creditEntry*/, Unit* /*source*/, Difficulty /*difficulty_fixed*/, DungeonEncounterList const* /*encounters*/, uint32 /*dungeonCompleted*/, bool /*updated*/) override
