@@ -45,7 +45,7 @@ void ZoneDifficulty::LoadMapDifficultySettings()
             data.AbsorbNerfPct = (*result)[3].Get<float>();
             data.MeleeDamageBuffPct = (*result)[4].Get<float>();
             data.SpellDamageBuffPct = (*result)[5].Get<float>();
-            data.Enabled = (*result)[6].Get<uint8>();
+            data.Enabled = (*result)[6].Get<bool>();
             sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][phaseMask] = data;
 
             // duels do not check for phases. Only 0 is allowed.
@@ -262,7 +262,7 @@ public:
                             int32 absorb = eff->GetAmount();
                             uint32 phaseMask = target->GetPhaseMask();
                             int matchingPhase = sZoneDifficulty->GetLowestMatchingPhase(mapId, phaseMask);
-                            if (sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].Enabled == 1 && (matchingPhase != -1))
+                            if (sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].Enabled && (matchingPhase != -1))
                             {
                                 absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].AbsorbNerfPct;
                             }
@@ -331,7 +331,7 @@ public:
 
                 uint32 phaseMask = target->GetPhaseMask();
                 int matchingPhase = sZoneDifficulty->GetLowestMatchingPhase(mapId, phaseMask);
-                if (sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].Enabled == 1 && matchingPhase != -1)
+                if (sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].Enabled && matchingPhase != -1)
                 {
                     heal = heal * sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].HealingNerfPct;
                 }
@@ -608,7 +608,7 @@ public:
 
         // is the creature in the list of entries to receive improved loot?
         uint32 mapId = creature->GetMap()->GetId();
-        if (!sZoneDifficulty->VectorContains(sZoneDifficulty->HardmodeCreatureLoot[mapId], creature->GetEntry()))
+        if !(sZoneDifficulty->VectorContains(sZoneDifficulty->HardmodeCreatureLoot[mapId], creature->GetEntry()))
         {
             return;
         }
@@ -641,7 +641,7 @@ public:
 
         // is the go in the list of entries to receive improved loot?
         uint32 mapId = go->GetMap()->GetId();
-        if (!sZoneDifficulty->VectorContains(sZoneDifficulty->HardmodeGameobjectLoot[mapId], go->GetEntry()))
+        if !(sZoneDifficulty->VectorContains(sZoneDifficulty->HardmodeGameobjectLoot[mapId], go->GetEntry()))
         {
             return;
         }
