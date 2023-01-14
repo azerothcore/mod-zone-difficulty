@@ -33,6 +33,7 @@ public:
     static ZoneDifficulty* instance();
 
     void LoadMapDifficultySettings();
+    void SaveHardmodeInstanceData(uint32 instanceId);
     [[nodiscard]] bool IsValidNerfTarget(Unit* target);
     [[nodiscard]] bool VectorContains(std::vector<uint32> vec, uint32 element);
     [[nodiscard]] bool ShouldNerfInDuels(Unit* target);

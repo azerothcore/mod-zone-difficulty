@@ -209,6 +209,24 @@ int32 ZoneDifficulty::GetLowestMatchingPhase(uint32 mapId, uint32 phaseMask)
     return -1;
 }
 
+/*
+ *  Store the HardmodeInstanceData in the database for the given instance id.
+ *  zone_difficulty_instance_saves is used to store the data.
+ *  `InstanceID` INT NOT NULL DEFAULT 0,
+ *  `HardmodeOn` TINYINT NOT NULL DEFAULT 0,
+ *  `HardmodePossible` TINYINT NOT NULL DEFAULT 1,
+ */
+ void ZoneDifficulty::SaveHardmodeInstanceData(uint32 instanceId)
+{
+    if (sZoneDifficulty->HardmodeInstanceData.find(instanceId) == sZoneDifficulty->HardmodeInstanceData.end())
+    {
+        LOG_ERROR("sql.sql", "ZoneDifficulty::SaveHardmodeInstanceData: InstanceId {} not found in HardmodeInstanceData.", instanceId);
+        return;
+    }
+
+    CharacterDatabase.Execute("REPLACE INTO zone_difficulty_instance_saves (InstanceID, HardmodeOn, CompletedEncounterOnNormal) VALUES (%u, %u, %u)", instanceId, sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodeOn, sZoneDifficulty->HardmodeInstanceData[instanceId].CompletedEncounterOnNormal);
+}
+
 class mod_zone_difficulty_unitscript : public UnitScript
 {
 public:
@@ -579,7 +597,12 @@ public:
 
     void OnInstanceIdRemoved(uint32 instanceId)
     {
-        LOG_ERROR("sql.sql", "OnInstanceIdRemoved: {}", instanceId);
+        if (sZoneDifficulty->HardmodeInstanceData.find(instanceId) != sZoneDifficulty->HardmodeInstanceData.end())
+        {
+            sZoneDifficulty->HardmodeInstanceData.erase(instanceId);
+        }
+
+            CharacterDatabase.Execute("DELETE FROM zone_difficulty_instance_saves WHERE InstanceID = %u;", instanceId);
     }
 
     void OnAfterUpdateEncounterState(Map* map, EncounterCreditType /*type*/, uint32 /*creditEntry*/, Unit* /*source*/, Difficulty /*difficulty_fixed*/, DungeonEncounterList const* /*encounters*/, uint32 /*dungeonCompleted*/, bool /*updated*/) override
@@ -595,6 +618,7 @@ public:
             }
         }
         sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].CompletedEncounterOnNormal = true;
+        sZoneDifficulty->SaveHardmodeInstanceData(map->GetInstanceId());
     }
 };
 
@@ -700,6 +724,7 @@ public:
             {
                 LOG_ERROR("sql.sql", "Turn on hardmode for id {}", instanceId);
                 sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodeOn = true;
+                sZoneDifficulty->SaveHardmodeInstanceData(instanceId);
                 uint32 mapId = player->GetMap()->GetId();
 
                 // does the map have any creature which is supposed to have an improved lootmode?
@@ -741,6 +766,7 @@ public:
             LOG_ERROR("sql.sql", "Turn off hardmode for id {}", instanceId);
             ZoneDifficultyHardmodeInstData data = sZoneDifficulty->HardmodeInstanceData[instanceId];
             sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodeOn = false;
+            sZoneDifficulty->SaveHardmodeInstanceData(instanceId);
 
             // Remove Extra Lootmode from all stored objects
             for (auto guid : sZoneDifficulty->HardmodeGameobjectsGUIDMap[instanceId])
