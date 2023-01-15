@@ -841,12 +841,12 @@ public:
 
                 // find all creatures/GOs with their entry listed in sZoneDifficulty->HardmodeCreatureLoot[mapId] and AddLootMode(64)
                 std::list<Creature*> creatures;
-                for (auto entry : sZoneDifficulty->HardmodeCreatureLoot[player->GetMap()->GetId()])
+                for (auto entry : sZoneDifficulty->HardmodeCreatureLoot[mapId])
                 {
                     player->GetCreaturesWithEntryInRange(creatures, 50000.0f, entry);
                 }
                 std::list<GameObject*> gameobjects;
-                for (auto entry : sZoneDifficulty->HardmodeGameobjectLoot[player->GetMap()->GetId()])
+                for (auto entry : sZoneDifficulty->HardmodeGameobjectLoot[mapId])
                 {
                     player->GetGameObjectListWithEntryInGrid(gameobjects, entry, 50000.0f);
                 }
