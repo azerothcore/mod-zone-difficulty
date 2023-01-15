@@ -142,19 +142,25 @@ void ZoneDifficulty::LoadMapDifficultySettings()
 */
 void ZoneDifficulty::LoadHardmodeInstanceData()
 {
+    // debugging
+    std::vector<bool> instanceIDs = sMapMgr->GetInstanceIDs();
+    for (int i = 0; i < instanceIDs.size(); i++)
+    {
+        LOG_ERROR("sql.sql", "ZoneDifficulty::LoadHardmodeInstanceData: id {} exists: {}:", i, instanceIDs[i]);
+    }
+    //end debugging
     if (QueryResult result = CharacterDatabase.Query("SELECT * FROM zone_difficulty_instance_saves"))
     {
-        std::vector<bool> instanceIDs = sMapMgr->GetInstanceIDs();
         do
         {
             uint32 instanceId = (*result)[0].Get<uint32>();
             bool HardmodeOn = (*result)[1].Get<bool>();
-            bool CompletedEncounterOnNormal = (*result)[2].Get<bool>();
+            bool HardmodePossible = (*result)[2].Get<bool>();
 
             if (instanceIDs[instanceId] == true)
             {
                 sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodeOn = HardmodeOn;
-                sZoneDifficulty->HardmodeInstanceData[instanceId].CompletedEncounterOnNormal = CompletedEncounterOnNormal;
+                sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodePossible = HardmodePossible;
             }
             else
             {
@@ -260,7 +266,7 @@ void ZoneDifficulty::SaveHardmodeInstanceData(uint32 instanceId)
         return;
     }
 
-    CharacterDatabase.Execute("REPLACE INTO zone_difficulty_instance_saves (InstanceID, HardmodeOn, CompletedEncounterOnNormal) VALUES (%u, %u, %u)", instanceId, sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodeOn, sZoneDifficulty->HardmodeInstanceData[instanceId].CompletedEncounterOnNormal);
+    CharacterDatabase.Execute("REPLACE INTO zone_difficulty_instance_saves (InstanceID, HardmodeOn, HardmodePossible) VALUES (%u, %u, %u)", instanceId, sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodeOn, sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodePossible);
 }
 
 class mod_zone_difficulty_unitscript : public UnitScript
@@ -646,7 +652,7 @@ public:
     {
         LOG_ERROR("sql.sql", "Encounter completed");
         // todo: Apparently this doesn't fire.
-        // Must set CompletedEncounterOnNormal to true, if the encounter wasn't in hardmode.
+        // Must set HardmodePossible to false, if the encounter wasn't in hardmode.
         if (sZoneDifficulty->HardmodeInstanceData.find(map->GetInstanceId()) != sZoneDifficulty->HardmodeInstanceData.end())
         {
             if (sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].HardmodeOn == true)
@@ -654,7 +660,7 @@ public:
                 return;
             }
         }
-        sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].CompletedEncounterOnNormal = true;
+        sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].HardmodePossible = false;
         sZoneDifficulty->SaveHardmodeInstanceData(map->GetInstanceId());
     }
 };
@@ -742,9 +748,9 @@ public:
             // ...if a single encounter was completed on normal mode
             if (sZoneDifficulty->HardmodeInstanceData.find(instanceId) != sZoneDifficulty->HardmodeInstanceData.end())
             {
-                if (sZoneDifficulty->HardmodeInstanceData[instanceId].CompletedEncounterOnNormal == true)
+                if (sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodePossible == false)
                 {
-                    LOG_ERROR("sql.sql", "CompletedEncounterOnNormal");
+                    LOG_ERROR("sql.sql", "HardmodePossible");
                     CanTurnOn = false;
                     // todo: Give Feedback
                 }

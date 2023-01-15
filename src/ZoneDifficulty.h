@@ -19,7 +19,7 @@ struct ZoneDifficultyNerfData
 struct ZoneDifficultyHardmodeInstData
 {
     bool HardmodeOn;
-    bool CompletedEncounterOnNormal;
+    bool HardmodePossible;
 };
 
 const int32 DUEL_INDEX = 0x7FFFFFFF;
