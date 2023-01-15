@@ -13,7 +13,7 @@ struct ZoneDifficultyNerfData
     float AbsorbNerfPct;
     float SpellDamageBuffPct;
     float MeleeDamageBuffPct;
-    uint32 Enabled;
+    int8 Enabled;
     float HealingNerfPctHard;
     float AbsorbNerfPctHard;
     float SpellDamageBuffPctHard;
@@ -30,8 +30,8 @@ const int32 DUEL_INDEX = 0x7FFFFFFF;
 const int32 DUEL_AREA = 2402;       // Forbidding Sea (Wetlands)
 const uint32 NPC_TEXT_LEADER = 91301;
 const uint32 NPC_TEXT_OTHER = 91302;
-const __int8 MODE_NORMAL = 1;
-const __int8 MODE_HARD = 64;
+const int8 MODE_NORMAL = 1;
+const int8 MODE_HARD = 64;
 
 class ZoneDifficulty
 {

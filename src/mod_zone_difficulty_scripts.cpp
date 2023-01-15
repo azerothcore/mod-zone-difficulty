@@ -42,7 +42,7 @@ void ZoneDifficulty::LoadMapDifficultySettings()
             uint32 mapId = (*result)[0].Get<uint32>();
             uint32 phaseMask = (*result)[1].Get<uint32>();
             ZoneDifficultyNerfData data;
-            uint32 mode = (*result)[6].Get<uint32>();
+            int8 mode = (*result)[6].Get<int8>();
             if (mode == MODE_NORMAL)
             {
                 data.HealingNerfPct = (*result)[2].Get<float>();
@@ -335,7 +335,7 @@ public:
                             int32 absorb = eff->GetAmount();
                             uint32 phaseMask = target->GetPhaseMask();
                             int matchingPhase = sZoneDifficulty->GetLowestMatchingPhase(mapId, phaseMask);
-                            uint32 mode = sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].Enabled;
+                            int8 mode = sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].Enabled;
                             if (matchingPhase != -1)
                             {
                                 if ((mode & MODE_NORMAL) == MODE_NORMAL)
@@ -412,7 +412,7 @@ public:
 
                 uint32 phaseMask = target->GetPhaseMask();
                 int matchingPhase = sZoneDifficulty->GetLowestMatchingPhase(mapId, phaseMask);
-                uint32 mode = sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].Enabled;
+                int8 mode = sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].Enabled;
                 if (matchingPhase != -1)
                 {
                     if ((mode & MODE_NORMAL) == MODE_NORMAL)
@@ -485,7 +485,7 @@ public:
 
             if (sZoneDifficulty->ZoneDifficultyNerfInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyNerfInfo.end() && matchingPhase != -1)
             {
-                uint32 mode = sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].Enabled;
+                int8 mode = sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].Enabled;
                 if ((mode && MODE_NORMAL) == MODE_NORMAL)
                 {
                     damage = damage * sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].SpellDamageBuffPct;
@@ -560,7 +560,7 @@ public:
 
             if (sZoneDifficulty->ZoneDifficultyNerfInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyNerfInfo.end() && matchingPhase != -1)
             {
-                uint32 mode = sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].Enabled;
+                int8 mode = sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].Enabled;
                 if ((mode & MODE_NORMAL) == MODE_NORMAL)
                 {
                     damage = damage * sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].SpellDamageBuffPct;
@@ -614,7 +614,7 @@ public:
             int matchingPhase = sZoneDifficulty->GetLowestMatchingPhase(mapId, phaseMask);
             if (sZoneDifficulty->ZoneDifficultyNerfInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyNerfInfo.end() && matchingPhase != -1)
             {
-                uint32 mode = sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].Enabled;
+                int8 mode = sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].Enabled;
                 if ((mode & MODE_NORMAL) == MODE_NORMAL)
                 {
                     damage = damage * sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].MeleeDamageBuffPct;
@@ -702,6 +702,7 @@ public:
 
     void OnInstanceIdRemoved(uint32 instanceId)
     {
+        LOG_ERROR("sql.sql", "OnInstanceIdRemoved: instanceId = {}", instanceId);
         if (sZoneDifficulty->HardmodeInstanceData.find(instanceId) != sZoneDifficulty->HardmodeInstanceData.end())
         {
             sZoneDifficulty->HardmodeInstanceData.erase(instanceId);
@@ -812,7 +813,7 @@ public:
             {
                 if (sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodePossible == false)
                 {
-                    LOG_ERROR("sql.sql", "HardmodePossible");
+                    LOG_ERROR("sql.sql", "Hardmode is not Possible");
                     CanTurnOn = false;
                     // todo: Give Feedback
                 }
