@@ -177,7 +177,7 @@ void ZoneDifficulty::LoadHardmodeInstanceData()
             }
             else
             {
-                CharacterDatabase.Execute("DELETE FROM zone_difficulty_instance_saves WHERE InstanceID = %u", instanceId);
+                CharacterDatabase.Execute("DELETE FROM zone_difficulty_instance_saves WHERE InstanceID = {}", instanceId);
             }
 
 
@@ -279,7 +279,7 @@ void ZoneDifficulty::SaveHardmodeInstanceData(uint32 instanceId)
         return;
     }
 
-    CharacterDatabase.Execute("REPLACE INTO zone_difficulty_instance_saves (InstanceID, HardmodeOn, HardmodePossible) VALUES (%u, %u, %u)", instanceId, sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodeOn, sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodePossible);
+    CharacterDatabase.Execute("REPLACE INTO zone_difficulty_instance_saves (InstanceID, HardmodeOn, HardmodePossible) VALUES ({}, {}, {})", instanceId, sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodeOn, sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodePossible);
 }
 
 class mod_zone_difficulty_unitscript : public UnitScript
@@ -707,7 +707,7 @@ public:
             sZoneDifficulty->HardmodeInstanceData.erase(instanceId);
         }
 
-        CharacterDatabase.Execute("DELETE FROM zone_difficulty_instance_saves WHERE InstanceID = %u;", instanceId);
+        CharacterDatabase.Execute("DELETE FROM zone_difficulty_instance_saves WHERE InstanceID = {};", instanceId);
     }
 
     void OnAfterUpdateEncounterState(Map* map, EncounterCreditType /*type*/, uint32 /*creditEntry*/, Unit* /*source*/, Difficulty /*difficulty_fixed*/, DungeonEncounterList const* /*encounters*/, uint32 /*dungeonCompleted*/, bool /*updated*/) override
