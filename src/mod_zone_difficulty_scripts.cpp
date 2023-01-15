@@ -42,12 +42,25 @@ void ZoneDifficulty::LoadMapDifficultySettings()
             uint32 mapId = (*result)[0].Get<uint32>();
             uint32 phaseMask = (*result)[1].Get<uint32>();
             ZoneDifficultyNerfData data;
-            data.HealingNerfPct = (*result)[2].Get<float>();
-            data.AbsorbNerfPct = (*result)[3].Get<float>();
-            data.MeleeDamageBuffPct = (*result)[4].Get<float>();
-            data.SpellDamageBuffPct = (*result)[5].Get<float>();
-            data.Enabled = (*result)[6].Get<bool>();
-            sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][phaseMask] = data;
+            __int8 mode = (*result)[6].Get<__int8>();
+            if (mode == MODE_NORMAL)
+            {
+                data.HealingNerfPct = (*result)[2].Get<float>();
+                data.AbsorbNerfPct = (*result)[3].Get<float>();
+                data.MeleeDamageBuffPct = (*result)[4].Get<float>();
+                data.SpellDamageBuffPct = (*result)[5].Get<float>();
+                data.Enabled = data.Enabled | mode;
+                sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][phaseMask] = data;
+            }
+            else if (mode == MODE_HARD)
+            {
+                data.HealingNerfPctHard = (*result)[2].Get<float>();
+                data.AbsorbNerfPctHard = (*result)[3].Get<float>();
+                data.MeleeDamageBuffPctHard = (*result)[4].Get<float>();
+                data.SpellDamageBuffPctHard = (*result)[5].Get<float>();
+                data.Enabled = data.Enabled | mode;
+                sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][phaseMask] = data;
+            }
 
             // duels do not check for phases. Only 0 is allowed.
             if (mapId == DUEL_INDEX && phaseMask != 0)
@@ -322,11 +335,11 @@ public:
                             int32 absorb = eff->GetAmount();
                             uint32 phaseMask = target->GetPhaseMask();
                             int matchingPhase = sZoneDifficulty->GetLowestMatchingPhase(mapId, phaseMask);
-                            if (sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].Enabled && (matchingPhase != -1))
+                            if (sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].Enabled > 0 && (matchingPhase != -1))
                             {
                                 absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].AbsorbNerfPct;
                             }
-                            else if (nerfInDuel)
+                            else if (sZoneDifficulty->ZoneDifficultyNerfInfo[DUEL_INDEX][0].Enabled > 0 && nerfInDuel)
                             {
                                 absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyNerfInfo[DUEL_INDEX][0].AbsorbNerfPct;
                             }
@@ -391,11 +404,11 @@ public:
 
                 uint32 phaseMask = target->GetPhaseMask();
                 int matchingPhase = sZoneDifficulty->GetLowestMatchingPhase(mapId, phaseMask);
-                if (sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].Enabled && matchingPhase != -1)
+                if (sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].Enabled > 0 && matchingPhase != -1)
                 {
                     heal = heal * sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].HealingNerfPct;
                 }
-                else if (nerfInDuel)
+                else if (sZoneDifficulty->ZoneDifficultyNerfInfo[DUEL_INDEX][0].Enabled > 0 && nerfInDuel)
                 {
                     heal = heal * sZoneDifficulty->ZoneDifficultyNerfInfo[DUEL_INDEX][0].HealingNerfPct;
                 }
@@ -456,11 +469,17 @@ public:
 
             if (sZoneDifficulty->ZoneDifficultyNerfInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyNerfInfo.end() && matchingPhase != -1)
             {
-                damage = damage * sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].SpellDamageBuffPct;
+                if (sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].Enabled > 0)
+                {
+                    damage = damage * sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].SpellDamageBuffPct;
+                }
             }
             else if (sZoneDifficulty->ShouldNerfInDuels(target))
             {
-                damage = damage * sZoneDifficulty->ZoneDifficultyNerfInfo[DUEL_INDEX][0].SpellDamageBuffPct;
+                if (sZoneDifficulty->ZoneDifficultyNerfInfo[DUEL_INDEX][0].Enabled > 0)
+                {
+                    damage = damage * sZoneDifficulty->ZoneDifficultyNerfInfo[DUEL_INDEX][0].SpellDamageBuffPct;
+                }
             }
 
             if (sZoneDifficulty->IsDebugInfoEnabled)
@@ -520,11 +539,17 @@ public:
 
             if (sZoneDifficulty->ZoneDifficultyNerfInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyNerfInfo.end() && matchingPhase != -1)
             {
-                damage = damage * sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].SpellDamageBuffPct;
+                if (sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].Enabled > 0)
+                {
+                    damage = damage * sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].SpellDamageBuffPct;
+                }
             }
             else if (sZoneDifficulty->ShouldNerfInDuels(target))
             {
-                damage = damage * sZoneDifficulty->ZoneDifficultyNerfInfo[DUEL_INDEX][0].SpellDamageBuffPct;
+                if (sZoneDifficulty->ZoneDifficultyNerfInfo[DUEL_INDEX][0].Enabled > 0)
+                {
+                    damage = damage * sZoneDifficulty->ZoneDifficultyNerfInfo[DUEL_INDEX][0].SpellDamageBuffPct;
+                }
             }
 
             if (sZoneDifficulty->IsDebugInfoEnabled)
@@ -563,11 +588,17 @@ public:
             int matchingPhase = sZoneDifficulty->GetLowestMatchingPhase(mapId, phaseMask);
             if (sZoneDifficulty->ZoneDifficultyNerfInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyNerfInfo.end() && matchingPhase != -1)
             {
-                damage = damage * sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].MeleeDamageBuffPct;
+                if (sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].Enabled > 0)
+                {
+                    damage = damage * sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].MeleeDamageBuffPct;
+                }
             }
             else if (sZoneDifficulty->ShouldNerfInDuels(target))
             {
-                damage = damage * sZoneDifficulty->ZoneDifficultyNerfInfo[DUEL_INDEX][0].MeleeDamageBuffPct;
+                if (sZoneDifficulty->ZoneDifficultyNerfInfo[DUEL_INDEX][0].Enabled > 0)
+                {
+                    damage = damage * sZoneDifficulty->ZoneDifficultyNerfInfo[DUEL_INDEX][0].MeleeDamageBuffPct;
+                }
             }
         }
     }
