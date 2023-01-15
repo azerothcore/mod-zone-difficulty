@@ -13,7 +13,7 @@ struct ZoneDifficultyNerfData
     float AbsorbNerfPct;
     float SpellDamageBuffPct;
     float MeleeDamageBuffPct;
-    __int8 Enabled;
+    uint32 Enabled;
     float HealingNerfPctHard;
     float AbsorbNerfPctHard;
     float SpellDamageBuffPctHard;

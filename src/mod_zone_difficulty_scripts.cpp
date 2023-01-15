@@ -42,7 +42,7 @@ void ZoneDifficulty::LoadMapDifficultySettings()
             uint32 mapId = (*result)[0].Get<uint32>();
             uint32 phaseMask = (*result)[1].Get<uint32>();
             ZoneDifficultyNerfData data;
-            __int8 mode = (*result)[6].Get<__int8>();
+            uint32 mode = (*result)[6].Get<uint32>();
             if (mode == MODE_NORMAL)
             {
                 data.HealingNerfPct = (*result)[2].Get<float>();
@@ -335,9 +335,17 @@ public:
                             int32 absorb = eff->GetAmount();
                             uint32 phaseMask = target->GetPhaseMask();
                             int matchingPhase = sZoneDifficulty->GetLowestMatchingPhase(mapId, phaseMask);
-                            if (sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].Enabled > 0 && (matchingPhase != -1))
+                            uint32 mode = sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].Enabled;
+                            if (matchingPhase != -1)
                             {
-                                absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].AbsorbNerfPct;
+                                if ((mode & MODE_NORMAL) == MODE_NORMAL)
+                                {
+                                    absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].AbsorbNerfPct;
+                                }
+                                if ((mode & MODE_HARD) == MODE_HARD && sZoneDifficulty->HardmodeInstanceData[target->GetMap()->GetInstanceId()].HardmodeOn == true)
+                                {
+                                    absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].AbsorbNerfPctHard;
+                                }
                             }
                             else if (sZoneDifficulty->ZoneDifficultyNerfInfo[DUEL_INDEX][0].Enabled > 0 && nerfInDuel)
                             {
@@ -404,9 +412,17 @@ public:
 
                 uint32 phaseMask = target->GetPhaseMask();
                 int matchingPhase = sZoneDifficulty->GetLowestMatchingPhase(mapId, phaseMask);
-                if (sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].Enabled > 0 && matchingPhase != -1)
+                uint32 mode = sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].Enabled;
+                if (matchingPhase != -1)
                 {
-                    heal = heal * sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].HealingNerfPct;
+                    if ((mode & MODE_NORMAL) == MODE_NORMAL)
+                    {
+                        heal = heal * sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].HealingNerfPct;
+                    }
+                    if ((mode & MODE_HARD) == MODE_HARD && sZoneDifficulty->HardmodeInstanceData[target->GetMap()->GetInstanceId()].HardmodeOn == true)
+                    {
+                        heal = heal * sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].HealingNerfPctHard;
+                    }
                 }
                 else if (sZoneDifficulty->ZoneDifficultyNerfInfo[DUEL_INDEX][0].Enabled > 0 && nerfInDuel)
                 {
@@ -462,16 +478,21 @@ public:
                 {
                     if (player->GetSession())
                     {
-                        ChatHandler(player->GetSession()).PSendSysMessage("A dot tick was altered. Pre Nerf Value: %i", damage);
+                        ChatHandler(player->GetSession()).PSendSysMessage("A dot tick will be altered. Pre Nerf Value: %i", damage);
                     }
                 }
             }
 
             if (sZoneDifficulty->ZoneDifficultyNerfInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyNerfInfo.end() && matchingPhase != -1)
             {
-                if (sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].Enabled > 0)
+                uint32 mode = sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].Enabled;
+                if ((mode && MODE_NORMAL) == MODE_NORMAL)
                 {
                     damage = damage * sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].SpellDamageBuffPct;
+                }
+                if ((mode & MODE_HARD) == MODE_HARD && sZoneDifficulty->HardmodeInstanceData[target->GetMap()->GetInstanceId()].HardmodeOn == true)
+                {
+                    damage = damage * sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].SpellDamageBuffPctHard;
                 }
             }
             else if (sZoneDifficulty->ShouldNerfInDuels(target))
@@ -539,9 +560,14 @@ public:
 
             if (sZoneDifficulty->ZoneDifficultyNerfInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyNerfInfo.end() && matchingPhase != -1)
             {
-                if (sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].Enabled > 0)
+                uint32 mode = sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].Enabled;
+                if ((mode & MODE_NORMAL) == MODE_NORMAL)
                 {
                     damage = damage * sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].SpellDamageBuffPct;
+                }
+                if ((mode & MODE_HARD) == MODE_HARD && sZoneDifficulty->HardmodeInstanceData[target->GetMap()->GetInstanceId()].HardmodeOn == true)
+                {
+                    damage = damage * sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].SpellDamageBuffPctHard;
                 }
             }
             else if (sZoneDifficulty->ShouldNerfInDuels(target))
@@ -588,9 +614,14 @@ public:
             int matchingPhase = sZoneDifficulty->GetLowestMatchingPhase(mapId, phaseMask);
             if (sZoneDifficulty->ZoneDifficultyNerfInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyNerfInfo.end() && matchingPhase != -1)
             {
-                if (sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].Enabled > 0)
+                uint32 mode = sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].Enabled;
+                if ((mode & MODE_NORMAL) == MODE_NORMAL)
                 {
                     damage = damage * sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].MeleeDamageBuffPct;
+                }
+                if ((mode & MODE_HARD) == MODE_HARD && sZoneDifficulty->HardmodeInstanceData[target->GetMap()->GetInstanceId()].HardmodeOn == true)
+                {
+                    damage = damage * sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].MeleeDamageBuffPctHard;
                 }
             }
             else if (sZoneDifficulty->ShouldNerfInDuels(target))
