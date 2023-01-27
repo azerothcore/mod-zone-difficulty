@@ -731,9 +731,10 @@ public:
         CharacterDatabase.Execute("DELETE FROM zone_difficulty_instance_saves WHERE InstanceID = {};", instanceId);
     }
 
-    void OnAfterUpdateEncounterState(Map* map, EncounterCreditType /*type*/, uint32 /*creditEntry*/, Unit* /*source*/, Difficulty /*difficulty_fixed*/, DungeonEncounterList const* /*encounters*/, uint32 /*dungeonCompleted*/, bool /*updated*/) override
+    void OnAfterUpdateEncounterState(Map* map, EncounterCreditType /*type*/, uint32 /*creditEntry*/, Unit* source, Difficulty /*difficulty_fixed*/, DungeonEncounterList const* /*encounters*/, uint32 /*dungeonCompleted*/, bool /*updated*/) override
     {
-        LOG_ERROR("sql.sql", "Encounter completed");
+        LOG_ERROR("sql.sql", "Encounter {} completed. Loot mode: {}", source->GetName(), source->ToCreature()->GetLootMode());
+
         // todo: Apparently this doesn't fire.
         // Must set HardmodePossible to false, if the encounter wasn't in hardmode.
         if (sZoneDifficulty->HardmodeInstanceData.find(map->GetInstanceId()) != sZoneDifficulty->HardmodeInstanceData.end())
