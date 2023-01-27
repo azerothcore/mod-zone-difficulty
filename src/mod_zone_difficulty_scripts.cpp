@@ -125,9 +125,11 @@ void ZoneDifficulty::LoadMapDifficultySettings()
             if (objecttype == 1)
             {
                 sZoneDifficulty->HardmodeCreatureLoot[mapId].push_back(entry);
+                LOG_ERROR("sql.sql", "New creature for map {} with entry: {}", mapId, entry);
             }
             else if (objecttype == 2)
             {
+                LOG_ERROR("sql.sql", "New gameobject for map {} with entry: {}", mapId, entry);
                 sZoneDifficulty->HardmodeGameobjectLoot[mapId].push_back(entry);
             }
             else
@@ -552,7 +554,8 @@ public:
                     {
                         if (player->GetSession())
                         {
-                            ChatHandler(player->GetSession()).PSendSysMessage("Spell: %s (%u) Before Nerf Value: %i (%f)", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, damage, sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].SpellDamageBuffPct);
+                            ChatHandler(player->GetSession()).PSendSysMessage("Spell: %s (%u) Before Nerf Value: %i (%f Normal Mode)", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, damage, sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].SpellDamageBuffPct);
+                            ChatHandler(player->GetSession()).PSendSysMessage("Spell: %s (%u) Before Nerf Value: %i (%f Hard Mode)", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, damage, sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].SpellDamageBuffPctHard);
                         }
                     }
                 }
@@ -632,6 +635,23 @@ public:
                 }
             }
         }
+    }
+
+    void OnUnitEnterCombat(Unit* unit, Unit* /*victim*/) override
+    {
+        uint32 mapId = unit->GetMap()->GetId();
+        if (sZoneDifficulty->HardmodeCreatureLoot.find(mapId) == sZoneDifficulty->HardmodeGameobjectLoot.end())
+        {
+            LOG_ERROR("sql.sql", "Checked creature for combat in map id: {} (map not listed).", mapId);
+            return;
+        }
+        if (!sZoneDifficulty->VectorContains(sZoneDifficulty->HardmodeCreatureLoot[mapId], unit->GetEntry()))
+        {
+            LOG_ERROR("sql.sql", "Checked creature for combat in map id: {} and entry: {} (entry not listed).", mapId, unit->GetEntry());
+            return;
+        }
+        unit->ToCreature()->AddLootMode(64);
+        LOG_ERROR("sql.sql", "Added lootmode 64 for creature: {}.", unit->GetName());
     }
 };
 
@@ -834,8 +854,9 @@ public:
                 uint32 mapId = player->GetMap()->GetId();
 
                 // does the map have any creature which is supposed to have an improved lootmode?
-                if (sZoneDifficulty->HardmodeCreatureLoot.find(mapId) != sZoneDifficulty->HardmodeCreatureLoot.end())
+                if (sZoneDifficulty->HardmodeCreatureLoot.find(mapId) == sZoneDifficulty->HardmodeCreatureLoot.end())
                 {
+                    LOG_ERROR("sql.sql", "No Creatures/GOs defined for this map with id: {} .", mapId);
                     CloseGossipMenuFor(player);
                     return false;
                 }
@@ -844,21 +865,29 @@ public:
                 std::list<Creature*> creatures;
                 for (auto entry : sZoneDifficulty->HardmodeCreatureLoot[mapId])
                 {
-                    player->GetCreaturesWithEntryInRange(creatures, 50000.0f, entry);
+                    LOG_ERROR("sql.sql", "Checking for creatures with entry: {}", entry);
+                    std::list<Creature*> additionalCreatures;
+                    player->GetCreaturesWithEntryInRange(additionalCreatures, 50000.0f, entry);
+                    creatures.splice(creatures.end(), additionalCreatures);
                 }
                 std::list<GameObject*> gameobjects;
                 for (auto entry : sZoneDifficulty->HardmodeGameobjectLoot[mapId])
                 {
-                    player->GetGameObjectListWithEntryInGrid(gameobjects, entry, 50000.0f);
+                    LOG_ERROR("sql.sql", "Checking for gameobjects with entry: {}", entry);
+                    std::list<GameObject*> additionalGameobjects;
+                    player->GetGameObjectListWithEntryInGrid(additionalGameobjects, entry, 50000.0f);
+                    gameobjects.splice(gameobjects.end(), additionalGameobjects);
                 }
 
                 //iterate over `creatures` and `gameobjects` and AddLootMode(64)
                 for (auto creature : creatures)
                 {
+                    LOG_ERROR("sql.sql", "creature: {} creature->AddLootMode(64)", creature->GetName());
                     creature->AddLootMode(64);
                 }
                 for (auto go : gameobjects)
                 {
+                    LOG_ERROR("sql.sql", "go: {} go->AddLootMode(64)", go->GetName());
                     go->AddLootMode(64);
                 }
 
@@ -877,6 +906,7 @@ public:
             // Remove Extra Lootmode from all stored objects
             for (auto guid : sZoneDifficulty->HardmodeGameobjectsGUIDMap[instanceId])
             {
+                LOG_ERROR("sql.sql", "OnGossipSelect action = {} player->GetMap()->GetGameObject(guid)->ResetLootMode();", action);
                 player->GetMap()->GetGameObject(guid)->ResetLootMode();
             }
             // todo: Give Feedback
