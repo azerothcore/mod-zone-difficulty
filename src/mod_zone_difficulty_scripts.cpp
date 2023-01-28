@@ -650,7 +650,7 @@ public:
             LOG_ERROR("sql.sql", "Checked creature for combat in map id: {} and entry: {} (entry not listed).", mapId, unit->GetEntry());
             return;
         }
-        unit->ToCreature()->AddLootMode(64);
+        //unit->ToCreature()->AddLootMode(64);
         LOG_ERROR("sql.sql", "Added lootmode 64 for creature: {}.", unit->GetName());
     }
 };
@@ -733,17 +733,23 @@ public:
 
     void OnAfterUpdateEncounterState(Map* map, EncounterCreditType /*type*/, uint32 /*creditEntry*/, Unit* source, Difficulty /*difficulty_fixed*/, DungeonEncounterList const* /*encounters*/, uint32 /*dungeonCompleted*/, bool /*updated*/) override
     {
+        // todo: add conditions for the lootmode
+        source->ToCreature()->AddLootMode(64);
+        source->ToCreature()->loot.clear();
+        source->ToCreature()->loot.FillLoot(source->ToCreature()->GetCreatureTemplate()->lootid, LootTemplates_Creature, source->ToCreature()->GetLootRecipient(), false, false, source->ToCreature()->GetLootMode(), source->ToCreature());
         LOG_ERROR("sql.sql", "Encounter {} completed. Loot mode: {}", source->GetName(), source->ToCreature()->GetLootMode());
 
-        // todo: Apparently this doesn't fire.
         // Must set HardmodePossible to false, if the encounter wasn't in hardmode.
         if (sZoneDifficulty->HardmodeInstanceData.find(map->GetInstanceId()) != sZoneDifficulty->HardmodeInstanceData.end())
         {
+            LOG_ERROR("sql.sql", "Encounter completed. Map relevant.");
             if (sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].HardmodeOn == true)
             {
+                LOG_ERROR("sql.sql", "Hardmode for instance id {} is {}.", map->GetInstanceId(), sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].HardmodeOn);
                 return;
             }
         }
+        LOG_ERROR("sql.sql", "Hardmode for instance id {} is {}. Setting HardmodePossible to false.", map->GetInstanceId(), sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].HardmodeOn);
         sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].HardmodePossible = false;
         sZoneDifficulty->SaveHardmodeInstanceData(map->GetInstanceId());
     }
@@ -775,7 +781,8 @@ public:
         {
             if (sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodeOn == true)
             {
-                creature->AddLootMode(64);
+                //creature->AddLootMode(64);
+                LOG_ERROR("sql.sql", "Checking creature {} for loot mode: {}", creature->GetName(), creature->GetLootMode());
                 sZoneDifficulty->HardmodeGameobjectsGUIDMap[instanceId].push_back(creature->GetGUID());
             }
         }
@@ -808,7 +815,8 @@ public:
         {
             if (sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodeOn == true)
             {
-                go->AddLootMode(64);
+                //go->AddLootMode(64);
+                LOG_ERROR("sql.sql", "Checking go {} for loot mode: {}", go->GetName(), go->GetLootMode());
                 sZoneDifficulty->HardmodeGameobjectsGUIDMap[instanceId].push_back(go->GetGUID());
             }
         }
@@ -884,12 +892,14 @@ public:
                 for (auto creature : creatures)
                 {
                     LOG_ERROR("sql.sql", "creature: {} creature->AddLootMode(64)", creature->GetName());
-                    creature->AddLootMode(64);
+                    //creature->AddLootMode(64);
+                    LOG_ERROR("sql.sql", "Checking creature {} for loot mode: {}", creature->GetName(), creature->GetLootMode());
                 }
                 for (auto go : gameobjects)
                 {
                     LOG_ERROR("sql.sql", "go: {} go->AddLootMode(64)", go->GetName());
-                    go->AddLootMode(64);
+                    //go->AddLootMode(64);
+                    LOG_ERROR("sql.sql", "Checking go {} for loot mode: {}", go->GetName(), go->GetLootMode());
                 }
 
                 // todo: Give Feedback
