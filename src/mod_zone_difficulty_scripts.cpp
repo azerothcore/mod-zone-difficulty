@@ -179,6 +179,26 @@ void ZoneDifficulty::LoadHardmodeInstanceData()
 }
 
 /*******************************************************************************************
+ *  Sends a whisper to all members of the player's raid in the same instance as the creature.
+ *
+ * @param message The message which should be sent to the <Player>.
+ * @param creature The creature who sends the whisper.
+ * @param player The object of the player, whose whole group should receive the message.
+ *******************************************************************************************/
+void ZoneDifficulty::SendWhisperToRaid(std::string message, Creature* creature, Player* player)
+{
+    Group::MemberSlotList const& members = player->GetGroup()->GetMemberSlots();
+    for (auto member : members)
+    {
+        Player* mplr = ObjectAccessor::FindConnectedPlayer(member.guid);
+        if (creature && mplr && mplr->GetMap()->GetInstanceId() == player->GetMap()->GetInstanceId())
+        {
+            creature->Whisper(message, LANG_UNIVERSAL, player);
+        }
+    }
+}
+
+/*******************************************************************************************
  *  Check if the target is a player, a pet or a guardian.
  *
  * @param target The affected <Unit>
@@ -817,7 +837,7 @@ class mod_zone_difficulty_dungeonmaster : public CreatureScript
 public:
     mod_zone_difficulty_dungeonmaster() : CreatureScript("mod_zone_difficulty_dungeonmaster") { }
 
-    bool OnGossipSelect(Player* player, Creature* /*creature*/, uint32 /*sender*/, uint32 action) override
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) override
     {
         uint32 instanceId = player->GetMap()->GetInstanceId();
         if (action == 100)
@@ -861,7 +881,7 @@ public:
             sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodeOn = false;
             sZoneDifficulty->SaveHardmodeInstanceData(instanceId);
 
-            // todo: Give Feedback
+            sZoneDifficulty->SendWhisperToRaid("We're switching to the cinematic version of the history lesson now. (Normal mode)", creature, player);
             CloseGossipMenuFor(player);
         }
 
@@ -884,6 +904,7 @@ public:
             }
             else
             {
+                creature->Whisper("I will let the leader of your group decide about this subject. You will receive a notification, when their make a new request to me.", LANG_UNIVERSAL, player);
                 //todo: Leave a message that only the leader can do this
             }
         }
