@@ -148,6 +148,7 @@ void ZoneDifficulty::LoadMapDifficultySettings()
 
 /* Loads the HardmodeInstanceData from the database.
 *  Fetch from zone_difficulty_instance_saves.
+*
 *  `InstanceID` INT NOT NULL DEFAULT 0,
 *  `HardmodeOn` TINYINT NOT NULL DEFAULT 0,
 *  `HardmodePossible` TINYINT NOT NULL DEFAULT 1,
@@ -187,20 +188,36 @@ void ZoneDifficulty::LoadHardmodeInstanceData()
     }
 }
 
+/*******************************************************************************************
+ *  Check if the target is a player, a pet or a guardian.
+ *
+ * @param target The affected <Unit>
+ * @return The result as bool. True for <Player>, <Pet> or <Guardian>.
+ *******************************************************************************************/
 bool ZoneDifficulty::IsValidNerfTarget(Unit* target)
 {
     return target->IsPlayer() || target->IsPet() || target->IsGuardian();
 }
 
+/*******************************************************************************************
+ *  Checks if the element is one of the values in the vector.
+ *
+ * @param vec A vector
+ * @param element One element which can potentially be part of the values in the vector
+ * @return The result as bool
+ *******************************************************************************************/
 bool ZoneDifficulty::VectorContains(std::vector<uint32> vec, uint32 element)
 {
     return find(vec.begin(), vec.end(), element) != vec.end();
 }
 
-/*
- *  Check if the target is in a duel while residing in the DUEL_AREA and their opponent is a valid object.
+/*******************************************************************************************
+ *  Checks if the target is in a duel while residing in the DUEL_AREA and their opponent is a valid object.
  *  Used to determine when the duel-specific nerfs should be applied.
- */
+ *
+ * @param target The affected <Unit>
+ * @return The result as bool
+ *******************************************************************************************/
 bool ZoneDifficulty::ShouldNerfInDuels(Unit* target)
 {
     if (target->GetAreaId() != DUEL_AREA)
@@ -236,12 +253,17 @@ bool ZoneDifficulty::ShouldNerfInDuels(Unit* target)
     return true;
 }
 
-/*
+/*******************************************************************************************
  *  Find the lowest phase for the target's mapId, which has a db entry for the target's map
  *  and at least partly matches the target's phase.
+ *
  *  `mapId` can be the id of a map or `DUEL_INDEX` to use the duel specific settings.
  *  Return -1 if none found.
- */
+ *
+ * @param mapId
+ * @param phaseMask Bitmask of all phases where the unit is currently visible
+ * @return the lowest phase which should be altered for this map and the unit is visible in
+ *******************************************************************************************/
 int32 ZoneDifficulty::GetLowestMatchingPhase(uint32 mapId, uint32 phaseMask)
 {
     // Check if there is an entry for the mapid at all
@@ -266,13 +288,14 @@ int32 ZoneDifficulty::GetLowestMatchingPhase(uint32 mapId, uint32 phaseMask)
     return -1;
 }
 
-/*
+/*******************************************************************************************
  *  Store the HardmodeInstanceData in the database for the given instance id.
  *  zone_difficulty_instance_saves is used to store the data.
- *  `InstanceID` INT NOT NULL DEFAULT 0,
- *  `HardmodeOn` TINYINT NOT NULL DEFAULT 0,
- *  `HardmodePossible` TINYINT NOT NULL DEFAULT 1,
- */
+ *
+ *  @param InstanceID INT NOT NULL DEFAULT 0,
+ *  @param HardmodeOn TINYINT NOT NULL DEFAULT 0,
+ *  @param HardmodePossible TINYINT NOT NULL DEFAULT 1,
+ *******************************************************************************************/
 void ZoneDifficulty::SaveHardmodeInstanceData(uint32 instanceId)
 {
     if (sZoneDifficulty->HardmodeInstanceData.find(instanceId) == sZoneDifficulty->HardmodeInstanceData.end())
@@ -636,23 +659,6 @@ public:
             }
         }
     }
-
-    void OnUnitEnterCombat(Unit* unit, Unit* /*victim*/) override
-    {
-        uint32 mapId = unit->GetMap()->GetId();
-        if (sZoneDifficulty->HardmodeCreatureLoot.find(mapId) == sZoneDifficulty->HardmodeGameobjectLoot.end())
-        {
-            LOG_ERROR("sql.sql", "Checked creature for combat in map id: {} (map not listed).", mapId);
-            return;
-        }
-        if (!sZoneDifficulty->VectorContains(sZoneDifficulty->HardmodeCreatureLoot[mapId], unit->GetEntry()))
-        {
-            LOG_ERROR("sql.sql", "Checked creature for combat in map id: {} and entry: {} (entry not listed).", mapId, unit->GetEntry());
-            return;
-        }
-        //unit->ToCreature()->AddLootMode(64);
-        LOG_ERROR("sql.sql", "Added lootmode 64 for creature: {}.", unit->GetName());
-    }
 };
 
 class mod_zone_difficulty_playerscript : public PlayerScript
@@ -733,12 +739,6 @@ public:
 
     void OnAfterUpdateEncounterState(Map* map, EncounterCreditType /*type*/, uint32 /*creditEntry*/, Unit* source, Difficulty /*difficulty_fixed*/, DungeonEncounterList const* /*encounters*/, uint32 /*dungeonCompleted*/, bool /*updated*/) override
     {
-        // todo: add conditions for the lootmode
-        source->ToCreature()->AddLootMode(64);
-        source->ToCreature()->loot.clear();
-        source->ToCreature()->loot.FillLoot(source->ToCreature()->GetCreatureTemplate()->lootid, LootTemplates_Creature, source->ToCreature()->GetLootRecipient(), false, false, source->ToCreature()->GetLootMode(), source->ToCreature());
-        LOG_ERROR("sql.sql", "Encounter {} completed. Loot mode: {}", source->GetName(), source->ToCreature()->GetLootMode());
-
         // Must set HardmodePossible to false, if the encounter wasn't in hardmode.
         if (sZoneDifficulty->HardmodeInstanceData.find(map->GetInstanceId()) != sZoneDifficulty->HardmodeInstanceData.end())
         {
@@ -746,6 +746,10 @@ public:
             if (sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].HardmodeOn == true)
             {
                 LOG_ERROR("sql.sql", "Hardmode for instance id {} is {}.", map->GetInstanceId(), sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].HardmodeOn);
+                source->ToCreature()->AddLootMode(64);
+                source->ToCreature()->loot.clear();
+                source->ToCreature()->loot.FillLoot(source->ToCreature()->GetCreatureTemplate()->lootid, LootTemplates_Creature, source->ToCreature()->GetLootRecipient(), false, false, source->ToCreature()->GetLootMode(), source->ToCreature());
+                LOG_ERROR("sql.sql", "Encounter {} completed. Loot mode: {}", source->GetName(), source->ToCreature()->GetLootMode());
                 return;
             }
         }
@@ -755,6 +759,7 @@ public:
     }
 };
 
+/*
 class mod_zone_difficulty_allcreaturescript : public AllCreatureScript
 {
 public:
@@ -822,6 +827,7 @@ public:
         }
     }
 };
+*/
 
 class mod_zone_difficulty_dungeonmaster : public CreatureScript
 {
@@ -868,38 +874,6 @@ public:
                     LOG_ERROR("sql.sql", "No Creatures/GOs defined for this map with id: {} .", mapId);
                     CloseGossipMenuFor(player);
                     return false;
-                }
-
-                // find all creatures/GOs with their entry listed in sZoneDifficulty->HardmodeCreatureLoot[mapId] and AddLootMode(64)
-                std::list<Creature*> creatures;
-                for (auto entry : sZoneDifficulty->HardmodeCreatureLoot[mapId])
-                {
-                    LOG_ERROR("sql.sql", "Checking for creatures with entry: {}", entry);
-                    std::list<Creature*> additionalCreatures;
-                    player->GetCreaturesWithEntryInRange(additionalCreatures, 50000.0f, entry);
-                    creatures.splice(creatures.end(), additionalCreatures);
-                }
-                std::list<GameObject*> gameobjects;
-                for (auto entry : sZoneDifficulty->HardmodeGameobjectLoot[mapId])
-                {
-                    LOG_ERROR("sql.sql", "Checking for gameobjects with entry: {}", entry);
-                    std::list<GameObject*> additionalGameobjects;
-                    player->GetGameObjectListWithEntryInGrid(additionalGameobjects, entry, 50000.0f);
-                    gameobjects.splice(gameobjects.end(), additionalGameobjects);
-                }
-
-                //iterate over `creatures` and `gameobjects` and AddLootMode(64)
-                for (auto creature : creatures)
-                {
-                    LOG_ERROR("sql.sql", "creature: {} creature->AddLootMode(64)", creature->GetName());
-                    //creature->AddLootMode(64);
-                    LOG_ERROR("sql.sql", "Checking creature {} for loot mode: {}", creature->GetName(), creature->GetLootMode());
-                }
-                for (auto go : gameobjects)
-                {
-                    LOG_ERROR("sql.sql", "go: {} go->AddLootMode(64)", go->GetName());
-                    //go->AddLootMode(64);
-                    LOG_ERROR("sql.sql", "Checking go {} for loot mode: {}", go->GetName(), go->GetLootMode());
                 }
 
                 // todo: Give Feedback
@@ -959,7 +933,7 @@ void AddModZoneDifficultyScripts()
     new mod_zone_difficulty_petscript();
     new mod_zone_difficulty_worldscript();
     new mod_zone_difficulty_globalscript();
-    new mod_zone_difficulty_allcreaturescript();
-    new mod_zone_difficulty_allgameobjectscript();
+//  new mod_zone_difficulty_allcreaturescript();
+//  new mod_zone_difficulty_allgameobjectscript();
     new mod_zone_difficulty_dungeonmaster();
 }
