@@ -119,27 +119,17 @@ void ZoneDifficulty::LoadMapDifficultySettings()
     {
         do
         {
+            ZoneDifficultyLootableObjects data;
             uint32 mapId = (*result)[0].Get<uint32>();
-            uint32 entry = (*result)[1].Get<uint32>();
-            uint32 objecttype = (*result)[2].Get<int16>();
-            if (objecttype == 1)
-            {
-                sZoneDifficulty->HardmodeCreatureLoot[mapId].push_back(entry);
-                LOG_ERROR("sql.sql", "New creature for map {} with entry: {}", mapId, entry);
-            }
-            else if (objecttype == 2)
-            {
-                LOG_ERROR("sql.sql", "New gameobject for map {} with entry: {}", mapId, entry);
-                sZoneDifficulty->HardmodeGameobjectLoot[mapId].push_back(entry);
-            }
-            else
-            {
-                LOG_ERROR("sql.sql", "Table `zone_difficulty_loot_objects` objecttype: has wrong value ({}), must be 1 for creatures or 2 for gameobjects.", objecttype);
-            }
+            data.SourceEntry = (*result)[1].Get<uint32>();
+            data.GameobjectEntry= (*result)[2].Get<uint32>();
 
-            if (mapId <= 0 || entry <= 0)
+            sZoneDifficulty->HardmodeLoot[mapId].push_back(data);
+            LOG_ERROR("sql.sql", "New creature for map {} with entry: {}", mapId, data.SourceEntry);
+
+            if (mapId <= 0 || data.SourceEntry <= 0)
             {
-                LOG_ERROR("sql.sql", "Table `zone_difficulty_loot_objects` for criteria MapId: {} OR Entry: {} has wrong value. Must be > 0.", mapId, entry);
+                LOG_ERROR("sql.sql", "Table `zone_difficulty_loot_objects` for criteria MapId: {} OR Entry: {} has wrong value. Must be > 0.", mapId, data.SourceEntry);
             }
 
         } while (result->NextRow());
@@ -751,11 +741,35 @@ public:
             // Give additional loot, if the encounter was in hardmode.
             if (sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].HardmodeOn == true)
             {
-                LOG_ERROR("sql.sql", "Hardmode for instance id {} is {}.", map->GetInstanceId(), sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].HardmodeOn);
-                source->ToCreature()->AddLootMode(64);
-                source->ToCreature()->loot.clear();
-                source->ToCreature()->loot.FillLoot(source->ToCreature()->GetCreatureTemplate()->lootid, LootTemplates_Creature, source->ToCreature()->GetLootRecipient(), false, false, source->ToCreature()->GetLootMode(), source->ToCreature());
-                LOG_ERROR("sql.sql", "Encounter {} completed. Loot mode: {}", source->GetName(), source->ToCreature()->GetLootMode());
+                uint32 mapId = map->GetId();
+                uint32 GameobjectEntry = 0;
+                if (sZoneDifficulty->HardmodeLoot.find(mapId) == sZoneDifficulty->HardmodeLoot.end())
+                {
+                    LOG_ERROR("sql.sql", "No additional loot stored in map with id {}.", map->GetInstanceId());
+                    return;
+                }
+
+                for (auto value : sZoneDifficulty->HardmodeLoot[mapId])
+                {
+                    if (value.GameobjectEntry != 0 && value.SourceEntry == source->GetEntry())
+                    {
+                        GameobjectEntry = value.GameobjectEntry;
+                        break;
+                    }
+                }
+
+                if (GameobjectEntry == 0)
+                {
+                    LOG_ERROR("sql.sql", "Hardmode for instance id {} is {}.", map->GetInstanceId(), sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].HardmodeOn);
+                    source->ToCreature()->AddLootMode(64);
+                    source->ToCreature()->loot.clear();
+                    source->ToCreature()->loot.FillLoot(source->ToCreature()->GetCreatureTemplate()->lootid, LootTemplates_Creature, source->ToCreature()->GetLootRecipient(), false, false, source->ToCreature()->GetLootMode(), source->ToCreature());
+                    LOG_ERROR("sql.sql", "Encounter {} completed. Loot mode: {}", source->GetName(), source->ToCreature()->GetLootMode());
+                }
+                else
+                {
+                    // todo: get the object with entry `GameobjectEntry` and change it's loot instead
+                }
                 return;
             }
             // Must set HardmodePossible to false, if the encounter wasn't in hardmode.
@@ -876,16 +890,6 @@ public:
                 LOG_ERROR("sql.sql", "Turn on hardmode for id {}", instanceId);
                 sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodeOn = true;
                 sZoneDifficulty->SaveHardmodeInstanceData(instanceId);
-                uint32 mapId = player->GetMap()->GetId();
-
-                // does the map have any creature which is supposed to have an improved lootmode?
-                if (sZoneDifficulty->HardmodeCreatureLoot.find(mapId) == sZoneDifficulty->HardmodeCreatureLoot.end())
-                {
-                    LOG_ERROR("sql.sql", "No Creatures/GOs defined for this map with id: {} .", mapId);
-                    CloseGossipMenuFor(player);
-                    return false;
-                }
-
                 // todo: Give Feedback
             }
 
@@ -898,12 +902,6 @@ public:
             sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodeOn = false;
             sZoneDifficulty->SaveHardmodeInstanceData(instanceId);
 
-            // Remove Extra Lootmode from all stored objects
-            for (auto guid : sZoneDifficulty->HardmodeGameobjectsGUIDMap[instanceId])
-            {
-                LOG_ERROR("sql.sql", "OnGossipSelect action = {} player->GetMap()->GetGameObject(guid)->ResetLootMode();", action);
-                player->GetMap()->GetGameObject(guid)->ResetLootMode();
-            }
             // todo: Give Feedback
             CloseGossipMenuFor(player);
         }

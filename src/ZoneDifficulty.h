@@ -26,6 +26,12 @@ struct ZoneDifficultyHardmodeInstData
     bool HardmodePossible;
 };
 
+struct ZoneDifficultyLootableObjects
+{
+    uint32 SourceEntry;
+    uint32 GameobjectEntry;
+};
+
 const int32 DUEL_INDEX = 0x7FFFFFFF;
 const int32 DUEL_AREA = 2402;       // Forbidding Sea (Wetlands)
 const uint32 NPC_TEXT_LEADER = 91301;
@@ -56,11 +62,8 @@ public:
     ZoneDifficultyDisablesMap DisallowedBuffs;
     typedef std::map<uint32, ZoneDifficultyHardmodeInstData> ZoneDifficultyHardmodeInstDataMap;
     ZoneDifficultyHardmodeInstDataMap HardmodeInstanceData;
-    typedef std::map<uint32, std::vector<uint32> > ZoneDifficultyHardmodeLootMap;
-    ZoneDifficultyHardmodeLootMap HardmodeCreatureLoot;
-    ZoneDifficultyHardmodeLootMap HardmodeGameobjectLoot;
-    typedef std::map<uint32, std::vector<ObjectGuid> > ZoneDifficultyHardmodeGameobjectsMap;
-    ZoneDifficultyHardmodeGameobjectsMap HardmodeGameobjectsGUIDMap;
+    typedef std::map<uint32, std::vector<ZoneDifficultyLootableObjects> > ZoneDifficultyHardmodeLootMap;
+    ZoneDifficultyHardmodeLootMap HardmodeLoot;
 };
 
 #define sZoneDifficulty ZoneDifficulty::instance()
