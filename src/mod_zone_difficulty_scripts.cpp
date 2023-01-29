@@ -769,7 +769,35 @@ public:
                 }
                 else
                 {
-                    // todo: get the object with entry `GameobjectEntry` and change it's loot instead
+                    GameObject* go = source->FindNearestGameObject(GameobjectEntry, 200.0f, true);
+                    if (go)
+                    {
+                        go->AddLootMode(64);
+                        go->loot.clear();
+                        go->loot.FillLoot(go->GetGOInfo()->GetLootId(), LootTemplates_Gameobject, go->GetLootRecipient(), false, false, go->GetLootMode(), go);
+                        LOG_ERROR("sql.sql", "Encounter {} completed. Adding loot to {} Loot mode: {}", source->GetName(), go->GetName(), source->ToCreature()->GetLootMode());
+                    }
+                    // if the gameobject is not spawned yet, wait one tick
+                    else
+                    {
+                        source->m_Events.AddEventAtOffset([GameobjectEntry, source]()
+                        {
+                            if (!source)
+                            {
+                                LOG_ERROR("sql.sql", "2nd try: source is a nullptr in OnAfterUpdateEncounterState");
+                                return;
+                            }
+
+                            GameObject* go = source->FindNearestGameObject(GameobjectEntry, 200.0f, true);
+                            if (go)
+                            {
+                                go->AddLootMode(64);
+                                go->loot.clear();
+                                go->loot.FillLoot(go->GetGOInfo()->GetLootId(), LootTemplates_Gameobject, go->GetLootRecipient(), false, false, go->GetLootMode(), go);
+                                LOG_ERROR("sql.sql", "2nd try: Encounter {} completed. Adding loot to {} Loot mode: {}", source->GetName(), go->GetName(), source->ToCreature()->GetLootMode());
+                            }
+                        }, 10ms);
+                    }
                 }
                 return;
             }
