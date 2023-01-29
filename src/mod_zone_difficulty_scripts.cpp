@@ -749,6 +749,7 @@ public:
                     return;
                 }
 
+                //iterate over all listed creature entries for that map id and see, if a go is to be looted instead
                 for (auto value : sZoneDifficulty->HardmodeLoot[mapId])
                 {
                     if (value.GameobjectEntry != 0 && value.SourceEntry == source->GetEntry())
@@ -782,76 +783,6 @@ public:
         }
     }
 };
-
-/*
-class mod_zone_difficulty_allcreaturescript : public AllCreatureScript
-{
-public:
-    mod_zone_difficulty_allcreaturescript() : AllCreatureScript("mod_zone_difficulty_allcreaturescript") { }
-
-    void OnCreatureAddWorld(Creature* creature) override
-    {
-        // does the map have any creature which is supposed to have an improved lootmode?
-        if (sZoneDifficulty->HardmodeCreatureLoot.find(creature->GetMap()->GetId()) != sZoneDifficulty->HardmodeGameobjectLoot.end())
-        {
-            return;
-        }
-
-        // is the creature in the list of entries to receive improved loot?
-        uint32 mapId = creature->GetMap()->GetId();
-        if (!sZoneDifficulty->VectorContains(sZoneDifficulty->HardmodeCreatureLoot[mapId], creature->GetEntry()))
-        {
-            return;
-        }
-
-        // is the hardmode turned on for this instance?
-        uint32 instanceId = creature->GetMap()->GetInstanceId();
-        if (sZoneDifficulty->HardmodeInstanceData.find(instanceId) != sZoneDifficulty->HardmodeInstanceData.end())
-        {
-            if (sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodeOn == true)
-            {
-                //creature->AddLootMode(64);
-                LOG_ERROR("sql.sql", "Checking creature {} for loot mode: {}", creature->GetName(), creature->GetLootMode());
-                sZoneDifficulty->HardmodeGameobjectsGUIDMap[instanceId].push_back(creature->GetGUID());
-            }
-        }
-    }
-};
-
-class mod_zone_difficulty_allgameobjectscript : public AllGameObjectScript
-{
-public:
-    mod_zone_difficulty_allgameobjectscript() : AllGameObjectScript("mod_zone_difficulty_allgameobjectscript") {}
-
-    void OnGameObjectAddWorld(GameObject* go) override
-    {
-        // does the map have any go which is supposed to have an improved lootmode?
-        if (sZoneDifficulty->HardmodeGameobjectLoot.find(go->GetMap()->GetId()) != sZoneDifficulty->HardmodeGameobjectLoot.end())
-        {
-            return;
-        }
-
-        // is the go in the list of entries to receive improved loot?
-        uint32 mapId = go->GetMap()->GetId();
-        if (!sZoneDifficulty->VectorContains(sZoneDifficulty->HardmodeGameobjectLoot[mapId], go->GetEntry()))
-        {
-            return;
-        }
-
-        // is the hardmode turned on for this instance?
-        uint32 instanceId = go->GetMap()->GetInstanceId();
-        if (sZoneDifficulty->HardmodeInstanceData.find(instanceId) != sZoneDifficulty->HardmodeInstanceData.end())
-        {
-            if (sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodeOn == true)
-            {
-                //go->AddLootMode(64);
-                LOG_ERROR("sql.sql", "Checking go {} for loot mode: {}", go->GetName(), go->GetLootMode());
-                sZoneDifficulty->HardmodeGameobjectsGUIDMap[instanceId].push_back(go->GetGUID());
-            }
-        }
-    }
-};
-*/
 
 class mod_zone_difficulty_dungeonmaster : public CreatureScript
 {
@@ -941,7 +872,5 @@ void AddModZoneDifficultyScripts()
     new mod_zone_difficulty_petscript();
     new mod_zone_difficulty_worldscript();
     new mod_zone_difficulty_globalscript();
-//  new mod_zone_difficulty_allcreaturescript();
-//  new mod_zone_difficulty_allgameobjectscript();
     new mod_zone_difficulty_dungeonmaster();
 }
