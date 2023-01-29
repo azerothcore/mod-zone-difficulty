@@ -739,10 +739,16 @@ public:
 
     void OnAfterUpdateEncounterState(Map* map, EncounterCreditType /*type*/, uint32 /*creditEntry*/, Unit* source, Difficulty /*difficulty_fixed*/, DungeonEncounterList const* /*encounters*/, uint32 /*dungeonCompleted*/, bool /*updated*/) override
     {
-        // Must set HardmodePossible to false, if the encounter wasn't in hardmode.
+        if (!source)
+        {
+            LOG_ERROR("sql.sql", "source is a nullptr in OnAfterUpdateEncounterState");
+            return;
+        }
+
         if (sZoneDifficulty->HardmodeInstanceData.find(map->GetInstanceId()) != sZoneDifficulty->HardmodeInstanceData.end())
         {
             LOG_ERROR("sql.sql", "Encounter completed. Map relevant.");
+            // Give additional loot, if the encounter was in hardmode.
             if (sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].HardmodeOn == true)
             {
                 LOG_ERROR("sql.sql", "Hardmode for instance id {} is {}.", map->GetInstanceId(), sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].HardmodeOn);
@@ -752,10 +758,14 @@ public:
                 LOG_ERROR("sql.sql", "Encounter {} completed. Loot mode: {}", source->GetName(), source->ToCreature()->GetLootMode());
                 return;
             }
+            // Must set HardmodePossible to false, if the encounter wasn't in hardmode.
+            else
+            {
+                LOG_ERROR("sql.sql", "Hardmode for instance id {} is {}. Setting HardmodePossible to false.", map->GetInstanceId(), sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].HardmodeOn);
+                sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].HardmodePossible = false;
+                sZoneDifficulty->SaveHardmodeInstanceData(map->GetInstanceId());
+            }
         }
-        LOG_ERROR("sql.sql", "Hardmode for instance id {} is {}. Setting HardmodePossible to false.", map->GetInstanceId(), sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].HardmodeOn);
-        sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].HardmodePossible = false;
-        sZoneDifficulty->SaveHardmodeInstanceData(map->GetInstanceId());
     }
 };
 
