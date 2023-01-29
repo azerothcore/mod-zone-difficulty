@@ -6,7 +6,6 @@
 #include "Player.h"
 #include "Config.h"
 #include "Chat.h"
-#include "GridNotifiers.h"
 #include "MapMgr.h"
 #include "Pet.h"
 #include "SpellAuras.h"
