@@ -518,7 +518,7 @@ public:
             if (sZoneDifficulty->ZoneDifficultyNerfInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyNerfInfo.end() && matchingPhase != -1)
             {
                 int8 mode = sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].Enabled;
-                if ((mode && MODE_NORMAL) == MODE_NORMAL)
+                if ((mode & MODE_NORMAL) == MODE_NORMAL)
                 {
                     damage = damage * sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].SpellDamageBuffPct;
                 }
