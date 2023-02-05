@@ -149,7 +149,7 @@ void ZoneDifficulty::LoadHardmodeInstanceData()
 {
     // debugging
     std::vector<bool> instanceIDs = sMapMgr->GetInstanceIDs();
-    for (int i = 0; i < instanceIDs.size(); i++)
+    for (int i = 0; i < int(instanceIDs.size()); i++)
     {
         LOG_ERROR("sql.sql", "ZoneDifficulty::LoadHardmodeInstanceData: id {} exists: {}:", i, instanceIDs[i]);
     }
