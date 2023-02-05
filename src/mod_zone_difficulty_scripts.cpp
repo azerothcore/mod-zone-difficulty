@@ -836,14 +836,15 @@ public:
 
     void OnBeforeCreateInstanceScript(InstanceMap* instanceMap, InstanceScript* /*instanceData*/, bool /*load*/, std::string /*data*/, uint32 completedEncounterMask)
     {
-        LOG_ERROR("sql.sql", "New instance created with id: {}. CompletedEncounterMask: {}", instanceMap->GetInstanceId(), completedEncounterMask);
-        if (sZoneDifficulty->HardmodeInstanceData.find(instanceMap->GetInstanceId()) == sZoneDifficulty->HardmodeInstanceData.end())
+        // debug start
+        for (auto mapdata : sZoneDifficulty->HardmodeLoot)
         {
-            LOG_ERROR("sql.sql", "New instance not handled because it already has values in HardmodeInstanceData for instanceId: {}", instanceMap->GetInstanceId());
-            return;
+            LOG_ERROR("sql.sql", "Maps with loot data: {}", mapdata.first);
         }
+        // debug end
 
-        if (sZoneDifficulty->HardmodeLoot.find(instanceMap->GetId()) != sZoneDifficulty->HardmodeLoot.end())
+
+        if (sZoneDifficulty->HardmodeLoot.find(instanceMap->GetId()) == sZoneDifficulty->HardmodeLoot.end())
         {
             LOG_ERROR("sql.sql", "New instance not handled because there is no hardmode data for map id: {}", instanceMap->GetId());
             return;
@@ -851,7 +852,7 @@ public:
 
         if (completedEncounterMask == 0)
         {
-            LOG_ERROR("sql.sql", "Initializing instance with HardmodePossible == true");
+            LOG_ERROR("sql.sql", "Initializing instance with HardmodePossible == true for instanceId: {} with mapId: {}", instanceMap->GetInstanceId(), instanceMap->GetId());
             sZoneDifficulty->HardmodeInstanceData[instanceMap->GetInstanceId()].HardmodePossible = true;
         }
     }
