@@ -164,6 +164,7 @@ void ZoneDifficulty::LoadHardmodeInstanceData()
 
             if (instanceIDs[instanceId] == true)
             {
+                LOG_ERROR("sql.sql", "Loading from DB for instanceId {}: HardmodeOn = {}, HardmodePossible = {}", instanceId, HardmodeOn, HardmodePossible);
                 sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodeOn = HardmodeOn;
                 sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodePossible = HardmodePossible;
             }
@@ -177,13 +178,12 @@ void ZoneDifficulty::LoadHardmodeInstanceData()
     }
 }
 
-/*******************************************************************************************
- *  Sends a whisper to all members of the player's raid in the same instance as the creature.
+/*  Sends a whisper to all members of the player's raid in the same instance as the creature.
  *
  * @param message The message which should be sent to the <Player>.
  * @param creature The creature who sends the whisper.
  * @param player The object of the player, whose whole group should receive the message.
- *******************************************************************************************/
+ */
 void ZoneDifficulty::SendWhisperToRaid(std::string message, Creature* creature, Player* player)
 {
     Group::MemberSlotList const& members = player->GetGroup()->GetMemberSlots();
@@ -197,36 +197,36 @@ void ZoneDifficulty::SendWhisperToRaid(std::string message, Creature* creature, 
     }
 }
 
-/*******************************************************************************************
- *  Check if the target is a player, a pet or a guardian.
+
+/*  Check if the target is a player, a pet or a guardian.
  *
  * @param target The affected <Unit>
  * @return The result as bool. True for <Player>, <Pet> or <Guardian>.
- *******************************************************************************************/
+ */
 bool ZoneDifficulty::IsValidNerfTarget(Unit* target)
 {
     return target->IsPlayer() || target->IsPet() || target->IsGuardian();
 }
 
-/*******************************************************************************************
- *  Checks if the element is one of the values in the vector.
+
+/*  Checks if the element is one of the values in the vector.
  *
  * @param vec A vector
  * @param element One element which can potentially be part of the values in the vector
  * @return The result as bool
- *******************************************************************************************/
+ */
 bool ZoneDifficulty::VectorContains(std::vector<uint32> vec, uint32 element)
 {
     return find(vec.begin(), vec.end(), element) != vec.end();
 }
 
-/*******************************************************************************************
- *  Checks if the target is in a duel while residing in the DUEL_AREA and their opponent is a valid object.
+
+/*  Checks if the target is in a duel while residing in the DUEL_AREA and their opponent is a valid object.
  *  Used to determine when the duel-specific nerfs should be applied.
  *
  * @param target The affected <Unit>
  * @return The result as bool
- *******************************************************************************************/
+ */
 bool ZoneDifficulty::ShouldNerfInDuels(Unit* target)
 {
     if (target->GetAreaId() != DUEL_AREA)
@@ -262,8 +262,7 @@ bool ZoneDifficulty::ShouldNerfInDuels(Unit* target)
     return true;
 }
 
-/*******************************************************************************************
- *  Find the lowest phase for the target's mapId, which has a db entry for the target's map
+/*  Find the lowest phase for the target's mapId, which has a db entry for the target's map
  *  and at least partly matches the target's phase.
  *
  *  `mapId` can be the id of a map or `DUEL_INDEX` to use the duel specific settings.
@@ -272,7 +271,7 @@ bool ZoneDifficulty::ShouldNerfInDuels(Unit* target)
  * @param mapId
  * @param phaseMask Bitmask of all phases where the unit is currently visible
  * @return the lowest phase which should be altered for this map and the unit is visible in
- *******************************************************************************************/
+ */
 int32 ZoneDifficulty::GetLowestMatchingPhase(uint32 mapId, uint32 phaseMask)
 {
     // Check if there is an entry for the mapid at all
@@ -297,14 +296,13 @@ int32 ZoneDifficulty::GetLowestMatchingPhase(uint32 mapId, uint32 phaseMask)
     return -1;
 }
 
-/*******************************************************************************************
- *  Store the HardmodeInstanceData in the database for the given instance id.
+/*  Store the HardmodeInstanceData in the database for the given instance id.
  *  zone_difficulty_instance_saves is used to store the data.
  *
  *  @param InstanceID INT NOT NULL DEFAULT 0,
  *  @param HardmodeOn TINYINT NOT NULL DEFAULT 0,
  *  @param HardmodePossible TINYINT NOT NULL DEFAULT 1,
- *******************************************************************************************/
+ */
 void ZoneDifficulty::SaveHardmodeInstanceData(uint32 instanceId)
 {
     if (sZoneDifficulty->HardmodeInstanceData.find(instanceId) == sZoneDifficulty->HardmodeInstanceData.end())
@@ -831,6 +829,35 @@ public:
     }
 };
 
+class mod_zone_difficulty_instancemapscript : public AllMapScript
+{
+public:
+    mod_zone_difficulty_instancemapscript() : AllMapScript("mod_zone_difficulty_instancemapscript") { }
+
+    void OnBeforeCreateInstanceScript(InstanceMap* instanceMap, InstanceScript* /*instanceData*/, bool /*load*/, std::string /*data*/, uint32 completedEncounterMask)
+    {
+        LOG_ERROR("sql.sql", "New instance created with id: {}. CompletedEncounterMask: {}", instanceMap->GetInstanceId(), completedEncounterMask);
+        if (sZoneDifficulty->HardmodeInstanceData.find(instanceMap->GetInstanceId()) == sZoneDifficulty->HardmodeInstanceData.end())
+        {
+            LOG_ERROR("sql.sql", "New instance not handled because it already has values in HardmodeInstanceData for instanceId: {}", instanceMap->GetInstanceId());
+            return;
+        }
+
+        if (sZoneDifficulty->HardmodeLoot.find(instanceMap->GetId()) != sZoneDifficulty->HardmodeLoot.end())
+        {
+            LOG_ERROR("sql.sql", "New instance not handled because there is no hardmode data for map id: {}", instanceMap->GetId());
+            return;
+        }
+
+        if (completedEncounterMask == 0)
+        {
+            LOG_ERROR("sql.sql", "Initializing instance with HardmodePossible == true");
+            sZoneDifficulty->HardmodeInstanceData[instanceMap->GetInstanceId()].HardmodePossible = true;
+        }
+    }
+};
+
+
 class mod_zone_difficulty_dungeonmaster : public CreatureScript
 {
 public:
@@ -850,7 +877,7 @@ public:
             {
                 if (sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodePossible == false)
                 {
-                    LOG_ERROR("sql.sql", "Hardmode is not Possible");
+                    LOG_ERROR("sql.sql", "Hardmode is not Possible for instanceId {}: {}", instanceId, sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodePossible);
                     CanTurnOn = false;
                     creature->Whisper("I am sorry, time-traveler. You can not return to this version of the time-line anymore. You must complete all previous encounters the challenging way.", LANG_UNIVERSAL, player);
                 }
@@ -927,5 +954,6 @@ void AddModZoneDifficultyScripts()
     new mod_zone_difficulty_petscript();
     new mod_zone_difficulty_worldscript();
     new mod_zone_difficulty_globalscript();
+    new mod_zone_difficulty_instancemapscript();
     new mod_zone_difficulty_dungeonmaster();
 }
