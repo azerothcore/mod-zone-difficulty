@@ -852,7 +852,7 @@ public:
                 {
                     LOG_ERROR("sql.sql", "Hardmode is not Possible");
                     CanTurnOn = false;
-                    // todo: Give Feedback
+                    creature->Whisper("I am sorry, time-traveler. You can not return to this version of the time-line anymore. You must complete all previous encounters the challenging way.", LANG_UNIVERSAL, player);
                 }
             }
             // ... if there is an encounter in progress
@@ -860,7 +860,7 @@ public:
             {
                 LOG_ERROR("sql.sql", "IsEncounterInProgress");
                 CanTurnOn = false;
-                // todo: Give Feedback
+                creature->Whisper("I am sorry, time-traveler. You can not return to this version of the time-line currently. There is already a battle in progress." , LANG_UNIVERSAL, player);
             }
 
             if (CanTurnOn == true)
@@ -868,7 +868,7 @@ public:
                 LOG_ERROR("sql.sql", "Turn on hardmode for id {}", instanceId);
                 sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodeOn = true;
                 sZoneDifficulty->SaveHardmodeInstanceData(instanceId);
-                // todo: Give Feedback
+                sZoneDifficulty->SendWhisperToRaid("We're switching to the challenging version of the history lesson now. (Hard mode)", creature, player);
             }
 
             CloseGossipMenuFor(player);
@@ -879,7 +879,6 @@ public:
             ZoneDifficultyHardmodeInstData data = sZoneDifficulty->HardmodeInstanceData[instanceId];
             sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodeOn = false;
             sZoneDifficulty->SaveHardmodeInstanceData(instanceId);
-
             sZoneDifficulty->SendWhisperToRaid("We're switching to the cinematic version of the history lesson now. (Normal mode)", creature, player);
             CloseGossipMenuFor(player);
         }
@@ -903,8 +902,7 @@ public:
             }
             else
             {
-                creature->Whisper("I will let the leader of your group decide about this subject. You will receive a notification, when their make a new request to me.", LANG_UNIVERSAL, player);
-                //todo: Leave a message that only the leader can do this
+                creature->Whisper("I will let the leader of your group decide about this subject. You will receive a notification, when they make a new request to me.", LANG_UNIVERSAL, player);
             }
         }
         SendGossipMenuFor(player, npctext, creature);
