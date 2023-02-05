@@ -888,17 +888,26 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature) override
     {
-        LOG_ERROR("sql.sql", "567");
+        LOG_ERROR("sql.sql", "OnGossipHello");
         uint32 npctext = NPC_TEXT_OTHER;
         if (Group* group = player->GetGroup())
         {
-            LOG_ERROR("sql.sql", "570");
+            LOG_ERROR("sql.sql", "OnGossipHello Has Group");
             if (group->IsLeader(player->GetGUID()))
             {
-                LOG_ERROR("sql.sql", "573");
+                LOG_ERROR("sql.sql", "OnGossipHello Is Leader");
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Please Chromie, let us re-experience how all the things really happened back then. (Hard mode)", GOSSIP_SENDER_MAIN, 100);
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, "I think we will be fine with the cinematic version from here. (Normal mode)", GOSSIP_SENDER_MAIN, 101);
-                npctext = NPC_TEXT_LEADER;
+
+                if (sZoneDifficulty->HardmodeInstanceData[player->GetMap()->GetInstanceId()].HardmodeOn == true)
+                {
+                    npctext = NPC_TEXT_LEADER_HARD;
+                }
+                else
+                {
+                    npctext = NPC_TEXT_LEADER_NORMAL;
+                }
+
             }
             else
             {

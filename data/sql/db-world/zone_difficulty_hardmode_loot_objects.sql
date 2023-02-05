@@ -5,7 +5,7 @@ CREATE TABLE `zone_difficulty_loot_objects` (
     -- 0 = no override. Only required if the loot for an encounter is obtained
     -- from e.g. a chest instead of a corpse.
     `OverrideGO` INT NOT NULL DEFAULT 0,
-	PRIMARY KEY (`MapID`, `Entry`, `Type`)
+	PRIMARY KEY (`MapID`, `SourceEntry`, `OverrideGO`)
 );
 
 INSERT INTO `zone_difficulty_loot_objects` (`MapID`, `SourceEntry`, `OverrideGO`) VALUES
