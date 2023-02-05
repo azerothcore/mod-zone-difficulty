@@ -34,8 +34,9 @@ struct ZoneDifficultyLootableObjects
 
 const int32 DUEL_INDEX = 0x7FFFFFFF;
 const int32 DUEL_AREA = 2402;       // Forbidding Sea (Wetlands)
-const uint32 NPC_TEXT_LEADER = 91301;
+const uint32 NPC_TEXT_LEADER_NORMAL = 91301;
 const uint32 NPC_TEXT_OTHER = 91302;
+const uint32 NPC_TEXT_LEADER_HARD = 91303;
 const int8 MODE_NORMAL = 1;
 const int8 MODE_HARD = 64;
 
@@ -47,6 +48,7 @@ public:
     void LoadMapDifficultySettings();
     void SaveHardmodeInstanceData(uint32 instanceId);
     void LoadHardmodeInstanceData();
+    void SendWhisperToRaid(std::string message, Creature* creature, Player* player);
     [[nodiscard]] bool IsValidNerfTarget(Unit* target);
     [[nodiscard]] bool VectorContains(std::vector<uint32> vec, uint32 element);
     [[nodiscard]] bool ShouldNerfInDuels(Unit* target);
