@@ -64,7 +64,7 @@ void ZoneDifficulty::LoadMapDifficultySettings()
             // duels do not check for phases. Only 0 is allowed.
             if (mapId == DUEL_INDEX && phaseMask != 0)
             {
-                LOG_ERROR("sql.sql", "Table `zone_difficulty_info` for criteria (duel mapId: {}) has wrong value ({}), must be 0 for duels.", mapId, phaseMask);
+                LOG_INFO("sql", "Table `zone_difficulty_info` for criteria (duel mapId: {}) has wrong value ({}), must be 0 for duels.", mapId, phaseMask);
             }
 
         } while (result->NextRow());
@@ -107,7 +107,7 @@ void ZoneDifficulty::LoadMapDifficultySettings()
                     }
                     else
                     {
-                        LOG_ERROR("sql.sql", "Disabling buffs for spell '{}' is invalid, skipped.", spell);
+                        LOG_INFO("sql", "Disabling buffs for spell '{}' is invalid, skipped.", spell);
                     }
                 }
                 sZoneDifficulty->DisallowedBuffs[mapid] = debuffs;
@@ -124,11 +124,11 @@ void ZoneDifficulty::LoadMapDifficultySettings()
             data.GameobjectEntry= (*result)[2].Get<uint32>();
 
             sZoneDifficulty->HardmodeLoot[mapId].push_back(data);
-            LOG_ERROR("sql.sql", "New creature for map {} with entry: {}", mapId, data.SourceEntry);
+            LOG_INFO("sql", "New creature for map {} with entry: {}", mapId, data.SourceEntry);
 
             if (mapId <= 0 || data.SourceEntry <= 0)
             {
-                LOG_ERROR("sql.sql", "Table `zone_difficulty_loot_objects` for criteria MapId: {} OR Entry: {} has wrong value. Must be > 0.", mapId, data.SourceEntry);
+                LOG_INFO("sql", "Table `zone_difficulty_loot_objects` for criteria MapId: {} OR Entry: {} has wrong value. Must be > 0.", mapId, data.SourceEntry);
             }
 
         } while (result->NextRow());
@@ -151,7 +151,7 @@ void ZoneDifficulty::LoadHardmodeInstanceData()
     std::vector<bool> instanceIDs = sMapMgr->GetInstanceIDs();
     for (int i = 0; i < int(instanceIDs.size()); i++)
     {
-        LOG_ERROR("sql.sql", "ZoneDifficulty::LoadHardmodeInstanceData: id {} exists: {}:", i, instanceIDs[i]);
+        LOG_INFO("sql", "ZoneDifficulty::LoadHardmodeInstanceData: id {} exists: {}:", i, instanceIDs[i]);
     }
     //end debugging
     if (QueryResult result = CharacterDatabase.Query("SELECT * FROM zone_difficulty_instance_saves"))
@@ -164,7 +164,7 @@ void ZoneDifficulty::LoadHardmodeInstanceData()
 
             if (instanceIDs[instanceId] == true)
             {
-                LOG_ERROR("sql.sql", "Loading from DB for instanceId {}: HardmodeOn = {}, HardmodePossible = {}", instanceId, HardmodeOn, HardmodePossible);
+                LOG_INFO("sql", "Loading from DB for instanceId {}: HardmodeOn = {}, HardmodePossible = {}", instanceId, HardmodeOn, HardmodePossible);
                 sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodeOn = HardmodeOn;
                 sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodePossible = HardmodePossible;
             }
@@ -307,7 +307,7 @@ void ZoneDifficulty::SaveHardmodeInstanceData(uint32 instanceId)
 {
     if (sZoneDifficulty->HardmodeInstanceData.find(instanceId) == sZoneDifficulty->HardmodeInstanceData.end())
     {
-        LOG_ERROR("sql.sql", "ZoneDifficulty::SaveHardmodeInstanceData: InstanceId {} not found in HardmodeInstanceData.", instanceId);
+        LOG_INFO("sql", "ZoneDifficulty::SaveHardmodeInstanceData: InstanceId {} not found in HardmodeInstanceData.", instanceId);
         return;
     }
 
@@ -735,7 +735,7 @@ public:
 
     void OnInstanceIdRemoved(uint32 instanceId) override
     {
-        LOG_ERROR("sql.sql", "OnInstanceIdRemoved: instanceId = {}", instanceId);
+        LOG_INFO("sql", "OnInstanceIdRemoved: instanceId = {}", instanceId);
         if (sZoneDifficulty->HardmodeInstanceData.find(instanceId) != sZoneDifficulty->HardmodeInstanceData.end())
         {
             sZoneDifficulty->HardmodeInstanceData.erase(instanceId);
@@ -748,13 +748,13 @@ public:
     {
         if (!source)
         {
-            LOG_ERROR("sql.sql", "source is a nullptr in OnAfterUpdateEncounterState");
+            LOG_INFO("sql", "source is a nullptr in OnAfterUpdateEncounterState");
             return;
         }
 
         if (sZoneDifficulty->HardmodeInstanceData.find(map->GetInstanceId()) != sZoneDifficulty->HardmodeInstanceData.end())
         {
-            LOG_ERROR("sql.sql", "Encounter completed. Map relevant.");
+            LOG_INFO("sql", "Encounter completed. Map relevant.");
             // Give additional loot, if the encounter was in hardmode.
             if (sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].HardmodeOn == true)
             {
@@ -762,7 +762,7 @@ public:
                 uint32 GameobjectEntry = 0;
                 if (sZoneDifficulty->HardmodeLoot.find(mapId) == sZoneDifficulty->HardmodeLoot.end())
                 {
-                    LOG_ERROR("sql.sql", "No additional loot stored in map with id {}.", map->GetInstanceId());
+                    LOG_INFO("sql", "No additional loot stored in map with id {}.", map->GetInstanceId());
                     return;
                 }
 
@@ -778,11 +778,11 @@ public:
 
                 if (GameobjectEntry == 0)
                 {
-                    LOG_ERROR("sql.sql", "Hardmode for instance id {} is {}.", map->GetInstanceId(), sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].HardmodeOn);
+                    LOG_INFO("sql", "Hardmode for instance id {} is {}.", map->GetInstanceId(), sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].HardmodeOn);
                     source->ToCreature()->AddLootMode(64);
                     source->ToCreature()->loot.clear();
                     source->ToCreature()->loot.FillLoot(source->ToCreature()->GetCreatureTemplate()->lootid, LootTemplates_Creature, source->ToCreature()->GetLootRecipient(), false, false, source->ToCreature()->GetLootMode(), source->ToCreature());
-                    LOG_ERROR("sql.sql", "Encounter {} completed. Loot mode: {}", source->GetName(), source->ToCreature()->GetLootMode());
+                    LOG_INFO("sql", "Encounter {} completed. Loot mode: {}", source->GetName(), source->ToCreature()->GetLootMode());
                 }
                 else
                 {
@@ -792,7 +792,7 @@ public:
                         go->AddLootMode(64);
                         go->loot.clear();
                         go->loot.FillLoot(go->GetGOInfo()->GetLootId(), LootTemplates_Gameobject, go->GetLootRecipient(), false, false, go->GetLootMode(), go);
-                        LOG_ERROR("sql.sql", "Encounter {} completed. Adding loot to {} Loot mode: {}", source->GetName(), go->GetName(), source->ToCreature()->GetLootMode());
+                        LOG_INFO("sql", "Encounter {} completed. Adding loot to {} Loot mode: {}", source->GetName(), go->GetName(), source->ToCreature()->GetLootMode());
                     }
                     // if the gameobject is not spawned yet, wait one tick
                     else
@@ -801,7 +801,7 @@ public:
                         {
                             if (!source)
                             {
-                                LOG_ERROR("sql.sql", "2nd try: source is a nullptr in OnAfterUpdateEncounterState");
+                                LOG_INFO("sql", "2nd try: source is a nullptr in OnAfterUpdateEncounterState");
                                 return;
                             }
 
@@ -811,7 +811,7 @@ public:
                                 go->AddLootMode(64);
                                 go->loot.clear();
                                 go->loot.FillLoot(go->GetGOInfo()->GetLootId(), LootTemplates_Gameobject, go->GetLootRecipient(), false, false, go->GetLootMode(), go);
-                                LOG_ERROR("sql.sql", "2nd try: Encounter {} completed. Adding loot to {} Loot mode: {}", source->GetName(), go->GetName(), source->ToCreature()->GetLootMode());
+                                LOG_INFO("sql", "2nd try: Encounter {} completed. Adding loot to {} Loot mode: {}", source->GetName(), go->GetName(), source->ToCreature()->GetLootMode());
                             }
                         }, 10ms);
                     }
@@ -821,7 +821,7 @@ public:
             // Must set HardmodePossible to false, if the encounter wasn't in hardmode.
             else
             {
-                LOG_ERROR("sql.sql", "Hardmode for instance id {} is {}. Setting HardmodePossible to false.", map->GetInstanceId(), sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].HardmodeOn);
+                LOG_INFO("sql", "Hardmode for instance id {} is {}. Setting HardmodePossible to false.", map->GetInstanceId(), sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].HardmodeOn);
                 sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].HardmodePossible = false;
                 sZoneDifficulty->SaveHardmodeInstanceData(map->GetInstanceId());
             }
@@ -839,20 +839,20 @@ public:
         // debug start
         for (auto mapdata : sZoneDifficulty->HardmodeLoot)
         {
-            LOG_ERROR("sql.sql", "Maps with loot data: {}", mapdata.first);
+            LOG_INFO("sql", "Maps with loot data: {}", mapdata.first);
         }
         // debug end
 
 
         if (sZoneDifficulty->HardmodeLoot.find(instanceMap->GetId()) == sZoneDifficulty->HardmodeLoot.end())
         {
-            LOG_ERROR("sql.sql", "New instance not handled because there is no hardmode data for map id: {}", instanceMap->GetId());
+            LOG_INFO("sql", "New instance not handled because there is no hardmode data for map id: {}", instanceMap->GetId());
             return;
         }
 
         if (completedEncounterMask == 0)
         {
-            LOG_ERROR("sql.sql", "Initializing instance with HardmodePossible == true for instanceId: {} with mapId: {}", instanceMap->GetInstanceId(), instanceMap->GetId());
+            LOG_INFO("sql", "Initializing instance with HardmodePossible == true for instanceId: {} with mapId: {}", instanceMap->GetInstanceId(), instanceMap->GetId());
             sZoneDifficulty->HardmodeInstanceData[instanceMap->GetInstanceId()].HardmodePossible = true;
         }
     }
@@ -869,7 +869,7 @@ public:
         uint32 instanceId = player->GetMap()->GetInstanceId();
         if (action == 100)
         {
-            LOG_ERROR("sql.sql", "Try turn on");
+            LOG_INFO("sql", "Try turn on");
             bool CanTurnOn = true;
 
             // Forbid turning harmode on ...
@@ -878,7 +878,7 @@ public:
             {
                 if (sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodePossible == false)
                 {
-                    LOG_ERROR("sql.sql", "Hardmode is not Possible for instanceId {}: {}", instanceId, sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodePossible);
+                    LOG_INFO("sql", "Hardmode is not Possible for instanceId {}: {}", instanceId, sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodePossible);
                     CanTurnOn = false;
                     creature->Whisper("I am sorry, time-traveler. You can not return to this version of the time-line anymore. You must complete all previous encounters the challenging way.", LANG_UNIVERSAL, player);
                 }
@@ -886,14 +886,14 @@ public:
             // ... if there is an encounter in progress
             else if (player->GetInstanceScript() && player->GetInstanceScript()->IsEncounterInProgress())
             {
-                LOG_ERROR("sql.sql", "IsEncounterInProgress");
+                LOG_INFO("sql", "IsEncounterInProgress");
                 CanTurnOn = false;
                 creature->Whisper("I am sorry, time-traveler. You can not return to this version of the time-line currently. There is already a battle in progress." , LANG_UNIVERSAL, player);
             }
 
             if (CanTurnOn == true)
             {
-                LOG_ERROR("sql.sql", "Turn on hardmode for id {}", instanceId);
+                LOG_INFO("sql", "Turn on hardmode for id {}", instanceId);
                 sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodeOn = true;
                 sZoneDifficulty->SaveHardmodeInstanceData(instanceId);
                 sZoneDifficulty->SendWhisperToRaid("We're switching to the challenging version of the history lesson now. (Hard mode)", creature, player);
@@ -903,7 +903,7 @@ public:
         }
         else if (action == 101)
         {
-            LOG_ERROR("sql.sql", "Turn off hardmode for id {}", instanceId);
+            LOG_INFO("sql", "Turn off hardmode for id {}", instanceId);
             sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodeOn = false;
             sZoneDifficulty->SaveHardmodeInstanceData(instanceId);
             sZoneDifficulty->SendWhisperToRaid("We're switching to the cinematic version of the history lesson now. (Normal mode)", creature, player);
@@ -915,14 +915,14 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature) override
     {
-        LOG_ERROR("sql.sql", "OnGossipHello");
+        LOG_INFO("sql", "OnGossipHello");
         uint32 npctext = NPC_TEXT_OTHER;
         if (Group* group = player->GetGroup())
         {
-            LOG_ERROR("sql.sql", "OnGossipHello Has Group");
+            LOG_INFO("sql", "OnGossipHello Has Group");
             if (group->IsLeader(player->GetGUID()))
             {
-                LOG_ERROR("sql.sql", "OnGossipHello Is Leader");
+                LOG_INFO("sql", "OnGossipHello Is Leader");
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Please Chromie, let us re-experience how all the things really happened back then. (Hard mode)", GOSSIP_SENDER_MAIN, 100);
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, "I think we will be fine with the cinematic version from here. (Normal mode)", GOSSIP_SENDER_MAIN, 101);
 
