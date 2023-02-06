@@ -733,7 +733,7 @@ class mod_zone_difficulty_globalscript : public GlobalScript
 public:
     mod_zone_difficulty_globalscript() : GlobalScript("mod_zone_difficulty_globalscript") { }
 
-    void OnInstanceIdRemoved(uint32 instanceId)
+    void OnInstanceIdRemoved(uint32 instanceId) override
     {
         LOG_ERROR("sql.sql", "OnInstanceIdRemoved: instanceId = {}", instanceId);
         if (sZoneDifficulty->HardmodeInstanceData.find(instanceId) != sZoneDifficulty->HardmodeInstanceData.end())
