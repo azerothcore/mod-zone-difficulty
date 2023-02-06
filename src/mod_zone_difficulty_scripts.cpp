@@ -904,7 +904,6 @@ public:
         else if (action == 101)
         {
             LOG_ERROR("sql.sql", "Turn off hardmode for id {}", instanceId);
-            ZoneDifficultyHardmodeInstData data = sZoneDifficulty->HardmodeInstanceData[instanceId];
             sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodeOn = false;
             sZoneDifficulty->SaveHardmodeInstanceData(instanceId);
             sZoneDifficulty->SendWhisperToRaid("We're switching to the cinematic version of the history lesson now. (Normal mode)", creature, player);
