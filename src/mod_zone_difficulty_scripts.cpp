@@ -2,15 +2,17 @@
  * Copyright (C) 2016+ AzerothCore <www.azerothcore.org>, released under GNU AGPL v3 license: https://github.com/azerothcore/azerothcore-wotlk/blob/master/LICENSE-AGPL3
  */
 
-#include "ScriptMgr.h"
-#include "Player.h"
 #include "Config.h"
 #include "Chat.h"
 #include "MapMgr.h"
 #include "Pet.h"
+#include "Player.h"
+#include "ScriptedCreature.h"
+#include "ScriptMgr.h"
 #include "SpellAuras.h"
 #include "SpellAuraEffects.h"
 #include "StringConvert.h"
+#include "TaskScheduler.h"
 #include "Tokenize.h"
 #include "Unit.h"
 #include "ZoneDifficulty.h"
@@ -888,11 +890,47 @@ public:
     }
 };
 
-
 class mod_zone_difficulty_dungeonmaster : public CreatureScript
 {
 public:
     mod_zone_difficulty_dungeonmaster() : CreatureScript("mod_zone_difficulty_dungeonmaster") { }
+
+    struct mod_zone_difficulty_dungeonmasterAI : public ScriptedAI
+    {
+        mod_zone_difficulty_dungeonmasterAI(Creature* creature) : ScriptedAI(creature) { }
+
+        void Reset() override
+        {
+            if (me->GetMap() && me->GetMap()->IsHeroic() && !me->GetMap()->IsRaid())
+            {
+                _scheduler.Schedule(15s, [this](TaskContext context)
+                    {
+                        me->Yell("If you want a challenge, please talk to me soon adventurer!", LANG_UNIVERSAL);
+                    });
+                _scheduler.Schedule(45s, [this](TaskContext context)
+                    {
+                        me->Yell("I will take my leave then and offer my services to other adventurers. See you again!", LANG_UNIVERSAL);
+                    });
+                _scheduler.Schedule(60s, [this](TaskContext context)
+                    {
+                        me->DespawnOrUnsummon();
+                    });
+            }
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            _scheduler.Update(diff);
+        }
+
+    private:
+        TaskScheduler _scheduler;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new mod_zone_difficulty_dungeonmasterAI(creature);
+    }
 
     bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) override
     {

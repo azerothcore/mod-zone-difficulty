@@ -10,9 +10,11 @@ INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entr
 
 INSERT INTO `creature` (`guid`, `id1`, `id2`, `id3`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `ScriptName`, `VerifiedBuild`) VALUES
   -- Gruul's Lair
-(303001, 1128001, 0, 0, 565, 3923, 3923, 1, 1, 0, 76.64, 55.82, -5.38, 3.29, 300, 0, 0, 0, 0, 0, 0, 0, 0, 'mod_zone_difficulty_dungeonmaster', 0),
+(303001, 1128001, 0, 0, 565, 3923, 3923, 1, 1, 1, 76.64, 55.82, -5.38, 3.29, 1000000, 0, 0, 0, 0, 0, 0, 0, 0, 'mod_zone_difficulty_dungeonmaster', 0),
  -- Magtheridon's Lair
-(303002, 1128001, 0, 0, 544, 3836, 3836, 1, 1, 0, 232.00, 9.90, 68.03, 3.17, 300, 0, 0, 0, 0, 0, 0, 0, 0, 'mod_zone_difficulty_dungeonmaster', 0);
+(303002, 1128001, 0, 0, 544, 3836, 3836, 1, 1, 1, 232.00, 9.90, 68.03, 3.17, 1000000, 0, 0, 0, 0, 0, 0, 0, 0, 'mod_zone_difficulty_dungeonmaster', 0),
+ -- Blood Furnace
+(303003, 1128001, 0, 0, 542, 3713, 3713, 2, 1, 1, -9.9, 7.28, -44.6, 0.45, 1000000, 0, 0, 0, 0, 0, 0, 0, 0, 'mod_zone_difficulty_dungeonmaster', 0);
 
 INSERT INTO `npc_text` (`ID`, `text0_0`, `BroadcastTextID0`, `lang0`, `Probability0`, `em0_0`, `em0_1`, `em0_2`, `em0_3`, `em0_4`, `em0_5`, `BroadcastTextID1`, `lang1`, `Probability1`, `em1_0`, `em1_1`, `em1_2`, `em1_3`, `em1_4`, `em1_5`, `BroadcastTextID2`, `lang2`, `Probability2`, `em2_0`, `em2_1`, `em2_2`, `em2_3`, `em2_4`, `em2_5`, `BroadcastTextID3`, `lang3`, `Probability3`, `em3_0`, `em3_1`, `em3_2`, `em3_3`, `em3_4`, `em3_5`, `BroadcastTextID4`, `lang4`, `Probability4`, `em4_0`, `em4_1`, `em4_2`, `em4_3`, `em4_4`, `em4_5`, `BroadcastTextID5`, `lang5`, `Probability5`, `em5_0`, `em5_1`, `em5_2`, `em5_3`, `em5_4`, `em5_5`, `BroadcastTextID6`, `lang6`, `Probability6`, `em6_0`, `em6_1`, `em6_2`, `em6_3`, `em6_4`, `em6_5`, `BroadcastTextID7`, `lang7`, `Probability7`, `em7_0`, `em7_1`, `em7_2`, `em7_3`, `em7_4`, `em7_5`, `VerifiedBuild`) VALUES
 (91301, 'Hello, $n. How strong do you think you are? I am offering 2 different versions to wittness the events of the past. If you don\'t tell me otherwise, i will show you the cinematic one.', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
