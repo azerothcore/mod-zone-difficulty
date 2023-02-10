@@ -11,4 +11,5 @@ CREATE TABLE `zone_difficulty_loot_objects` (
 INSERT INTO `zone_difficulty_loot_objects` (`MapID`, `SourceEntry`, `OverrideGO`) VALUES
 (544, 17257, 0),    -- Magtheridon, Magtheridon's Lair
 (565, 18831, 0),    -- High King Maulgar, Gruul's Lair
-(565, 19044, 0);    -- Gruul, Gruul's Lair
+(565, 19044, 0),    -- Gruul, Gruul's Lair
+(543, 17537, 0);    -- Vazruden, Hellfire Ramparts

@@ -932,13 +932,16 @@ public:
 
         void Reset() override
         {
+            LOG_INFO("sql", "mod_zone_difficulty_dungeonmasterAI: Reset happens.");
             if (me->GetMap() && me->GetMap()->IsHeroic() && !me->GetMap()->IsRaid())
             {
+                LOG_INFO("sql", "We're inside a heroic 5man now.");
                 for (auto quest : sZoneDifficulty->DailyHeroicQuests)
                 {
-                    if (sZoneDifficulty->HeroicQuestMapList[me->GetMapId()] == quest)
+                    LOG_INFO("sql", "Checking quest {} and MapId {}", quest, me->GetMapId());
+                    if (sPoolMgr->IsSpawnedObject<Quest>(quest))
                     {
-                        if (sPoolMgr->IsSpawnedObject<Quest>(quest))
+                        if (sZoneDifficulty->HeroicQuestMapList[me->GetMapId()] == quest)
                         {
                             LOG_INFO("sql", "mod_zone_difficulty_dungeonmasterAI: Quest with id {} is active.", quest);
                             me->SetPhaseMask(1, true);
