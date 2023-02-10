@@ -12,4 +12,4 @@ INSERT INTO `zone_difficulty_loot_objects` (`MapID`, `SourceEntry`, `OverrideGO`
 (544, 17257, 0),    -- Magtheridon, Magtheridon's Lair
 (565, 18831, 0),    -- High King Maulgar, Gruul's Lair
 (565, 19044, 0),    -- Gruul, Gruul's Lair
-(543, 17537, 0);    -- Vazruden, Hellfire Ramparts
+(543, 17308, 0);    -- Omor the Unscarred, Hellfire Ramparts
