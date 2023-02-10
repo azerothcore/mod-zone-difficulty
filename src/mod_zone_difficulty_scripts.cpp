@@ -37,6 +37,24 @@ void ZoneDifficulty::LoadMapDifficultySettings()
     ZoneDifficultyNerfInfo[DUEL_INDEX][0].MeleeDamageBuffPct = 1;
     ZoneDifficultyNerfInfo[DUEL_INDEX][0].SpellDamageBuffPct = 1;
 
+    // Heroic Quest -> MapId Translation
+    HeroicQuestMapList[542] = 11362;
+    HeroicQuestMapList[543] = 11354;
+    HeroicQuestMapList[547] = 11368;
+    HeroicQuestMapList[546] = 11369;
+    HeroicQuestMapList[557] = 11373;
+    HeroicQuestMapList[558] = 11374;
+    HeroicQuestMapList[560] = 11378;
+    HeroicQuestMapList[556] = 11372;
+    HeroicQuestMapList[585] = 11499;
+    HeroicQuestMapList[555] = 11375;
+    HeroicQuestMapList[540] = 11363;
+    HeroicQuestMapList[552] = 11388;
+    HeroicQuestMapList[269] = 11382;
+    HeroicQuestMapList[553] = 11384;
+    HeroicQuestMapList[554] = 11386;
+    HeroicQuestMapList[545] = 11370;
+
     if (QueryResult result = WorldDatabase.Query("SELECT * FROM zone_difficulty_info"))
     {
         do
@@ -918,27 +936,27 @@ public:
             {
                 for (auto quest : sZoneDifficulty->DailyHeroicQuests)
                 {
-                    if (sPoolMgr->IsSpawnedObject<Quest>(quest))
+                    if (sZoneDifficulty->HeroicQuestMapList[me->GetMapId()] == quest)
                     {
-                        LOG_INFO("sql", "mod_zone_difficulty_dungeonmasterAI: Quest with id {} is active.", quest);
-                        me->SetPhaseMask(1,true);
+                        if (sPoolMgr->IsSpawnedObject<Quest>(quest))
+                        {
+                            LOG_INFO("sql", "mod_zone_difficulty_dungeonmasterAI: Quest with id {} is active.", quest);
+                            me->SetPhaseMask(1, true);
 
-                        _scheduler.Schedule(15s, [this](TaskContext context)
-                            {
-                                me->Yell("If you want a challenge, please talk to me soon adventurer!", LANG_UNIVERSAL);
-                            });
-                        _scheduler.Schedule(45s, [this](TaskContext context)
-                            {
-                                me->Yell("I will take my leave then and offer my services to other adventurers. See you again!", LANG_UNIVERSAL);
-                            });
-                        _scheduler.Schedule(60s, [this](TaskContext context)
-                            {
-                                me->DespawnOrUnsummon();
-                            });
-                    }
-                    else
-                    {
-                        me->SetPhaseMask(1024, true);
+                            _scheduler.Schedule(15s, [this](TaskContext context)
+                                {
+                                    me->Yell("If you want a challenge, please talk to me soon adventurer!", LANG_UNIVERSAL);
+                                });
+                            _scheduler.Schedule(45s, [this](TaskContext context)
+                                {
+                                    me->Yell("I will take my leave then and offer my services to other adventurers. See you again!", LANG_UNIVERSAL);
+                                });
+                            _scheduler.Schedule(60s, [this](TaskContext context)
+                                {
+                                    me->DespawnOrUnsummon();
+                                });
+                            break;
+                        }
                     }
                 }
             }
