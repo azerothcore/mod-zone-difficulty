@@ -7,6 +7,7 @@
 #include "MapMgr.h"
 #include "Pet.h"
 #include "Player.h"
+#include "PoolMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptMgr.h"
 #include "SpellAuras.h"
@@ -83,6 +84,7 @@ void ZoneDifficulty::LoadMapDifficultySettings()
 
         } while (result->NextRow());
     }
+
     if (QueryResult result = WorldDatabase.Query("SELECT * FROM zone_difficulty_disallowed_buffs"))
     {
         do
@@ -116,6 +118,7 @@ void ZoneDifficulty::LoadMapDifficultySettings()
             }
         } while (result->NextRow());
     }
+
     if (QueryResult result = WorldDatabase.Query("SELECT * FROM zone_difficulty_loot_objects"))
     {
         do
@@ -135,6 +138,16 @@ void ZoneDifficulty::LoadMapDifficultySettings()
 
         } while (result->NextRow());
     }
+
+    if (QueryResult result = WorldDatabase.Query("SELECT entry FROM `pool_quest` WHERE `pool_entry`=356; "))
+    {
+        do
+        {
+            sZoneDifficulty->DailyHeroicQuests.push_back((*result)[0].Get<uint32>());
+            LOG_INFO("sql", "Adding daily heroic quest with id {}.", (*result)[0].Get<uint32>());
+        } while (result->NextRow());
+    }
+
 }
 
 /* Loads the HardmodeInstanceData from the database.
@@ -903,18 +916,31 @@ public:
         {
             if (me->GetMap() && me->GetMap()->IsHeroic() && !me->GetMap()->IsRaid())
             {
-                _scheduler.Schedule(15s, [this](TaskContext context)
+                for (auto quest : sZoneDifficulty->DailyHeroicQuests)
+                {
+                    if (sPoolMgr->IsSpawnedObject<Quest>(quest))
                     {
-                        me->Yell("If you want a challenge, please talk to me soon adventurer!", LANG_UNIVERSAL);
-                    });
-                _scheduler.Schedule(45s, [this](TaskContext context)
+                        LOG_INFO("sql", "mod_zone_difficulty_dungeonmasterAI: Quest with id {} is active.", quest);
+                        me->SetPhaseMask(1,true);
+
+                        _scheduler.Schedule(15s, [this](TaskContext context)
+                            {
+                                me->Yell("If you want a challenge, please talk to me soon adventurer!", LANG_UNIVERSAL);
+                            });
+                        _scheduler.Schedule(45s, [this](TaskContext context)
+                            {
+                                me->Yell("I will take my leave then and offer my services to other adventurers. See you again!", LANG_UNIVERSAL);
+                            });
+                        _scheduler.Schedule(60s, [this](TaskContext context)
+                            {
+                                me->DespawnOrUnsummon();
+                            });
+                    }
+                    else
                     {
-                        me->Yell("I will take my leave then and offer my services to other adventurers. See you again!", LANG_UNIVERSAL);
-                    });
-                _scheduler.Schedule(60s, [this](TaskContext context)
-                    {
-                        me->DespawnOrUnsummon();
-                    });
+                        me->SetPhaseMask(1024, true);
+                    }
+                }
             }
         }
 

@@ -56,6 +56,7 @@ public:
 
     bool IsEnabled{ false };
     bool IsDebugInfoEnabled{ false };
+    std::vector<uint32> DailyHeroicQuests;
 
     typedef std::map<uint32, std::map<uint32, ZoneDifficultyNerfData> > ZoneDifficultyNerfDataMap;
     ZoneDifficultyNerfDataMap ZoneDifficultyNerfInfo;
