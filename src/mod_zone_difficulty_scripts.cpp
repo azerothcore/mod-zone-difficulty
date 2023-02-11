@@ -211,7 +211,7 @@ void ZoneDifficulty::LoadHardmodeInstanceData()
     }
 }
 
-/*  Sends a whisper to all members of the player's raid in the same instance as the creature.
+/* @brief Sends a whisper to all members of the player's raid in the same instance as the creature.
  *
  * @param message The message which should be sent to the <Player>.
  * @param creature The creature who sends the whisper.
@@ -220,18 +220,19 @@ void ZoneDifficulty::LoadHardmodeInstanceData()
 void ZoneDifficulty::SendWhisperToRaid(std::string message, Creature* creature, Player* player)
 {
     Group::MemberSlotList const& members = player->GetGroup()->GetMemberSlots();
-    for (auto member : members)
+    for (auto& member : members)
     {
         Player* mplr = ObjectAccessor::FindConnectedPlayer(member.guid);
         if (creature && mplr && mplr->GetMap()->GetInstanceId() == player->GetMap()->GetInstanceId())
         {
-            creature->Whisper(message, LANG_UNIVERSAL, player);
+            LOG_INFO("sql", "Player {} should receive a whisper.", mplr->GetName());
+            creature->Whisper(message, LANG_UNIVERSAL, mplr);
         }
     }
 }
 
 
-/*  Check if the target is a player, a pet or a guardian.
+/* @brief Check if the target is a player, a pet or a guardian.
  *
  * @param target The affected <Unit>
  * @return The result as bool. True for <Player>, <Pet> or <Guardian>.
@@ -242,7 +243,7 @@ bool ZoneDifficulty::IsValidNerfTarget(Unit* target)
 }
 
 
-/*  Checks if the element is one of the values in the vector.
+/* @brief Checks if the element is one of the values in the vector.
  *
  * @param vec A vector
  * @param element One element which can potentially be part of the values in the vector
@@ -254,7 +255,7 @@ bool ZoneDifficulty::VectorContains(std::vector<uint32> vec, uint32 element)
 }
 
 
-/*  Checks if the target is in a duel while residing in the DUEL_AREA and their opponent is a valid object.
+/* @brief Checks if the target is in a duel while residing in the DUEL_AREA and their opponent is a valid object.
  *  Used to determine when the duel-specific nerfs should be applied.
  *
  * @param target The affected <Unit>
@@ -295,7 +296,7 @@ bool ZoneDifficulty::ShouldNerfInDuels(Unit* target)
     return true;
 }
 
-/*  Find the lowest phase for the target's mapId, which has a db entry for the target's map
+/* @brief Find the lowest phase for the target's mapId, which has a db entry for the target's map
  *  and at least partly matches the target's phase.
  *
  *  `mapId` can be the id of a map or `DUEL_INDEX` to use the duel specific settings.
@@ -329,7 +330,7 @@ int32 ZoneDifficulty::GetLowestMatchingPhase(uint32 mapId, uint32 phaseMask)
     return -1;
 }
 
-/*  Store the HardmodeInstanceData in the database for the given instance id.
+/* @brief Store the HardmodeInstanceData in the database for the given instance id.
  *  zone_difficulty_instance_saves is used to store the data.
  *
  *  @param InstanceID INT NOT NULL DEFAULT 0,
@@ -794,6 +795,23 @@ public:
     void OnBeforeSetBossState(uint32 id, EncounterState newState, EncounterState oldState, Map* instance)
     {
         LOG_INFO("sql", "OnBeforeSetBossState: bossId = {}, newState = {}, oldState = {}, MapId = {}, InstanceId = {}", id, newState, oldState, instance->GetId(), instance->GetInstanceId());
+        if (sZoneDifficulty->HardmodeLoot.find(instance->GetId()) == sZoneDifficulty->HardmodeLoot.end())
+        {
+            LOG_INFO("sql", "OnBeforeSetBossState: Instance not handled because there is no hardmode loot data for map id: {}", instance->GetId());
+            return;
+        }
+        if (oldState == 1 && newState == 3)
+        {
+            sZoneDifficulty->HardmodeInstanceData[instance->GetId()].HardmodePossible = false;
+            if (sZoneDifficulty->HardmodeInstanceData[instance->GetId()].HardmodeOn == true)
+            {
+                for (auto player : instance->GetPlayers())
+                {
+                    //todo: Send to all players
+                }
+
+            }
+        }
     }
 
     void OnInstanceIdRemoved(uint32 instanceId) override
@@ -842,10 +860,13 @@ public:
                 if (GameobjectEntry == 0)
                 {
                     LOG_INFO("sql", "Hardmode for instance id {} is {}.", map->GetInstanceId(), sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].HardmodeOn);
-                    source->ToCreature()->AddLootMode(64);
-                    source->ToCreature()->loot.clear();
-                    source->ToCreature()->loot.FillLoot(source->ToCreature()->GetCreatureTemplate()->lootid, LootTemplates_Creature, source->ToCreature()->GetLootRecipient(), false, false, source->ToCreature()->GetLootMode(), source->ToCreature());
-                    LOG_INFO("sql", "Encounter {} completed. Loot mode: {}", source->GetName(), source->ToCreature()->GetLootMode());
+                    source->m_Events.AddEventAtOffset([source]()
+                        {
+                        source->ToCreature()->AddLootMode(64);
+                        source->ToCreature()->loot.clear();
+                        source->ToCreature()->loot.FillLoot(source->ToCreature()->GetCreatureTemplate()->lootid, LootTemplates_Creature, source->ToCreature()->GetLootRecipient(), false, false, source->ToCreature()->GetLootMode(), source->ToCreature());
+                        LOG_INFO("sql", "Encounter {} completed. Loot mode: {}", source->GetName(), source->ToCreature()->GetLootMode());
+                        }, 10ms);
                 }
                 else
                 {
@@ -909,7 +930,7 @@ public:
 
         if (sZoneDifficulty->HardmodeLoot.find(instanceMap->GetId()) == sZoneDifficulty->HardmodeLoot.end())
         {
-            LOG_INFO("sql", "New instance not handled because there is no hardmode data for map id: {}", instanceMap->GetId());
+            LOG_INFO("sql", "New instance not handled because there is no hardmode loot data for map id: {}", instanceMap->GetId());
             return;
         }
 
@@ -995,7 +1016,7 @@ public:
                 {
                     LOG_INFO("sql", "Hardmode is not Possible for instanceId {}: {}", instanceId, sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodePossible);
                     CanTurnOn = false;
-                    creature->Whisper("I am sorry, time-traveler. You can not return to this version of the time-line anymore. You must complete all previous encounters the challenging way.", LANG_UNIVERSAL, player);
+                    creature->Whisper("I am sorry, time-traveler. You can not return to this version of the time-line anymore. You have already completed one of the .", LANG_UNIVERSAL, player);
                 }
             }
             // ... if there is an encounter in progress
@@ -1017,6 +1038,22 @@ public:
             CloseGossipMenuFor(player);
         }
         else if (action == 101)
+        {
+            if (sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodePossible == true)
+            {
+                LOG_INFO("sql", "Turn off hardmode for id {}", instanceId);
+                sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodeOn = false;
+                sZoneDifficulty->SaveHardmodeInstanceData(instanceId);
+                sZoneDifficulty->SendWhisperToRaid("We're switching to the cinematic version of the history lesson now. (Normal mode)", creature, player);
+                CloseGossipMenuFor(player);
+            }
+            else
+            {
+                AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Yes, i am sure. I know we can not go back to the harder version anymore, but we still want to stick with the less challenging route.", GOSSIP_SENDER_MAIN, 102);
+                SendGossipMenuFor(player, NPC_TEXT_LEADER_FINAL, creature);
+            }
+        }
+        else if (action == 102)
         {
             LOG_INFO("sql", "Turn off hardmode for id {}", instanceId);
             sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodeOn = false;
@@ -1049,7 +1086,6 @@ public:
                 {
                     npctext = NPC_TEXT_LEADER_NORMAL;
                 }
-
             }
             else
             {

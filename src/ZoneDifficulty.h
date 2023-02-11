@@ -37,6 +37,7 @@ const int32 DUEL_AREA = 2402;       // Forbidding Sea (Wetlands)
 const uint32 NPC_TEXT_LEADER_NORMAL = 91301;
 const uint32 NPC_TEXT_OTHER = 91302;
 const uint32 NPC_TEXT_LEADER_HARD = 91303;
+const uint32 NPC_TEXT_LEADER_FINAL = 91304;
 const int8 MODE_NORMAL = 1;
 const int8 MODE_HARD = 64;
 
