@@ -989,15 +989,15 @@ public:
                             LOG_INFO("sql", "mod_zone_difficulty_dungeonmasterAI: Quest with id {} is active.", quest);
                             me->SetPhaseMask(1, true);
 
-                            _scheduler.Schedule(15s, [this](TaskContext context)
+                            _scheduler.Schedule(15s, [this](TaskContext /*context*/)
                                 {
                                     me->Yell("If you want a challenge, please talk to me soon adventurer!", LANG_UNIVERSAL);
                                 });
-                            _scheduler.Schedule(45s, [this](TaskContext context)
+                            _scheduler.Schedule(45s, [this](TaskContext /*context*/)
                                 {
                                     me->Yell("I will take my leave then and offer my services to other adventurers. See you again!", LANG_UNIVERSAL);
                                 });
-                            _scheduler.Schedule(60s, [this](TaskContext context)
+                            _scheduler.Schedule(60s, [this](TaskContext /*context*/ )
                                 {
                                     me->DespawnOrUnsummon();
                                 });
