@@ -141,17 +141,16 @@ void ZoneDifficulty::LoadMapDifficultySettings()
     {
         do
         {
-            ZoneDifficultyLootableObjects data;
+            uint32 data;
             uint32 mapId = (*result)[0].Get<uint32>();
-            data.SourceEntry = (*result)[1].Get<uint32>();
-            data.GameobjectEntry= (*result)[2].Get<uint32>();
+            data = (*result)[1].Get<uint32>();
 
             sZoneDifficulty->HardmodeLoot[mapId].push_back(data);
-            LOG_INFO("sql", "New creature for map {} with entry: {}", mapId, data.SourceEntry);
+            LOG_INFO("sql", "New creature for map {} with entry: {}", mapId, data);
 
-            if (mapId <= 0 || data.SourceEntry <= 0)
+            if (mapId <= 0 || data <= 0)
             {
-                LOG_INFO("sql", "Table `zone_difficulty_loot_objects` for criteria MapId: {} OR Entry: {} has wrong value. Must be > 0.", mapId, data.SourceEntry);
+                LOG_INFO("sql", "Table `zone_difficulty_loot_objects` for criteria MapId: {} OR Entry: {} has wrong value. Must be > 0.", mapId, data);
             }
 
         } while (result->NextRow());
@@ -191,21 +190,53 @@ void ZoneDifficulty::LoadHardmodeInstanceData()
     {
         do
         {
-            uint32 instanceId = (*result)[0].Get<uint32>();
+            uint32 InstanceId = (*result)[0].Get<uint32>();
             bool HardmodeOn = (*result)[1].Get<bool>();
             bool HardmodePossible = (*result)[2].Get<bool>();
 
-            if (instanceIDs[instanceId] == true)
+            if (instanceIDs[InstanceId] == true)
             {
-                LOG_INFO("sql", "Loading from DB for instanceId {}: HardmodeOn = {}, HardmodePossible = {}", instanceId, HardmodeOn, HardmodePossible);
-                sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodeOn = HardmodeOn;
-                sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodePossible = HardmodePossible;
+                LOG_INFO("sql", "Loading from DB for instanceId {}: HardmodeOn = {}, HardmodePossible = {}", InstanceId, HardmodeOn, HardmodePossible);
+                sZoneDifficulty->HardmodeInstanceData[InstanceId].HardmodeOn = HardmodeOn;
+                sZoneDifficulty->HardmodeInstanceData[InstanceId].HardmodePossible = HardmodePossible;
             }
             else
             {
-                CharacterDatabase.Execute("DELETE FROM zone_difficulty_instance_saves WHERE InstanceID = {}", instanceId);
+                CharacterDatabase.Execute("DELETE FROM zone_difficulty_instance_saves WHERE InstanceID = {}", InstanceId);
             }
 
+
+        } while (result->NextRow());
+    }
+}
+
+/* @brief Loads the score data from the database.
+*  Fetch from zone_difficulty_hardmode_score.
+*
+*  `CharacterGuid` INT NOT NULL DEFAULT 0,
+*  `Type` TINYINT NOT NULL DEFAULT 0,
+*  `Score` INT NOT NULL DEFAULT 0,
+**
+*/
+void ZoneDifficulty::LoadHardmodeScoreData()
+{
+    if (QueryResult result = CharacterDatabase.Query("SELECT * FROM zone_difficulty_hardmode_score"))
+    {
+        do
+        {
+            uint32 GUID = (*result)[0].Get<uint32>();
+            uint8 Type = (*result)[1].Get<uint8>();
+            uint32 Score = (*result)[2].Get<uint32>();
+
+            LOG_INFO("sql", "Loading from DB for player with GUID {}: Type = {}, Score = {}", GUID, Type, Score);
+            if (Type = TYPE_HEROIC_TBC)
+            {
+                sZoneDifficulty->PlayerHeroicScore[GUID] = Score;
+            }
+            else
+            {
+                LOG_ERROR("sql", "Undhandled Type {} in zone_difficulty_hardmode_score.", Type);
+            }
 
         } while (result->NextRow());
     }
@@ -228,6 +259,32 @@ void ZoneDifficulty::SendWhisperToRaid(std::string message, Creature* creature, 
             LOG_INFO("sql", "Player {} should receive a whisper.", mplr->GetName());
             creature->Whisper(message, LANG_UNIVERSAL, mplr);
         }
+    }
+}
+
+/* @brief Grants every player in the group one score for the hardmode.
+ *
+ * @param player One of the players in the group.
+ * @param map The map where the player is currently
+ */
+void ZoneDifficulty::GrantHardmodeScore(Map* map)
+{
+    Map::PlayerList const& PlayerList = map->GetPlayers();
+    for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+    {
+        Player* player = i->GetSource();
+        LOG_INFO("sql", "Player {} should receive score up from {}", player->GetName(), sZoneDifficulty->PlayerHeroicScore[player->GetGUID().GetCounter()]);
+        if (!sZoneDifficulty->PlayerHeroicScore[player->GetGUID().GetCounter()])
+        {
+            sZoneDifficulty->PlayerHeroicScore[player->GetGUID().GetCounter()] = 1;
+        }
+        else
+        {
+            ++sZoneDifficulty->PlayerHeroicScore[player->GetGUID().GetCounter()];
+        }
+        LOG_INFO("sql", "Player {} new score: {}", player->GetName(), sZoneDifficulty->PlayerHeroicScore[player->GetGUID().GetCounter()]);
+        ChatHandler(player->GetSession()).PSendSysMessage("You have received hardmode score for heroic TBC dungeons. New score: %i", sZoneDifficulty->PlayerHeroicScore[player->GetGUID().GetCounter()]);
+        CharacterDatabase.Execute("REPLACE INTO zone_difficulty_hardmode_score VALUES({}, {}, {})", player->GetGUID().GetCounter(), TYPE_HEROIC_TBC, sZoneDifficulty->PlayerHeroicScore[player->GetGUID().GetCounter()]);
     }
 }
 
@@ -412,7 +469,7 @@ public:
                                 if ((mode & MODE_HARD) == MODE_HARD && sZoneDifficulty->HardmodeInstanceData[target->GetMap()->GetInstanceId()].HardmodeOn == true)
                                 {
                                     if (map->IsRaid() ||
-                                       (map->IsHeroic() && map->IsDungeon()))
+                                        (map->IsHeroic() && map->IsDungeon()))
                                     {
                                         absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].AbsorbNerfPctHard;
                                     }
@@ -494,7 +551,7 @@ public:
                     if ((mode & MODE_HARD) == MODE_HARD && sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].HardmodeOn == true)
                     {
                         if (map->IsRaid() ||
-                           (map->IsHeroic() && map->IsDungeon()))
+                            (map->IsHeroic() && map->IsDungeon()))
                         {
                             heal = heal * sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].HealingNerfPctHard;
                         }
@@ -570,7 +627,7 @@ public:
                 if ((mode & MODE_HARD) == MODE_HARD && sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].HardmodeOn == true)
                 {
                     if (map->IsRaid() ||
-                       (map->IsHeroic() && map->IsDungeon()))
+                        (map->IsHeroic() && map->IsDungeon()))
                     {
                         damage = damage * sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].SpellDamageBuffPctHard;
                     }
@@ -651,7 +708,7 @@ public:
                 if ((mode & MODE_HARD) == MODE_HARD && sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].HardmodeOn == true)
                 {
                     if (map->IsRaid() ||
-                       (map->IsHeroic() && map->IsDungeon()))
+                        (map->IsHeroic() && map->IsDungeon()))
                     {
                         damage = damage * sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].SpellDamageBuffPctHard;
                     }
@@ -710,7 +767,7 @@ public:
                 if ((mode & MODE_HARD) == MODE_HARD && sZoneDifficulty->HardmodeInstanceData[target->GetMap()->GetInstanceId()].HardmodeOn == true)
                 {
                     if (map->IsRaid() ||
-                       (map->IsHeroic() && map->IsDungeon()))
+                        (map->IsHeroic() && map->IsDungeon()))
                     {
                         damage = damage * sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].MeleeDamageBuffPctHard;
                     }
@@ -835,72 +892,37 @@ public:
 
         if (sZoneDifficulty->HardmodeInstanceData.find(map->GetInstanceId()) != sZoneDifficulty->HardmodeInstanceData.end())
         {
-            LOG_INFO("sql", "Encounter completed. Map relevant.");
+            LOG_INFO("sql", "Encounter completed. Map relevant. Checking for source: {}", source->GetEntry());
             // Give additional loot, if the encounter was in hardmode.
             if (sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].HardmodeOn == true)
             {
                 uint32 mapId = map->GetId();
-                uint32 GameobjectEntry = 0;
                 if (sZoneDifficulty->HardmodeLoot.find(mapId) == sZoneDifficulty->HardmodeLoot.end())
                 {
                     LOG_INFO("sql", "No additional loot stored in map with id {}.", map->GetInstanceId());
                     return;
                 }
 
-                //iterate over all listed creature entries for that map id and see, if a go is to be looted instead
+                bool SourceAwardsHardmodeLoot = false;
+                //iterate over all listed creature entries for that map id and see, if the encounter should yield hardmode loot and if a go is to be looted instead
                 for (auto value : sZoneDifficulty->HardmodeLoot[mapId])
                 {
-                    if (value.GameobjectEntry != 0 && value.SourceEntry == source->GetEntry())
+                    if (value == source->GetEntry())
                     {
-                        GameobjectEntry = value.GameobjectEntry;
+                        SourceAwardsHardmodeLoot = true;
                         break;
                     }
                 }
 
-                if (GameobjectEntry == 0)
+                if (!SourceAwardsHardmodeLoot)
                 {
-                    LOG_INFO("sql", "Hardmode for instance id {} is {}.", map->GetInstanceId(), sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].HardmodeOn);
-                    source->m_Events.AddEventAtOffset([source]()
-                        {
-                        source->ToCreature()->AddLootMode(64);
-                        source->ToCreature()->loot.clear();
-                        source->ToCreature()->loot.FillLoot(source->ToCreature()->GetCreatureTemplate()->lootid, LootTemplates_Creature, source->ToCreature()->GetLootRecipient(), false, false, source->ToCreature()->GetLootMode(), source->ToCreature());
-                        LOG_INFO("sql", "Encounter {} completed. Loot mode: {}", source->GetName(), source->ToCreature()->GetLootMode());
-                        }, 10ms);
+                    return;
                 }
-                else
-                {
-                    GameObject* go = source->FindNearestGameObject(GameobjectEntry, 200.0f, true);
-                    if (go)
-                    {
-                        go->AddLootMode(64);
-                        go->loot.clear();
-                        go->loot.FillLoot(go->GetGOInfo()->GetLootId(), LootTemplates_Gameobject, go->GetLootRecipient(), false, false, go->GetLootMode(), go);
-                        LOG_INFO("sql", "Encounter {} completed. Adding loot to {} Loot mode: {}", source->GetName(), go->GetName(), source->ToCreature()->GetLootMode());
-                    }
-                    // if the gameobject is not spawned yet, wait one tick
-                    else
-                    {
-                        source->m_Events.AddEventAtOffset([GameobjectEntry, source]()
-                        {
-                            if (!source)
-                            {
-                                LOG_INFO("sql", "2nd try: source is a nullptr in OnAfterUpdateEncounterState");
-                                return;
-                            }
 
-                            GameObject* go = source->FindNearestGameObject(GameobjectEntry, 200.0f, true);
-                            if (go)
-                            {
-                                go->AddLootMode(64);
-                                go->loot.clear();
-                                go->loot.FillLoot(go->GetGOInfo()->GetLootId(), LootTemplates_Gameobject, go->GetLootRecipient(), false, false, go->GetLootMode(), go);
-                                LOG_INFO("sql", "2nd try: Encounter {} completed. Adding loot to {} Loot mode: {}", source->GetName(), go->GetName(), source->ToCreature()->GetLootMode());
-                            }
-                        }, 10ms);
-                    }
+                if (map->IsHeroic() && map->IsNonRaidDungeon())
+                {
+                    sZoneDifficulty->GrantHardmodeScore(map);
                 }
-                return;
             }
             // Must set HardmodePossible to false, if the encounter wasn't in hardmode.
             else
@@ -1024,7 +1046,7 @@ public:
             {
                 LOG_INFO("sql", "IsEncounterInProgress");
                 CanTurnOn = false;
-                creature->Whisper("I am sorry, time-traveler. You can not return to this version of the time-line currently. There is already a battle in progress." , LANG_UNIVERSAL, player);
+                creature->Whisper("I am sorry, time-traveler. You can not return to this version of the time-line currently. There is already a battle in progress.", LANG_UNIVERSAL, player);
             }
 
             if (CanTurnOn == true)

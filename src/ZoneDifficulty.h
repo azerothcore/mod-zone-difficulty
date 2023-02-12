@@ -26,12 +26,6 @@ struct ZoneDifficultyHardmodeInstData
     bool HardmodePossible;
 };
 
-struct ZoneDifficultyLootableObjects
-{
-    uint32 SourceEntry;
-    uint32 GameobjectEntry;
-};
-
 const int32 DUEL_INDEX = 0x7FFFFFFF;
 const int32 DUEL_AREA = 2402;       // Forbidding Sea (Wetlands)
 const uint32 NPC_TEXT_LEADER_NORMAL = 91301;
@@ -40,6 +34,7 @@ const uint32 NPC_TEXT_LEADER_HARD = 91303;
 const uint32 NPC_TEXT_LEADER_FINAL = 91304;
 const int8 MODE_NORMAL = 1;
 const int8 MODE_HARD = 64;
+const int8 TYPE_HEROIC_TBC = 1;
 
 class ZoneDifficulty
 {
@@ -49,7 +44,9 @@ public:
     void LoadMapDifficultySettings();
     void SaveHardmodeInstanceData(uint32 instanceId);
     void LoadHardmodeInstanceData();
+    void LoadHardmodeScoreData();
     void SendWhisperToRaid(std::string message, Creature* creature, Player* player);
+    void GrantHardmodeScore(Map* map);
     [[nodiscard]] bool IsValidNerfTarget(Unit* target);
     [[nodiscard]] bool VectorContains(std::vector<uint32> vec, uint32 element);
     [[nodiscard]] bool ShouldNerfInDuels(Unit* target);
@@ -59,6 +56,7 @@ public:
     bool IsDebugInfoEnabled{ false };
     std::vector<uint32> DailyHeroicQuests;
     std::map<uint32, uint32> HeroicQuestMapList;
+    std::map<uint32, uint32> PlayerHeroicScore;
 
     typedef std::map<uint32, std::map<uint32, ZoneDifficultyNerfData> > ZoneDifficultyNerfDataMap;
     ZoneDifficultyNerfDataMap ZoneDifficultyNerfInfo;
@@ -67,7 +65,7 @@ public:
     ZoneDifficultyDisablesMap DisallowedBuffs;
     typedef std::map<uint32, ZoneDifficultyHardmodeInstData> ZoneDifficultyHardmodeInstDataMap;
     ZoneDifficultyHardmodeInstDataMap HardmodeInstanceData;
-    typedef std::map<uint32, std::vector<ZoneDifficultyLootableObjects> > ZoneDifficultyHardmodeLootMap;
+    typedef std::map<uint32, std::vector<uint32> > ZoneDifficultyHardmodeLootMap;
     ZoneDifficultyHardmodeLootMap HardmodeLoot;
 };
 
