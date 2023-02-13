@@ -265,7 +265,7 @@ void ZoneDifficulty::SendWhisperToRaid(std::string message, Creature* creature, 
  */
 void ZoneDifficulty::GrantHardmodeScore(Map* map, uint32 type)
 {
-    if (!map || map < 0 || type < 0 || type > 255)
+    if (!map || type < 0 || type > 255)
     {
         LOG_ERROR("sql", "No object for map or wrong value for type: {} in GrantHardmodeScore.", type);
         return;
@@ -1166,10 +1166,10 @@ public:
     }
 };
 
-class mod_zone_difficulty_allcreature : public AllCreatureScript
+class mod_zone_difficulty_allcreaturescript : public AllCreatureScript
 {
 public:
-    mod_zone_difficulty_allcreature() : AllCreatureScript("mod_zone_difficulty_allcreature") { }
+    mod_zone_difficulty_allcreaturescript() : AllCreatureScript("mod_zone_difficulty_allcreaturescript") { }
 
     void OnAllCreatureUpdate(Creature* creature, uint32 /*diff*/) override
     {
@@ -1231,10 +1231,15 @@ public:
                     return;
                 }
                 LOG_INFO("sql", "Modify creature hp for hard mode: {} to {}", baseHealth, newHp);
+                bool hpIsFull = false;
+                if (creature->GetHealthPct() >= 100)
+                {
+                    hpIsFull = true;
+                }
                 creature->SetMaxHealth(newHp);
                 creature->SetCreateHealth(newHp);
                 creature->SetModifierValue(UNIT_MOD_HEALTH, BASE_VALUE, (float)newHp);
-                if (creature->GetHealthPct() >= 100)
+                if (hpIsFull)
                 {
                     creature->SetHealth(newHp);
                 }
@@ -1246,10 +1251,15 @@ public:
                 if (creature->GetMaxHealth() == newHp)
                 {
                     LOG_INFO("sql", "Modify creature hp for normal mode: {} to {}", baseHealth, baseHealth);
+                    bool hpIsFull = false;
+                    if (creature->GetHealthPct() >= 100)
+                    {
+                        hpIsFull = true;
+                    }
                     creature->SetMaxHealth(baseHealth);
                     creature->SetCreateHealth(baseHealth);
                     creature->SetModifierValue(UNIT_MOD_HEALTH, BASE_VALUE, (float)baseHealth);
-                    if (creature->GetHealthPct() >= 100)
+                    if (hpIsFull)
                     {
                         creature->SetHealth(baseHealth);
                     }
@@ -1273,5 +1283,5 @@ void AddModZoneDifficultyScripts()
     new mod_zone_difficulty_globalscript();
     new mod_zone_difficulty_instancemapscript();
     new mod_zone_difficulty_dungeonmaster();
-    new mod_zone_difficulty_allcreature();
+    new mod_zone_difficulty_allcreaturescript();
 }
