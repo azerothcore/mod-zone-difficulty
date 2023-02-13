@@ -26,15 +26,30 @@ struct ZoneDifficultyHardmodeInstData
     bool HardmodePossible;
 };
 
+struct ZoneDifficultyHardmodeMapData
+{
+    uint32 EncounterEntry;
+    uint32 OverrideGO;
+    uint32 RewardType;
+};
+
 const int32 DUEL_INDEX = 0x7FFFFFFF;
 const int32 DUEL_AREA = 2402;       // Forbidding Sea (Wetlands)
 const uint32 NPC_TEXT_LEADER_NORMAL = 91301;
 const uint32 NPC_TEXT_OTHER = 91302;
 const uint32 NPC_TEXT_LEADER_HARD = 91303;
 const uint32 NPC_TEXT_LEADER_FINAL = 91304;
-const int8 MODE_NORMAL = 1;
-const int8 MODE_HARD = 64;
-const int8 TYPE_HEROIC_TBC = 1;
+const int32 MODE_NORMAL = 1;
+const int32 MODE_HARD = 64;
+const int32 TYPE_HEROIC_TBC = 1;
+const int32 TYPE_RAID_T4 = 2;
+const int32 TYPE_RAID_T5 = 3;
+const int32 TYPE_RAID_T6 = 4;
+const int32 TYPE_HEROIC_WOTLK = 5;
+const int32 TYPE_RAID_T7 = 6;
+const int32 TYPE_RAID_T8 = 7;
+const int32 TYPE_RAID_T9 = 8;
+const int32 TYPE_RAID_T10 = 9;
 
 class ZoneDifficulty
 {
@@ -46,7 +61,7 @@ public:
     void LoadHardmodeInstanceData();
     void LoadHardmodeScoreData();
     void SendWhisperToRaid(std::string message, Creature* creature, Player* player);
-    void GrantHardmodeScore(Map* map);
+    void GrantHardmodeScore(Map* map, uint32 type);
     [[nodiscard]] bool IsValidNerfTarget(Unit* target);
     [[nodiscard]] bool VectorContains(std::vector<uint32> vec, uint32 element);
     [[nodiscard]] bool ShouldNerfInDuels(Unit* target);
@@ -56,7 +71,6 @@ public:
     bool IsDebugInfoEnabled{ false };
     std::vector<uint32> DailyHeroicQuests;
     std::map<uint32, uint32> HeroicQuestMapList;
-    std::map<uint32, uint32> PlayerHeroicScore;
 
     typedef std::map<uint32, std::map<uint32, ZoneDifficultyNerfData> > ZoneDifficultyNerfDataMap;
     ZoneDifficultyNerfDataMap ZoneDifficultyNerfInfo;
@@ -65,8 +79,10 @@ public:
     ZoneDifficultyDisablesMap DisallowedBuffs;
     typedef std::map<uint32, ZoneDifficultyHardmodeInstData> ZoneDifficultyHardmodeInstDataMap;
     ZoneDifficultyHardmodeInstDataMap HardmodeInstanceData;
-    typedef std::map<uint32, std::vector<uint32> > ZoneDifficultyHardmodeLootMap;
+    typedef std::map<uint32, std::vector<ZoneDifficultyHardmodeMapData> > ZoneDifficultyHardmodeLootMap;
     ZoneDifficultyHardmodeLootMap HardmodeLoot;
+    typedef std::map<uint32, std::vector<uint32> > ZondeDifficultyScoreMap;
+    ZondeDifficultyScoreMap ZoneDifficultyHardmodeScore;
 };
 
 #define sZoneDifficulty ZoneDifficulty::instance()

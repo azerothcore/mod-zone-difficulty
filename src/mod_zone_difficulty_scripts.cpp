@@ -137,20 +137,22 @@ void ZoneDifficulty::LoadMapDifficultySettings()
         } while (result->NextRow());
     }
 
-    if (QueryResult result = WorldDatabase.Query("SELECT * FROM zone_difficulty_loot_objects"))
+    if (QueryResult result = WorldDatabase.Query("SELECT * FROM zone_difficulty_instance_data"))
     {
         do
         {
-            uint32 data;
-            uint32 mapId = (*result)[0].Get<uint32>();
-            data = (*result)[1].Get<uint32>();
+            ZoneDifficultyHardmodeMapData data;
+            uint32 MapID = (*result)[0].Get<uint32>();
+            data.EncounterEntry = (*result)[1].Get<uint32>();
+            data.OverrideGO = (*result)[2].Get<uint32>();
+            data.RewardType = (*result)[3].Get<uint8>();
 
-            sZoneDifficulty->HardmodeLoot[mapId].push_back(data);
-            LOG_INFO("sql", "New creature for map {} with entry: {}", mapId, data);
+            sZoneDifficulty->HardmodeLoot[MapID].push_back(data);
+            LOG_INFO("sql", "New creature for map {} with entry: {}", MapID, data.EncounterEntry);
 
-            if (mapId <= 0 || data <= 0)
+            if (MapID <= 0 || data.EncounterEntry <= 0)
             {
-                LOG_INFO("sql", "Table `zone_difficulty_loot_objects` for criteria MapId: {} OR Entry: {} has wrong value. Must be > 0.", mapId, data);
+                LOG_INFO("sql", "Table `zone_difficulty_instance_data` for criteria MapId: {} OR Entry: {} has wrong value. Must be > 0.", MapID, data.EncounterEntry);
             }
 
         } while (result->NextRow());
@@ -229,14 +231,7 @@ void ZoneDifficulty::LoadHardmodeScoreData()
             uint32 Score = (*result)[2].Get<uint32>();
 
             LOG_INFO("sql", "Loading from DB for player with GUID {}: Type = {}, Score = {}", GUID, Type, Score);
-            if (Type = TYPE_HEROIC_TBC)
-            {
-                sZoneDifficulty->PlayerHeroicScore[GUID] = Score;
-            }
-            else
-            {
-                LOG_ERROR("sql", "Undhandled Type {} in zone_difficulty_hardmode_score.", Type);
-            }
+            sZoneDifficulty->ZoneDifficultyHardmodeScore[GUID][Type] = Score;
 
         } while (result->NextRow());
     }
@@ -267,24 +262,29 @@ void ZoneDifficulty::SendWhisperToRaid(std::string message, Creature* creature, 
  * @param player One of the players in the group.
  * @param map The map where the player is currently
  */
-void ZoneDifficulty::GrantHardmodeScore(Map* map)
+void ZoneDifficulty::GrantHardmodeScore(Map* map, uint32 type)
 {
+    if (!map || map < 0 || type < 0 || type > 255)
+    {
+        LOG_ERROR("sql", "No object for map or wrong value for type: {} in GrantHardmodeScore.", type);
+        return;
+    }
     Map::PlayerList const& PlayerList = map->GetPlayers();
     for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
     {
         Player* player = i->GetSource();
-        LOG_INFO("sql", "Player {} should receive score up from {}", player->GetName(), sZoneDifficulty->PlayerHeroicScore[player->GetGUID().GetCounter()]);
-        if (!sZoneDifficulty->PlayerHeroicScore[player->GetGUID().GetCounter()])
+        LOG_INFO("sql", "Player {} should receive score with type {} up from {}", player->GetName(), type, sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][type]);
+        if (!sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][type])
         {
-            sZoneDifficulty->PlayerHeroicScore[player->GetGUID().GetCounter()] = 1;
+            sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][type] = 1;
         }
         else
         {
-            ++sZoneDifficulty->PlayerHeroicScore[player->GetGUID().GetCounter()];
+            ++sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][type];
         }
-        LOG_INFO("sql", "Player {} new score: {}", player->GetName(), sZoneDifficulty->PlayerHeroicScore[player->GetGUID().GetCounter()]);
-        ChatHandler(player->GetSession()).PSendSysMessage("You have received hardmode score for heroic TBC dungeons. New score: %i", sZoneDifficulty->PlayerHeroicScore[player->GetGUID().GetCounter()]);
-        CharacterDatabase.Execute("REPLACE INTO zone_difficulty_hardmode_score VALUES({}, {}, {})", player->GetGUID().GetCounter(), TYPE_HEROIC_TBC, sZoneDifficulty->PlayerHeroicScore[player->GetGUID().GetCounter()]);
+        LOG_INFO("sql", "Player {} new score: {}", player->GetName(), sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][type]);
+        ChatHandler(player->GetSession()).PSendSysMessage("You have received hardmode score for heroic TBC dungeons. New score: %i", sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][type]);
+        CharacterDatabase.Execute("REPLACE INTO zone_difficulty_hardmode_score VALUES({}, {}, {})", player->GetGUID().GetCounter(), type, sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][type]);
     }
 }
 
@@ -907,7 +907,7 @@ public:
                 //iterate over all listed creature entries for that map id and see, if the encounter should yield hardmode loot and if a go is to be looted instead
                 for (auto value : sZoneDifficulty->HardmodeLoot[mapId])
                 {
-                    if (value == source->GetEntry())
+                    if (value.EncounterEntry == source->GetEntry())
                     {
                         SourceAwardsHardmodeLoot = true;
                         break;
@@ -921,7 +921,15 @@ public:
 
                 if (map->IsHeroic() && map->IsNonRaidDungeon())
                 {
-                    sZoneDifficulty->GrantHardmodeScore(map);
+                    sZoneDifficulty->GrantHardmodeScore(map, TYPE_HEROIC_TBC);
+                }
+                else if(map->IsRaid())
+                {
+                    sZoneDifficulty->GrantHardmodeScore(map, TYPE_RAID_T4);
+                }
+                else
+                {
+                    LOG_INFO("sql", "Map with id {} is not a raid or a dungeon. Hardmode loot not granted.", map->GetInstanceId());
                 }
             }
             // Must set HardmodePossible to false, if the encounter wasn't in hardmode.
@@ -997,7 +1005,7 @@ public:
                                 {
                                     me->Yell("I will take my leave then and offer my services to other adventurers. See you again!", LANG_UNIVERSAL);
                                 });
-                            _scheduler.Schedule(60s, [this](TaskContext /*context*/ )
+                            _scheduler.Schedule(60s, [this](TaskContext /*context*/)
                                 {
                                     me->DespawnOrUnsummon();
                                 });
