@@ -42,3 +42,11 @@ ModZoneDifficulty.SpellBuff.OnlyBosses = 0
 #
 
 ModZoneDifficulty.MeleeBuff.OnlyBosses = 0
+
+#
+#    odZoneDifficulty.Hardmode.HpModifier
+#        Description: Modifier for creature HP except bosses in hardmode.
+#        Default:     2.0 - 200% HP
+#
+
+ModZoneDifficulty.Hardmode.HpModifier = 2.0

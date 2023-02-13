@@ -64,13 +64,16 @@ public:
     void GrantHardmodeScore(Map* map, uint32 type);
     [[nodiscard]] bool IsValidNerfTarget(Unit* target);
     [[nodiscard]] bool VectorContains(std::vector<uint32> vec, uint32 element);
+    [[nodiscard]] bool IsHardmodeMap(uint32 mapid);
     [[nodiscard]] bool ShouldNerfInDuels(Unit* target);
     [[nodiscard]] int32 GetLowestMatchingPhase(uint32 mapId, uint32 phaseMask);
 
     bool IsEnabled{ false };
     bool IsDebugInfoEnabled{ false };
+    float HardmodeHpModifier{ 2.0 };
     std::vector<uint32> DailyHeroicQuests;
     std::map<uint32, uint32> HeroicQuestMapList;
+    std::map<uint32, uint8> Expansion;
 
     typedef std::map<uint32, std::map<uint32, ZoneDifficultyNerfData> > ZoneDifficultyNerfDataMap;
     ZoneDifficultyNerfDataMap ZoneDifficultyNerfInfo;

@@ -155,6 +155,8 @@ void ZoneDifficulty::LoadMapDifficultySettings()
                 LOG_INFO("sql", "Table `zone_difficulty_instance_data` for criteria MapId: {} OR Entry: {} has wrong value. Must be > 0.", MapID, data.EncounterEntry);
             }
 
+            Expansion[MapID] = data.RewardType;
+
         } while (result->NextRow());
     }
 
@@ -166,7 +168,6 @@ void ZoneDifficulty::LoadMapDifficultySettings()
             LOG_INFO("sql", "Adding daily heroic quest with id {}.", (*result)[0].Get<uint32>());
         } while (result->NextRow());
     }
-
 }
 
 /* Loads the HardmodeInstanceData from the database.
@@ -283,11 +284,49 @@ void ZoneDifficulty::GrantHardmodeScore(Map* map, uint32 type)
             ++sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][type];
         }
         LOG_INFO("sql", "Player {} new score: {}", player->GetName(), sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][type]);
-        ChatHandler(player->GetSession()).PSendSysMessage("You have received hardmode score for heroic TBC dungeons. New score: %i", sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][type]);
+
+        std::string typestring;
+        switch (type)
+        {
+        case TYPE_HEROIC_TBC:
+            typestring = " for heroic TBC dungeons";
+        case TYPE_RAID_T4:
+            typestring = " for T4 Raids";
+        case TYPE_RAID_T5:
+            typestring = " for T5 Raids";
+        case TYPE_RAID_T6:
+            typestring = " for T6 Raids";
+        case TYPE_HEROIC_WOTLK:
+            typestring = " for heroic WotLK dungeons";
+        case TYPE_RAID_T7:
+            typestring = " for T7 Raids";
+        case TYPE_RAID_T8:
+            typestring = " for T8 Raids";
+        case TYPE_RAID_T9:
+            typestring = " for T9 Raids";
+        case TYPE_RAID_T10:
+            typestring = " for T10 Raids";
+        default:
+            typestring = "";
+        }
+        ChatHandler(player->GetSession()).PSendSysMessage("You have received hardmode score{}. New score: %i", typestring, sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][type]);
         CharacterDatabase.Execute("REPLACE INTO zone_difficulty_hardmode_score VALUES({}, {}, {})", player->GetGUID().GetCounter(), type, sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][type]);
     }
 }
 
+/* @brief Check if the map has assigned any data to tune it.
+ *
+ * @param map The ID of the <Map> to check.
+ * @return The result as bool.
+ */
+bool ZoneDifficulty::IsHardmodeMap(uint32 mapid)
+{
+    if (sZoneDifficulty->HardmodeLoot.find(mapid) == sZoneDifficulty->HardmodeLoot.end())
+    {
+        return false;
+    }
+    return true;
+}
 
 /* @brief Check if the target is a player, a pet or a guardian.
  *
@@ -299,7 +338,6 @@ bool ZoneDifficulty::IsValidNerfTarget(Unit* target)
     return target->IsPlayer() || target->IsPet() || target->IsGuardian();
 }
 
-
 /* @brief Checks if the element is one of the values in the vector.
  *
  * @param vec A vector
@@ -310,7 +348,6 @@ bool ZoneDifficulty::VectorContains(std::vector<uint32> vec, uint32 element)
 {
     return find(vec.begin(), vec.end(), element) != vec.end();
 }
-
 
 /* @brief Checks if the target is in a duel while residing in the DUEL_AREA and their opponent is a valid object.
  *  Used to determine when the duel-specific nerfs should be applied.
@@ -832,6 +869,7 @@ public:
     {
         sZoneDifficulty->IsEnabled = sConfigMgr->GetOption<bool>("ModZoneDifficulty.Enable", false);
         sZoneDifficulty->IsDebugInfoEnabled = sConfigMgr->GetOption<bool>("ModZoneDifficulty.DebugInfo", false);
+        sZoneDifficulty->HardmodeHpModifier = sConfigMgr->GetOption<float>("ModZoneDifficulty.Hardmode.HpModifier", 2);
         sZoneDifficulty->LoadMapDifficultySettings();
     }
 
@@ -839,6 +877,7 @@ public:
     {
         sZoneDifficulty->IsEnabled = sConfigMgr->GetOption<bool>("ModZoneDifficulty.Enable", false);
         sZoneDifficulty->IsDebugInfoEnabled = sConfigMgr->GetOption<bool>("ModZoneDifficulty.DebugInfo", false);
+        sZoneDifficulty->HardmodeHpModifier = sConfigMgr->GetOption<float>("ModZoneDifficulty.Hardmode.HpModifier", 2);
         sZoneDifficulty->LoadMapDifficultySettings();
         sZoneDifficulty->LoadHardmodeInstanceData();
     }
@@ -852,7 +891,7 @@ public:
     void OnBeforeSetBossState(uint32 id, EncounterState newState, EncounterState oldState, Map* instance)
     {
         LOG_INFO("sql", "OnBeforeSetBossState: bossId = {}, newState = {}, oldState = {}, MapId = {}, InstanceId = {}", id, newState, oldState, instance->GetId(), instance->GetInstanceId());
-        if (sZoneDifficulty->HardmodeLoot.find(instance->GetId()) == sZoneDifficulty->HardmodeLoot.end())
+        if (!sZoneDifficulty->IsHardmodeMap(instance->GetId()))
         {
             LOG_INFO("sql", "OnBeforeSetBossState: Instance not handled because there is no hardmode loot data for map id: {}", instance->GetId());
             return;
@@ -897,7 +936,7 @@ public:
             if (sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].HardmodeOn == true)
             {
                 uint32 mapId = map->GetId();
-                if (sZoneDifficulty->HardmodeLoot.find(mapId) == sZoneDifficulty->HardmodeLoot.end())
+                if (!sZoneDifficulty->IsHardmodeMap(mapId))
                 {
                     LOG_INFO("sql", "No additional loot stored in map with id {}.", map->GetInstanceId());
                     return;
@@ -958,7 +997,7 @@ public:
         // debug end
 
 
-        if (sZoneDifficulty->HardmodeLoot.find(instanceMap->GetId()) == sZoneDifficulty->HardmodeLoot.end())
+        if (!sZoneDifficulty->IsHardmodeMap(instanceMap->GetId()))
         {
             LOG_INFO("sql", "New instance not handled because there is no hardmode loot data for map id: {}", instanceMap->GetId());
             return;
@@ -1127,6 +1166,103 @@ public:
     }
 };
 
+class mod_zone_difficulty_allcreature : public AllCreatureScript
+{
+public:
+    mod_zone_difficulty_allcreature() : AllCreatureScript("mod_zone_difficulty_allcreature") { }
+
+    void OnAllCreatureUpdate(Creature* creature, uint32 /*diff*/) override
+    {
+        // Heavily inspired by https://github.com/azerothcore/mod-autobalance/blob/1d82080237e62376b9a030502264c90b5b8f272b/src/AutoBalance.cpp
+        if (!creature || !creature->GetMap())
+        {
+            return;
+        }
+
+        if ((creature->IsHunterPet() || creature->IsPet() || creature->IsSummon()) && creature->IsControlledByPlayer())
+        {
+            return;
+        }
+
+        uint32 mapid = creature->GetMapId();
+        if (sZoneDifficulty->ZoneDifficultyNerfInfo.find(mapid) == sZoneDifficulty->ZoneDifficultyNerfInfo.end())
+        {
+            return;
+        }
+
+        if (creature->IsDungeonBoss())
+        {
+            return;
+        }
+
+        if (!creature->IsAlive())
+        {
+            return;
+        }
+
+        Map* map = creature->GetMap();
+        if (!map->IsRaid() &&
+            (!(map->IsHeroic() && map->IsDungeon())))
+        {
+            return;
+        }
+
+        CreatureTemplate const* creatureTemplate = creature->GetCreatureTemplate();
+        //skip critters and special creatures (spell summons etc.) in instances
+        if (creatureTemplate->maxlevel <= 1)
+        {
+            return;
+        }
+        uint32 level = creature->GetLevel();
+
+        CreatureBaseStats const* origCreatureStats = sObjectMgr->GetCreatureBaseStats(level, creatureTemplate->unit_class);
+        uint32 baseHealth = origCreatureStats->GenerateHealth(creatureTemplate);
+        uint32 newHp = round(baseHealth * sZoneDifficulty->HardmodeHpModifier);
+
+        uint32 phaseMask = creature->GetPhaseMask();
+        int matchingPhase = sZoneDifficulty->GetLowestMatchingPhase(creature->GetMapId(), phaseMask);
+        int8 mode = sZoneDifficulty->ZoneDifficultyNerfInfo[mapid][matchingPhase].Enabled;
+        if (matchingPhase != -1)
+        {
+            if ((mode & MODE_HARD) == MODE_HARD && sZoneDifficulty->HardmodeInstanceData[creature->GetMap()->GetInstanceId()].HardmodeOn == true)
+            {
+                if (creature->GetMaxHealth() == newHp)
+                {
+                    return;
+                }
+                LOG_INFO("sql", "Modify creature hp for hard mode: {} to {}", baseHealth, newHp);
+                creature->SetMaxHealth(newHp);
+                creature->SetCreateHealth(newHp);
+                creature->SetModifierValue(UNIT_MOD_HEALTH, BASE_VALUE, (float)newHp);
+                if (creature->GetHealthPct() >= 100)
+                {
+                    creature->SetHealth(newHp);
+                }
+                creature->UpdateAllStats();
+                return;
+            }
+            if (sZoneDifficulty->HardmodeInstanceData[creature->GetMap()->GetInstanceId()].HardmodeOn == false)
+            {
+                if (creature->GetMaxHealth() == newHp)
+                {
+                    LOG_INFO("sql", "Modify creature hp for normal mode: {} to {}", baseHealth, baseHealth);
+                    creature->SetMaxHealth(baseHealth);
+                    creature->SetCreateHealth(baseHealth);
+                    creature->SetModifierValue(UNIT_MOD_HEALTH, BASE_VALUE, (float)baseHealth);
+                    if (creature->GetHealthPct() >= 100)
+                    {
+                        creature->SetHealth(baseHealth);
+                    }
+                    creature->UpdateAllStats();
+                    return;
+                }
+            }
+        }
+
+    }
+
+};
+
 // Add all scripts in one
 void AddModZoneDifficultyScripts()
 {
@@ -1137,4 +1273,5 @@ void AddModZoneDifficultyScripts()
     new mod_zone_difficulty_globalscript();
     new mod_zone_difficulty_instancemapscript();
     new mod_zone_difficulty_dungeonmaster();
+    new mod_zone_difficulty_allcreature();
 }
