@@ -289,41 +289,57 @@ void ZoneDifficulty::GrantHardmodeScore(Map* map, uint32 type)
         switch (type)
         {
         case TYPE_VANILLA:
-            typestring = " for vanilla dungeons";
+            typestring = "for Vanilla dungeons.";
+            break;
         case TYPE_RAID_MC:
-            typestring = " for Molten Core.";
+            typestring = "for Molten Core.";
+            break;
         case TYPE_RAID_ONY:
-            typestring = " for Onyxia.";
+            typestring = "for Onyxia.";
+            break;
         case TYPE_RAID_BWL:
-            typestring = " for Blackwing Lair.";
+            typestring = "for Blackwing Lair.";
+            break;
         case TYPE_RAID_ZG:
-            typestring = " for Zul Gurub.";
+            typestring = "for Zul Gurub.";
+            break;
         case TYPE_RAID_AQ20:
-            typestring = " for Ruins of Ahn'Qiraj.";
+            typestring = "for Ruins of Ahn'Qiraj.";
+            break;
         case TYPE_RAID_AQ40:
-            typestring = " for Temple of Ahn'Qiraj.";
+            typestring = "for Temple of Ahn'Qiraj.";
+            break;
         case TYPE_HEROIC_TBC:
-            typestring = " for heroic TBC dungeons";
+            typestring = "for Heroic TBC dungeons.";
+            break;
         case TYPE_RAID_T4:
-            typestring = " for T4 Raids";
+            typestring = "for T4 Raids.";
+            break;
         case TYPE_RAID_T5:
-            typestring = " for T5 Raids";
+            typestring = "for T5 Raids.";
+            break;
         case TYPE_RAID_T6:
-            typestring = " for T6 Raids";
+            typestring = "for T6 Raids.";
+            break;
         case TYPE_HEROIC_WOTLK:
-            typestring = " for heroic WotLK dungeons";
+            typestring = "for Heroic WotLK dungeons.";
+            break;
         case TYPE_RAID_T7:
-            typestring = " for T7 Raids";
+            typestring = "for T7 Raids.";
+            break;
         case TYPE_RAID_T8:
-            typestring = " for T8 Raids";
+            typestring = "for T8 Raids.";
+            break;
         case TYPE_RAID_T9:
-            typestring = " for T9 Raids";
+            typestring = "for T9 Raids.";
+            break;
         case TYPE_RAID_T10:
-            typestring = " for T10 Raids";
+            typestring = "for T10 Raids.";
+            break;
         default:
-            typestring = "";
+            typestring = "-";
         }
-        ChatHandler(player->GetSession()).PSendSysMessage("You have received hardmode score%s. New score: %i", typestring, sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][type]);
+        ChatHandler(player->GetSession()).PSendSysMessage("You have received hardmode score %s New score: %i", typestring, sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][type]);
         CharacterDatabase.Execute("REPLACE INTO zone_difficulty_hardmode_score VALUES({}, {}, {})", player->GetGUID().GetCounter(), type, sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][type]);
     }
 }
@@ -894,6 +910,7 @@ public:
         sZoneDifficulty->HardmodeHpModifier = sConfigMgr->GetOption<float>("ModZoneDifficulty.Hardmode.HpModifier", 2);
         sZoneDifficulty->LoadMapDifficultySettings();
         sZoneDifficulty->LoadHardmodeInstanceData();
+        sZoneDifficulty->LoadHardmodeScoreData();
     }
 };
 
