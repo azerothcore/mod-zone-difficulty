@@ -270,12 +270,12 @@ void ZoneDifficulty::GrantHardmodeScore(Map* map, uint32 type)
         LOG_ERROR("sql", "No object for map or wrong value for type: {} in GrantHardmodeScore.", type);
         return;
     }
+    LOG_INFO("sql",  "Called GrantHardmodeScore for map id: {} and type: {}", map->GetId(), type);
     Map::PlayerList const& PlayerList = map->GetPlayers();
     for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
     {
         Player* player = i->GetSource();
-        LOG_INFO("sql", "Player {} should receive score with type {} up from {}", player->GetName(), type, sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][type]);
-        if (!sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][type])
+        if (sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()].find(type) == sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()].end())
         {
             sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][type] = 1;
         }
@@ -288,6 +288,20 @@ void ZoneDifficulty::GrantHardmodeScore(Map* map, uint32 type)
         std::string typestring;
         switch (type)
         {
+        case TYPE_VANILLA:
+            typestring = " for vanilla dungeons";
+        case TYPE_RAID_MC:
+            typestring = " for Molten Core.";
+        case TYPE_RAID_ONY:
+            typestring = " for Onyxia.";
+        case TYPE_RAID_BWL:
+            typestring = " for Blackwing Lair.";
+        case TYPE_RAID_ZG:
+            typestring = " for Zul Gurub.";
+        case TYPE_RAID_AQ20:
+            typestring = " for Ruins of Ahn'Qiraj.";
+        case TYPE_RAID_AQ40:
+            typestring = " for Temple of Ahn'Qiraj.";
         case TYPE_HEROIC_TBC:
             typestring = " for heroic TBC dungeons";
         case TYPE_RAID_T4:
@@ -309,7 +323,7 @@ void ZoneDifficulty::GrantHardmodeScore(Map* map, uint32 type)
         default:
             typestring = "";
         }
-        ChatHandler(player->GetSession()).PSendSysMessage("You have received hardmode score{}. New score: %i", typestring, sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][type]);
+        ChatHandler(player->GetSession()).PSendSysMessage("You have received hardmode score%s. New score: %i", typestring, sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][type]);
         CharacterDatabase.Execute("REPLACE INTO zone_difficulty_hardmode_score VALUES({}, {}, {})", player->GetGUID().GetCounter(), type, sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][type]);
     }
 }
@@ -960,11 +974,11 @@ public:
 
                 if (map->IsHeroic() && map->IsNonRaidDungeon())
                 {
-                    sZoneDifficulty->GrantHardmodeScore(map, TYPE_HEROIC_TBC);
+                    sZoneDifficulty->GrantHardmodeScore(map, sZoneDifficulty->Expansion[mapId]);
                 }
                 else if(map->IsRaid())
                 {
-                    sZoneDifficulty->GrantHardmodeScore(map, TYPE_RAID_T4);
+                    sZoneDifficulty->GrantHardmodeScore(map, sZoneDifficulty->Expansion[mapId]);
                 }
                 else
                 {

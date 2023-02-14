@@ -41,15 +41,22 @@ const uint32 NPC_TEXT_LEADER_HARD = 91303;
 const uint32 NPC_TEXT_LEADER_FINAL = 91304;
 const int32 MODE_NORMAL = 1;
 const int32 MODE_HARD = 64;
-const int32 TYPE_HEROIC_TBC = 1;
-const int32 TYPE_RAID_T4 = 2;
-const int32 TYPE_RAID_T5 = 3;
-const int32 TYPE_RAID_T6 = 4;
-const int32 TYPE_HEROIC_WOTLK = 5;
-const int32 TYPE_RAID_T7 = 6;
-const int32 TYPE_RAID_T8 = 7;
-const int32 TYPE_RAID_T9 = 8;
-const int32 TYPE_RAID_T10 = 9;
+const int32 TYPE_VANILLA = 1;
+const int32 TYPE_RAID_MC = 2;
+const int32 TYPE_RAID_ONY = 3;
+const int32 TYPE_RAID_BWL = 4;
+const int32 TYPE_RAID_ZG = 5;
+const int32 TYPE_RAID_AQ20 = 6;
+const int32 TYPE_RAID_AQ40 = 7;
+const int32 TYPE_HEROIC_TBC = 8;
+const int32 TYPE_RAID_T4 = 9;
+const int32 TYPE_RAID_T5 = 10;
+const int32 TYPE_RAID_T6 = 11;
+const int32 TYPE_HEROIC_WOTLK = 12;
+const int32 TYPE_RAID_T7 = 13;
+const int32 TYPE_RAID_T8 = 14;
+const int32 TYPE_RAID_T9 = 15;
+const int32 TYPE_RAID_T10 = 16;
 
 class ZoneDifficulty
 {
@@ -84,7 +91,7 @@ public:
     ZoneDifficultyHardmodeInstDataMap HardmodeInstanceData;
     typedef std::map<uint32, std::vector<ZoneDifficultyHardmodeMapData> > ZoneDifficultyHardmodeLootMap;
     ZoneDifficultyHardmodeLootMap HardmodeLoot;
-    typedef std::map<uint32, std::vector<uint32> > ZondeDifficultyScoreMap;
+    typedef std::map<uint32, std::map<uint32, uint32> > ZondeDifficultyScoreMap;
     ZondeDifficultyScoreMap ZoneDifficultyHardmodeScore;
 };
 
