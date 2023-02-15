@@ -15,41 +15,41 @@ INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entr
 
 INSERT INTO `creature` (`guid`, `id1`, `id2`, `id3`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `ScriptName`, `VerifiedBuild`) VALUES
   -- Gruul's Lair
-(303001, 1128001, 0, 0, 565, 3923, 3923, 1, 1, 1, 76.64, 55.82, -5.38, 3.29, 1000000, 0, 0, 0, 0, 0, 0, 0, 0, 'mod_zone_difficulty_dungeonmaster', 0),
+(303001, 1128001, 0, 0, 565, 3923, 3923, 1, 1, 0, 76.64, 55.82, -5.38, 3.29, 1000000, 0, 0, 0, 0, 0, 0, 0, 0, 'mod_zone_difficulty_dungeonmaster', 0),
  -- Magtheridon's Lair
-(303002, 1128001, 0, 0, 544, 3836, 3836, 1, 1, 1, 232.00, 9.90, 68.03, 3.17, 1000000, 0, 0, 0, 0, 0, 0, 0, 0, 'mod_zone_difficulty_dungeonmaster', 0),
+(303002, 1128001, 0, 0, 544, 3836, 3836, 1, 1, 0, 232.00, 9.90, 68.03, 3.17, 1000000, 0, 0, 0, 0, 0, 0, 0, 0, 'mod_zone_difficulty_dungeonmaster', 0),
  -- Blood Furnace
-(303003, 1128001, 0, 0, 542, 3713, 3713, 2, 1024, 1, -9.9, 7.28, -44.6, 0.45, 1000000, 0, 0, 0, 0, 0, 0, 0, 0, 'mod_zone_difficulty_dungeonmaster', 0),
+(303003, 1128001, 0, 0, 542, 3713, 3713, 2, 1024, 0, -9.9, 7.28, -44.6, 0.45, 1000000, 0, 0, 0, 0, 0, 0, 0, 0, 'mod_zone_difficulty_dungeonmaster', 0),
  -- Hellfire Ramparts
-(303004, 1128001, 0, 0, 543, 3562, 3562, 2, 1024, 1, -1362.3, 1650.80, 68.42, 5.77, 1000000, 0, 0, 0, 0, 0, 0, 0, 0, 'mod_zone_difficulty_dungeonmaster', 0),
+(303004, 1128001, 0, 0, 543, 3562, 3562, 2, 1024, 0, -1362.3, 1650.80, 68.42, 5.77, 1000000, 0, 0, 0, 0, 0, 0, 0, 0, 'mod_zone_difficulty_dungeonmaster', 0),
  -- Slave Pens
-(303005, 1128001, 0, 0, 547, 3717, 3717, 2, 1024, 1, 135.1, -121.3, -1.56, 2.86, 1000000, 0, 0, 0, 0, 0, 0, 0, 0, 'mod_zone_difficulty_dungeonmaster', 0),
+(303005, 1128001, 0, 0, 547, 3717, 3717, 2, 1024, 0, 135.1, -121.3, -1.56, 2.86, 1000000, 0, 0, 0, 0, 0, 0, 0, 0, 'mod_zone_difficulty_dungeonmaster', 0),
  -- The Underbog
-(303006, 1128001, 0, 0, 546, 3716, 3716, 2, 1024, 1, 11.9, -29.06, -2.75, 0.99, 1000000, 0, 0, 0, 0, 0, 0, 0, 0, 'mod_zone_difficulty_dungeonmaster', 0),
+(303006, 1128001, 0, 0, 546, 3716, 3716, 2, 1024, 0, 11.9, -29.06, -2.75, 0.99, 1000000, 0, 0, 0, 0, 0, 0, 0, 0, 'mod_zone_difficulty_dungeonmaster', 0),
  -- Mana-Tombs
-(303007, 1128001, 0, 0, 557, 3792, 3792, 2, 1024, 1, -3.57, -6.31, -0.95, 1.59, 1000000, 0, 0, 0, 0, 0, 0, 0, 0, 'mod_zone_difficulty_dungeonmaster', 0),
+(303007, 1128001, 0, 0, 557, 3792, 3792, 2, 1024, 0, -3.57, -6.31, -0.95, 1.59, 1000000, 0, 0, 0, 0, 0, 0, 0, 0, 'mod_zone_difficulty_dungeonmaster', 0),
  -- Auchenai Crypts
-(303008, 1128001, 0, 0, 558, 3790, 3790, 2, 1024, 1, -17.65, 7.91, -0.12, 4.72, 1000000, 0, 0, 0, 0, 0, 0, 0, 0, 'mod_zone_difficulty_dungeonmaster', 0),
+(303008, 1128001, 0, 0, 558, 3790, 3790, 2, 1024, 0, -17.65, 7.91, -0.12, 4.72, 1000000, 0, 0, 0, 0, 0, 0, 0, 0, 'mod_zone_difficulty_dungeonmaster', 0),
  -- The Escape From Durnholde
-(303009, 1128001, 0, 0, 560, 2367, 2367, 2, 1024, 1, 2705.16, 1320.52, 14.06, 5.82, 1000000, 0, 0, 0, 0, 0, 0, 0, 0, 'mod_zone_difficulty_dungeonmaster', 0),
+(303009, 1128001, 0, 0, 560, 2367, 2367, 2, 1024, 0, 2705.16, 1320.52, 14.06, 5.82, 1000000, 0, 0, 0, 0, 0, 0, 0, 0, 'mod_zone_difficulty_dungeonmaster', 0),
  -- Sethekk Halls
-(303010, 1128001, 0, 0, 556, 3791, 3791, 2, 1024, 1, 1.56, 7.91, 0.01, 4.88, 1000000, 0, 0, 0, 0, 0, 0, 0, 0, 'mod_zone_difficulty_dungeonmaster', 0),
+(303010, 1128001, 0, 0, 556, 3791, 3791, 2, 1024, 0, 1.56, 7.91, 0.01, 4.88, 1000000, 0, 0, 0, 0, 0, 0, 0, 0, 'mod_zone_difficulty_dungeonmaster', 0),
  -- Magisters' Terrace
-(303011, 1128001, 0, 0, 585, 4131, 4131, 2, 1024, 1, 6.79, 9.90, -2.81, 4.74, 1000000, 0, 0, 0, 0, 0, 0, 0, 0, 'mod_zone_difficulty_dungeonmaster', 0),
+(303011, 1128001, 0, 0, 585, 4131, 4131, 2, 1024, 0, 6.79, 9.90, -2.81, 4.74, 1000000, 0, 0, 0, 0, 0, 0, 0, 0, 'mod_zone_difficulty_dungeonmaster', 0),
  -- Shadow Labyrinth
-(303012, 1128001, 0, 0, 555, 3789, 3789, 2, 1024, 1, -3.26, -8.02, -1.12, 1.46, 1000000, 0, 0, 0, 0, 0, 0, 0, 0, 'mod_zone_difficulty_dungeonmaster', 0),
+(303012, 1128001, 0, 0, 555, 3789, 3789, 2, 1024, 0, -3.26, -8.02, -1.12, 1.46, 1000000, 0, 0, 0, 0, 0, 0, 0, 0, 'mod_zone_difficulty_dungeonmaster', 0),
  -- Shattered Halls
-(303013, 1128001, 0, 0, 540, 3714, 3714, 2, 1024, 1, -35.76, -16.70, -13.87, 2.93, 1000000, 0, 0, 0, 0, 0, 0, 0, 0, 'mod_zone_difficulty_dungeonmaster', 0),
+(303013, 1128001, 0, 0, 540, 3714, 3714, 2, 1024, 0, -35.76, -16.70, -13.87, 2.93, 1000000, 0, 0, 0, 0, 0, 0, 0, 0, 'mod_zone_difficulty_dungeonmaster', 0),
  -- The Arcatraz
-(303014, 1128001, 0, 0, 552, 3848, 3848, 2, 1024, 1, 20.11, 6.33, -0.16, 4.56, 1000000, 0, 0, 0, 0, 0, 0, 0, 0, 'mod_zone_difficulty_dungeonmaster', 0),
+(303014, 1128001, 0, 0, 552, 3848, 3848, 2, 1024, 0, 20.11, 6.33, -0.16, 4.56, 1000000, 0, 0, 0, 0, 0, 0, 0, 0, 'mod_zone_difficulty_dungeonmaster', 0),
  -- The Black Morass
-(303015, 1128001, 0, 0, 269, 2366, 2366, 2, 1024, 1, -1483.39, 7069.76, 32.80, 3.77, 1000000, 0, 0, 0, 0, 0, 0, 0, 0, 'mod_zone_difficulty_dungeonmaster', 0),
+(303015, 1128001, 0, 0, 269, 2366, 2366, 2, 1024, 0, -1483.39, 7069.76, 32.80, 3.77, 1000000, 0, 0, 0, 0, 0, 0, 0, 0, 'mod_zone_difficulty_dungeonmaster', 0),
  -- The Botanica
-(303016, 1128001, 0, 0, 553, 3847, 3847, 2, 1024, 1, 26.34, -23.81, -1.06, 0.58, 1000000, 0, 0, 0, 0, 0, 0, 0, 0, 'mod_zone_difficulty_dungeonmaster', 0),
+(303016, 1128001, 0, 0, 553, 3847, 3847, 2, 1024, 0, 26.34, -23.81, -1.06, 0.58, 1000000, 0, 0, 0, 0, 0, 0, 0, 0, 'mod_zone_difficulty_dungeonmaster', 0),
  -- The Mechanar
-(303017, 1128001, 0, 0, 554, 3849, 3849, 2, 1024, 1, -25.95, 14.52, -1.81, 5.08, 1000000, 0, 0, 0, 0, 0, 0, 0, 0, 'mod_zone_difficulty_dungeonmaster', 0),
+(303017, 1128001, 0, 0, 554, 3849, 3849, 2, 1024, 0, -25.95, 14.52, -1.81, 5.08, 1000000, 0, 0, 0, 0, 0, 0, 0, 0, 'mod_zone_difficulty_dungeonmaster', 0),
  -- The Steamvault
-(303018, 1128001, 0, 0, 545, 3715, 3715, 2, 1024, 1, 9.83, 9.14, -3.86, 3.32, 1000000, 0, 0, 0, 0, 0, 0, 0, 0, 'mod_zone_difficulty_dungeonmaster', 0);
+(303018, 1128001, 0, 0, 545, 3715, 3715, 2, 1024, 0, 9.83, 9.14, -3.86, 3.32, 1000000, 0, 0, 0, 0, 0, 0, 0, 0, 'mod_zone_difficulty_dungeonmaster', 0);
 
 INSERT INTO `npc_text` (`ID`, `text0_0`, `BroadcastTextID0`, `lang0`, `Probability0`, `em0_0`, `em0_1`, `em0_2`, `em0_3`, `em0_4`, `em0_5`, `BroadcastTextID1`, `lang1`, `Probability1`, `em1_0`, `em1_1`, `em1_2`, `em1_3`, `em1_4`, `em1_5`, `BroadcastTextID2`, `lang2`, `Probability2`, `em2_0`, `em2_1`, `em2_2`, `em2_3`, `em2_4`, `em2_5`, `BroadcastTextID3`, `lang3`, `Probability3`, `em3_0`, `em3_1`, `em3_2`, `em3_3`, `em3_4`, `em3_5`, `BroadcastTextID4`, `lang4`, `Probability4`, `em4_0`, `em4_1`, `em4_2`, `em4_3`, `em4_4`, `em4_5`, `BroadcastTextID5`, `lang5`, `Probability5`, `em5_0`, `em5_1`, `em5_2`, `em5_3`, `em5_4`, `em5_5`, `BroadcastTextID6`, `lang6`, `Probability6`, `em6_0`, `em6_1`, `em6_2`, `em6_3`, `em6_4`, `em6_5`, `BroadcastTextID7`, `lang7`, `Probability7`, `em7_0`, `em7_1`, `em7_2`, `em7_3`, `em7_4`, `em7_5`, `VerifiedBuild`) VALUES
 (91301, 'Hello, $n. How strong do you think you are? I am offering 2 different versions to wittness the events of the past. If you don\'t tell me otherwise, i will show you the cinematic one.', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),

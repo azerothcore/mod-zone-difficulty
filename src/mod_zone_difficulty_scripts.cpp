@@ -160,12 +160,28 @@ void ZoneDifficulty::LoadMapDifficultySettings()
         } while (result->NextRow());
     }
 
-    if (QueryResult result = WorldDatabase.Query("SELECT entry FROM `pool_quest` WHERE `pool_entry`=356; "))
+    if (QueryResult result = WorldDatabase.Query("SELECT entry FROM `pool_quest` WHERE `pool_entry`=356"))
     {
         do
         {
             sZoneDifficulty->DailyHeroicQuests.push_back((*result)[0].Get<uint32>());
             LOG_INFO("sql", "Adding daily heroic quest with id {}.", (*result)[0].Get<uint32>());
+        } while (result->NextRow());
+    }
+
+    if (QueryResult result = WorldDatabase.Query("SELECT * FROM zone_difficulty_creatureoverrides"))
+    {
+        do
+        {
+            uint32 creatureentry = (*result)[0].Get<uint32>();
+            float hpmodifier = (*result)[1].Get<float>();
+            bool enabled = (*result)[2].Get<bool>();
+
+            if (enabled)
+            {
+                sZoneDifficulty->ZoneDifficultyCreatureOverrides[creatureentry] = hpmodifier;
+                LOG_INFO("sql", "New creature with entry: {} has exception for hp: {}", creatureentry, hpmodifier);
+            }
         } while (result->NextRow());
     }
 }
@@ -1244,11 +1260,19 @@ public:
         {
             return;
         }
-        uint32 level = creature->GetLevel();
 
-        CreatureBaseStats const* origCreatureStats = sObjectMgr->GetCreatureBaseStats(level, creatureTemplate->unit_class);
+        CreatureBaseStats const* origCreatureStats = sObjectMgr->GetCreatureBaseStats(creature->GetLevel(), creatureTemplate->unit_class);
         uint32 baseHealth = origCreatureStats->GenerateHealth(creatureTemplate);
-        uint32 newHp = round(baseHealth * sZoneDifficulty->HardmodeHpModifier);
+        uint32 newHp;
+        uint32 entry = creature->GetEntry();
+        if (sZoneDifficulty->ZoneDifficultyCreatureOverrides.find(entry) == sZoneDifficulty->ZoneDifficultyCreatureOverrides.end())
+        {
+            newHp = round(baseHealth * sZoneDifficulty->HardmodeHpModifier);
+        }
+        else
+        {
+            newHp = round(baseHealth * sZoneDifficulty->ZoneDifficultyCreatureOverrides[entry]);
+        }
 
         uint32 phaseMask = creature->GetPhaseMask();
         int matchingPhase = sZoneDifficulty->GetLowestMatchingPhase(creature->GetMapId(), phaseMask);

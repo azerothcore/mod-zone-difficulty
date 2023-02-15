@@ -81,6 +81,7 @@ public:
     std::vector<uint32> DailyHeroicQuests;
     std::map<uint32, uint32> HeroicQuestMapList;
     std::map<uint32, uint8> Expansion;
+    std::map<uint32, uint32> ZoneDifficultyCreatureOverrides;
 
     typedef std::map<uint32, std::map<uint32, ZoneDifficultyNerfData> > ZoneDifficultyNerfDataMap;
     ZoneDifficultyNerfDataMap ZoneDifficultyNerfInfo;
@@ -91,8 +92,8 @@ public:
     ZoneDifficultyHardmodeInstDataMap HardmodeInstanceData;
     typedef std::map<uint32, std::vector<ZoneDifficultyHardmodeMapData> > ZoneDifficultyHardmodeLootMap;
     ZoneDifficultyHardmodeLootMap HardmodeLoot;
-    typedef std::map<uint32, std::map<uint32, uint32> > ZondeDifficultyScoreMap;
-    ZondeDifficultyScoreMap ZoneDifficultyHardmodeScore;
+    typedef std::map<uint32, std::map<uint32, uint32> > ZoneDifficultyDualUintMap;
+    ZoneDifficultyDualUintMap ZoneDifficultyHardmodeScore;
 };
 
 #define sZoneDifficulty ZoneDifficulty::instance()
