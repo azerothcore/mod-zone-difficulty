@@ -1,17 +1,13 @@
-DELETE FROM `gameobject_template` WHERE entry IN(612001);
-
-DELETE FROM `creature_template` WHERE `entry` IN (1128001);
+DELETE FROM `creature_template` WHERE `entry` IN (1128001,1128002);
 
 DELETE FROM `creature` WHERE `guid` IN
 (303001,303002,303003,303004,303005,303006,303007,303008,303009,303010,303011,303012,303013,303014,303015,303016,303017,303018);
 
 DELETE FROM `npc_text` WHERE `ID` IN (91301,91302,91303,91304,91305,91306,91307,91308,91309,91310);
 
-INSERT INTO `gameobject_template` VALUES
-(612001, 3, 1387, 'Trial of the Invincible Chest', '', '', '', 1, 1599, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0);
-
 INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `dmgschool`, `DamageModifier`, `BaseAttackTime`, `RangeAttackTime`, `BaseVariance`, `RangeVariance`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `HoverHeight`, `HealthModifier`, `ManaModifier`, `ArmorModifier`, `RacialLeader`, `movementId`, `RegenHealth`, `mechanic_immune_mask`, `spell_school_immune_mask`, `flags_extra`, `ScriptName`, `VerifiedBuild`) VALUES
-(1128001, 0, 0, 0, 0, 0, 10008, 0, 0, 0, 'Chromie', '', 0, 63, 63, 0, 35, 1, 1, 1.14286, 1, 0, 0, 1, 2000, 2000, 1, 1, 1, 33536, 2048, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.35, 1, 1, 0, 0, 1, 0, 0, 2, 'mod_zone_difficulty_dungeonmaster', 0);
+(1128001, 0, 0, 0, 0, 0, 10008, 0, 0, 0, 'Chromie', '', 0, 63, 63, 0, 35, 1, 1, 1.14286, 1, 0, 0, 1, 2000, 2000, 1, 1, 1, 33536, 2048, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.35, 1, 1, 0, 0, 1, 0, 0, 2, 'mod_zone_difficulty_dungeonmaster', 0),
+(1128002, 0, 0, 0, 0, 0, 27568, 0, 0, 0, 'Chromie', '', 0, 63, 63, 0, 35, 1, 1, 1.14286, 1, 0, 0, 1, 2000, 2000, 1, 1, 1, 33536, 2048, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.35, 1, 1, 0, 0, 1, 0, 0, 2, 'mod_zone_difficulty_rewardnpc', 0);
 
 INSERT INTO `creature` (`guid`, `id1`, `id2`, `id3`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `ScriptName`, `VerifiedBuild`) VALUES
   -- Gruul's Lair
