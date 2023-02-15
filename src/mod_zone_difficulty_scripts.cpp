@@ -1058,6 +1058,23 @@ public:
     }
 };
 
+class mod_zone_difficulty_rewardnpc : public CreatureScript
+{
+public:
+    mod_zone_difficulty_rewardnpc() : CreatureScript("mod_zone_difficulty_rewardnpc") { }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) override
+    {
+
+    }
+
+    bool OnGossipHello(Player* player, Creature* creature) override
+    {
+
+    }
+
+};
+
 class mod_zone_difficulty_dungeonmaster : public CreatureScript
 {
 public:
