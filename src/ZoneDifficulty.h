@@ -81,7 +81,7 @@ public:
     std::vector<uint32> DailyHeroicQuests;
     std::map<uint32, uint32> HeroicQuestMapList;
     std::map<uint32, uint8> Expansion;
-    std::map<uint32, uint32> ZoneDifficultyCreatureOverrides;
+    std::map<uint32, float> ZoneDifficultyCreatureOverrides;
 
     typedef std::map<uint32, std::map<uint32, ZoneDifficultyNerfData> > ZoneDifficultyNerfDataMap;
     ZoneDifficultyNerfDataMap ZoneDifficultyNerfInfo;

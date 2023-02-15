@@ -1237,11 +1237,6 @@ public:
             return;
         }
 
-        if (creature->IsDungeonBoss())
-        {
-            return;
-        }
-
         if (!creature->IsAlive())
         {
             return;
@@ -1265,8 +1260,13 @@ public:
         uint32 baseHealth = origCreatureStats->GenerateHealth(creatureTemplate);
         uint32 newHp;
         uint32 entry = creature->GetEntry();
+        LOG_INFO("sql", "Checking hp for creature with entry {}.", entry);
         if (sZoneDifficulty->ZoneDifficultyCreatureOverrides.find(entry) == sZoneDifficulty->ZoneDifficultyCreatureOverrides.end())
         {
+            if (creature->IsDungeonBoss())
+            {
+                return;
+            }
             newHp = round(baseHealth * sZoneDifficulty->HardmodeHpModifier);
         }
         else
@@ -1301,6 +1301,7 @@ public:
                 creature->UpdateAllStats();
                 return;
             }
+
             if (sZoneDifficulty->HardmodeInstanceData[creature->GetMap()->GetInstanceId()].HardmodeOn == false)
             {
                 if (creature->GetMaxHealth() == newHp)
@@ -1323,9 +1324,7 @@ public:
                 }
             }
         }
-
     }
-
 };
 
 // Add all scripts in one
