@@ -150,11 +150,6 @@ void ZoneDifficulty::LoadMapDifficultySettings()
             sZoneDifficulty->HardmodeLoot[MapID].push_back(data);
             LOG_INFO("sql", "New creature for map {} with entry: {}", MapID, data.EncounterEntry);
 
-            if (MapID <= 0 || data.EncounterEntry <= 0)
-            {
-                LOG_INFO("sql", "Table `zone_difficulty_instance_data` for criteria MapId: {} OR Entry: {} has wrong value. Must be > 0.", MapID, data.EncounterEntry);
-            }
-
             Expansion[MapID] = data.RewardType;
 
         } while (result->NextRow());
@@ -181,6 +176,27 @@ void ZoneDifficulty::LoadMapDifficultySettings()
             {
                 sZoneDifficulty->ZoneDifficultyCreatureOverrides[creatureentry] = hpmodifier;
                 LOG_INFO("sql", "New creature with entry: {} has exception for hp: {}", creatureentry, hpmodifier);
+            }
+        } while (result->NextRow());
+    }
+
+    if (QueryResult result = WorldDatabase.Query("SELECT ContentType, ItemType, Entry, Price, Enchant, EnchantSlot, Enabled FROM zone_difficulty_hardmode_rewards"))
+    {
+        do
+        {
+            ZoneDifficultyRewardData data;
+            uint32 contenttype = (*result)[0].Get<uint32>();
+            uint32 itemtype = (*result)[1].Get<uint32>();
+            data.Entry = (*result)[2].Get<uint32>();
+            data.Price = (*result)[3].Get<uint32>();
+            data.Enchant = (*result)[4].Get<uint32>();
+            data.EnchantSlot = (*result)[5].Get<uint8>();
+            bool enabled = (*result)[6].Get<bool>();
+
+            if (enabled)
+            {
+                sZoneDifficulty->ZoneDifficultyRewards[contenttype][itemtype] = data;
+                LOG_INFO("sql", "Loading item with entry {} has enchant {} in slot {}.", data.Entry, data.Enchant, data.EnchantSlot);
             }
         } while (result->NextRow());
     }
@@ -274,6 +290,65 @@ void ZoneDifficulty::SendWhisperToRaid(std::string message, Creature* creature, 
     }
 }
 
+std::string ZoneDifficulty::GetContentTypeString(uint32 type)
+{
+    std::string typestring;
+    switch (type)
+    {
+    case TYPE_VANILLA:
+        typestring = "for Vanilla dungeons.";
+        break;
+    case TYPE_RAID_MC:
+        typestring = "for Molten Core.";
+        break;
+    case TYPE_RAID_ONY:
+        typestring = "for Onyxia.";
+        break;
+    case TYPE_RAID_BWL:
+        typestring = "for Blackwing Lair.";
+        break;
+    case TYPE_RAID_ZG:
+        typestring = "for Zul Gurub.";
+        break;
+    case TYPE_RAID_AQ20:
+        typestring = "for Ruins of Ahn'Qiraj.";
+        break;
+    case TYPE_RAID_AQ40:
+        typestring = "for Temple of Ahn'Qiraj.";
+        break;
+    case TYPE_HEROIC_TBC:
+        typestring = "for Heroic TBC dungeons.";
+        break;
+    case TYPE_RAID_T4:
+        typestring = "for T4 Raids.";
+        break;
+    case TYPE_RAID_T5:
+        typestring = "for T5 Raids.";
+        break;
+    case TYPE_RAID_T6:
+        typestring = "for T6 Raids.";
+        break;
+    case TYPE_HEROIC_WOTLK:
+        typestring = "for Heroic WotLK dungeons.";
+        break;
+    case TYPE_RAID_T7:
+        typestring = "for T7 Raids.";
+        break;
+    case TYPE_RAID_T8:
+        typestring = "for T8 Raids.";
+        break;
+    case TYPE_RAID_T9:
+        typestring = "for T9 Raids.";
+        break;
+    case TYPE_RAID_T10:
+        typestring = "for T10 Raids.";
+        break;
+    default:
+        typestring = "-";
+        return typestring;
+    }
+}
+
 /* @brief Grants every player in the group one score for the hardmode.
  *
  * @param player One of the players in the group.
@@ -281,12 +356,12 @@ void ZoneDifficulty::SendWhisperToRaid(std::string message, Creature* creature, 
  */
 void ZoneDifficulty::GrantHardmodeScore(Map* map, uint32 type)
 {
-    if (!map || type < 0 || type > 255)
+    if (!map || type > 255)
     {
         LOG_ERROR("sql", "No object for map or wrong value for type: {} in GrantHardmodeScore.", type);
         return;
     }
-    LOG_INFO("sql",  "Called GrantHardmodeScore for map id: {} and type: {}", map->GetId(), type);
+    LOG_INFO("sql", "Called GrantHardmodeScore for map id: {} and type: {}", map->GetId(), type);
     Map::PlayerList const& PlayerList = map->GetPlayers();
     for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
     {
@@ -301,60 +376,7 @@ void ZoneDifficulty::GrantHardmodeScore(Map* map, uint32 type)
         }
         LOG_INFO("sql", "Player {} new score: {}", player->GetName(), sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][type]);
 
-        std::string typestring;
-        switch (type)
-        {
-        case TYPE_VANILLA:
-            typestring = "for Vanilla dungeons.";
-            break;
-        case TYPE_RAID_MC:
-            typestring = "for Molten Core.";
-            break;
-        case TYPE_RAID_ONY:
-            typestring = "for Onyxia.";
-            break;
-        case TYPE_RAID_BWL:
-            typestring = "for Blackwing Lair.";
-            break;
-        case TYPE_RAID_ZG:
-            typestring = "for Zul Gurub.";
-            break;
-        case TYPE_RAID_AQ20:
-            typestring = "for Ruins of Ahn'Qiraj.";
-            break;
-        case TYPE_RAID_AQ40:
-            typestring = "for Temple of Ahn'Qiraj.";
-            break;
-        case TYPE_HEROIC_TBC:
-            typestring = "for Heroic TBC dungeons.";
-            break;
-        case TYPE_RAID_T4:
-            typestring = "for T4 Raids.";
-            break;
-        case TYPE_RAID_T5:
-            typestring = "for T5 Raids.";
-            break;
-        case TYPE_RAID_T6:
-            typestring = "for T6 Raids.";
-            break;
-        case TYPE_HEROIC_WOTLK:
-            typestring = "for Heroic WotLK dungeons.";
-            break;
-        case TYPE_RAID_T7:
-            typestring = "for T7 Raids.";
-            break;
-        case TYPE_RAID_T8:
-            typestring = "for T8 Raids.";
-            break;
-        case TYPE_RAID_T9:
-            typestring = "for T9 Raids.";
-            break;
-        case TYPE_RAID_T10:
-            typestring = "for T10 Raids.";
-            break;
-        default:
-            typestring = "-";
-        }
+        std::string typestring = sZoneDifficulty->GetContentTypeString(type);
         ChatHandler(player->GetSession()).PSendSysMessage("You have received hardmode score %s New score: %i", typestring, sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][type]);
         CharacterDatabase.Execute("REPLACE INTO zone_difficulty_hardmode_score VALUES({}, {}, {})", player->GetGUID().GetCounter(), type, sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][type]);
     }
@@ -1009,7 +1031,7 @@ public:
                 {
                     sZoneDifficulty->GrantHardmodeScore(map, sZoneDifficulty->Expansion[mapId]);
                 }
-                else if(map->IsRaid())
+                else if (map->IsRaid())
                 {
                     sZoneDifficulty->GrantHardmodeScore(map, sZoneDifficulty->Expansion[mapId]);
                 }
@@ -1066,13 +1088,30 @@ public:
     bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) override
     {
 
+        return true;
     }
 
     bool OnGossipHello(Player* player, Creature* creature) override
     {
+        LOG_INFO("sql", "OnGossipHelloRewardNpc");
+        uint32 npctext = NPC_TEXT_OFFER;
+        uint32 action = 1;
 
+        for (auto& typedata : sZoneDifficulty->ZoneDifficultyRewards)
+        {
+            LOG_INFO("sql", "typedata.first is {}", typedata.first);
+            std::string gossip;
+            std::string typestring = sZoneDifficulty->GetContentTypeString(typedata.first);
+            gossip.append("I want to redeem rewards ").append(typestring);
+            LOG_INFO("sql", "typestring is: {} gossip is: ", typestring, gossip);
+            // typedata.first is the ContentType
+            AddGossipItemFor(player, GOSSIP_ICON_CHAT, gossip, GOSSIP_SENDER_MAIN, action);
+            ++action;
+        }
+
+        SendGossipMenuFor(player, npctext, creature);
+        return true;
     }
-
 };
 
 class mod_zone_difficulty_dungeonmaster : public CreatureScript
@@ -1090,7 +1129,7 @@ public:
             if (me->GetMap() && me->GetMap()->IsHeroic() && !me->GetMap()->IsRaid())
             {
                 LOG_INFO("sql", "We're inside a heroic 5man now.");
-                for (auto quest : sZoneDifficulty->DailyHeroicQuests)
+                for (auto& quest : sZoneDifficulty->DailyHeroicQuests)
                 {
                     LOG_INFO("sql", "Checking quest {} and MapId {}", quest, me->GetMapId());
                     if (sPoolMgr->IsSpawnedObject<Quest>(quest))
@@ -1200,7 +1239,7 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature) override
     {
-        LOG_INFO("sql", "OnGossipHello");
+        LOG_INFO("sql", "OnGossipHelloChromie");
         uint32 npctext = NPC_TEXT_OTHER;
         if (Group* group = player->GetGroup())
         {
@@ -1353,6 +1392,7 @@ void AddModZoneDifficultyScripts()
     new mod_zone_difficulty_worldscript();
     new mod_zone_difficulty_globalscript();
     new mod_zone_difficulty_instancemapscript();
+    new mod_zone_difficulty_rewardnpc();
     new mod_zone_difficulty_dungeonmaster();
     new mod_zone_difficulty_allcreaturescript();
 }
