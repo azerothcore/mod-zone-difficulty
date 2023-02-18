@@ -4,6 +4,7 @@
 
 #include "Config.h"
 #include "Chat.h"
+#include "ItemTemplate.h"
 #include "MapMgr.h"
 #include "Pet.h"
 #include "Player.h"
@@ -195,7 +196,7 @@ void ZoneDifficulty::LoadMapDifficultySettings()
 
             if (enabled)
             {
-                sZoneDifficulty->ZoneDifficultyRewards[contenttype][itemtype] = data;
+                sZoneDifficulty->ZoneDifficultyRewards[contenttype][itemtype].push_back(data);
                 LOG_INFO("sql", "Loading item with entry {} has enchant {} in slot {}.", data.Entry, data.Enchant, data.EnchantSlot);
             }
         } while (result->NextRow());
@@ -288,6 +289,35 @@ void ZoneDifficulty::SendWhisperToRaid(std::string message, Creature* creature, 
             creature->Whisper(message, LANG_UNIVERSAL, mplr);
         }
     }
+}
+
+std::string ZoneDifficulty::GetItemTypeString(uint32 type)
+{
+    std::string typestring;
+    switch (type)
+    {
+    case ITEMTYPE_MISC:
+        typestring = "Back, Finger, Neck, and Trinket";
+        break;
+    case ITEMTYPE_CLOTH:
+        typestring = "Cloth";
+        break;
+    case ITEMTYPE_LEATHER:
+        typestring = "Leather";
+        break;
+    case ITEMTYPE_MAIL:
+        typestring = "Mail";
+        break;
+    case ITEMTYPE_PLATE:
+        typestring = "Plate";
+        break;
+    case ITEMTYPE_WEAPONS:
+        typestring = "Weapons and Shields";
+        break;
+    default:
+        LOG_ERROR("sql", "Unknown type {} in ZoneDifficulty::GetItemTypeString.", type);
+    }
+    return typestring;
 }
 
 std::string ZoneDifficulty::GetContentTypeString(uint32 type)
@@ -1087,7 +1117,64 @@ public:
 
     bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) override
     {
+        LOG_INFO("sql", "OnGossipSelectRewardNpc action: {}", action);
+        ClearGossipMenuFor(player);
+        uint32 npctext;
 
+        // player has selected a content type
+        if (action < 100)
+        {
+            npctext = NPC_TEXT_CATEGORY;
+            for (auto& itemtype : sZoneDifficulty->ZoneDifficultyRewards[action])
+            {
+                LOG_INFO("sql", "typedata.first is {}", itemtype.first);
+                std::string gossip;
+                std::string typestring = sZoneDifficulty->GetItemTypeString(itemtype.first);
+                gossip.append("I am interested in ").append(typestring).append(" items.");
+                AddGossipItemFor(player, GOSSIP_ICON_CHAT, gossip, GOSSIP_SENDER_MAIN, itemtype.first + (action * 100));
+            }
+        }
+        else if (action < 1000)
+        {
+            npctext = NPC_TEXT_ITEM;
+            uint32 category = 0;
+            uint32 counter = action;
+            while (counter > 99)
+            {
+                ++category;
+                counter = counter - 100;
+            }
+            LOG_INFO("sql", "Building gossip with category {} and counter {}", category, counter);
+            uint32 first = 0;
+
+            for (auto& item : sZoneDifficulty->ZoneDifficultyRewards[category][counter])
+            {
+                if (first == 0)
+                {
+                    first = item.Entry;
+                }
+                else if (first == item.Entry)
+                {
+                    break;
+                }
+                LOG_INFO("sql", "Adding gossip option for entry {}", item.Entry);
+                std::string gossip;
+                ItemTemplate const* proto = sObjectMgr->GetItemTemplate(item.Entry);
+                std::string name = proto->Name1;
+                if (ItemLocale const* leftIl = sObjectMgr->GetItemLocale(item.Entry))
+                {
+                    ObjectMgr::GetLocaleString(leftIl->Name, player->GetSession()->GetSessionDbcLocale(), name);
+                }
+
+                AddGossipItemFor(player, GOSSIP_ICON_CHAT, name, GOSSIP_SENDER_MAIN, (1000 * category) + (100 * counter) + item.Entry);
+            }
+        }
+        else
+        {
+
+        }
+
+                SendGossipMenuFor(player, npctext, creature);
         return true;
     }
 
@@ -1095,7 +1182,6 @@ public:
     {
         LOG_INFO("sql", "OnGossipHelloRewardNpc");
         uint32 npctext = NPC_TEXT_OFFER;
-        uint32 action = 1;
 
         for (auto& typedata : sZoneDifficulty->ZoneDifficultyRewards)
         {
@@ -1105,8 +1191,7 @@ public:
             gossip.append("I want to redeem rewards ").append(typestring);
             LOG_INFO("sql", "typestring is: {} gossip is: ", typestring, gossip);
             // typedata.first is the ContentType
-            AddGossipItemFor(player, GOSSIP_ICON_CHAT, gossip, GOSSIP_SENDER_MAIN, action);
-            ++action;
+            AddGossipItemFor(player, GOSSIP_ICON_CHAT, gossip, GOSSIP_SENDER_MAIN, typedata.first);
         }
 
         SendGossipMenuFor(player, npctext, creature);
