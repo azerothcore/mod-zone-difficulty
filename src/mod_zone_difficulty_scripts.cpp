@@ -32,6 +32,8 @@ void ZoneDifficulty::LoadMapDifficultySettings()
         return;
     }
 
+    sZoneDifficulty->ZoneDifficultyRewards.clear();
+
     // Default values for when there is no entry in the db for duels (index 0xFFFFFFFF)
     ZoneDifficultyNerfInfo[DUEL_INDEX][0].HealingNerfPct = 1;
     ZoneDifficultyNerfInfo[DUEL_INDEX][0].AbsorbNerfPct = 1;
@@ -183,8 +185,14 @@ void ZoneDifficulty::LoadMapDifficultySettings()
 
     if (QueryResult result = WorldDatabase.Query("SELECT ContentType, ItemType, Entry, Price, Enchant, EnchantSlot, Enabled FROM zone_difficulty_hardmode_rewards"))
     {
+        // debug
+        uint32 i = 0;
+        // end debug
         do
         {
+            // debug
+            ++i;
+            // end debug
             ZoneDifficultyRewardData data;
             uint32 contenttype = (*result)[0].Get<uint32>();
             uint32 itemtype = (*result)[1].Get<uint32>();
@@ -199,6 +207,7 @@ void ZoneDifficulty::LoadMapDifficultySettings()
                 sZoneDifficulty->ZoneDifficultyRewards[contenttype][itemtype].push_back(data);
                 LOG_INFO("sql", "Loading item with entry {} has enchant {} in slot {}.", data.Entry, data.Enchant, data.EnchantSlot);
             }
+            LOG_INFO("sql", "Total items in vector: {}.", i);
         } while (result->NextRow());
     }
 }
@@ -384,14 +393,14 @@ std::string ZoneDifficulty::GetContentTypeString(uint32 type)
  * @param player One of the players in the group.
  * @param map The map where the player is currently
  */
-void ZoneDifficulty::GrantHardmodeScore(Map* map, uint32 type)
+void ZoneDifficulty::ModHardmodeScore(Map* map, int32 type)
 {
     if (!map || type > 255)
     {
-        LOG_ERROR("sql", "No object for map or wrong value for type: {} in GrantHardmodeScore.", type);
+        LOG_ERROR("sql", "No object for map or wrong value for type: {} in ModHardmodeScore.", type);
         return;
     }
-    LOG_INFO("sql", "Called GrantHardmodeScore for map id: {} and type: {}", map->GetId(), type);
+    LOG_INFO("sql", "Called ModHardmodeScore for map id: {} and type: {}", map->GetId(), type);
     Map::PlayerList const& PlayerList = map->GetPlayers();
     for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
     {
@@ -410,6 +419,37 @@ void ZoneDifficulty::GrantHardmodeScore(Map* map, uint32 type)
         ChatHandler(player->GetSession()).PSendSysMessage("You have received hardmode score %s New score: %i", typestring, sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][type]);
         CharacterDatabase.Execute("REPLACE INTO zone_difficulty_hardmode_score VALUES({}, {}, {})", player->GetGUID().GetCounter(), type, sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][type]);
     }
+}
+
+/* @brief Send and item to the player using the data from ZoneDifficultyRewards.
+ *
+ * @param player The recipient of the mail.
+ * @param category The content level e.g. TYPE_HEROIC_TBC.
+ * @param itemtype The type of the item e.g. ITEMTYPE_CLOTH.
+ * @param id the id in the vector.
+ */
+void SendItem(Player* player, uint32 category, uint32 itemtype, uint32 id)
+{
+    ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(sZoneDifficulty->ZoneDifficultyRewards[category][itemtype][id].Entry);
+    if (!itemTemplate)
+    {
+        LOG_ERROR("sql", "itemTemplate could not be constructed in sZoneDifficulty->SendItem for category {}, itemtype {}, id {}.", category, itemtype, id);
+        return;
+    }
+
+    ObjectGuid::LowType senderGuid = player->GetGUID().GetCounter();
+
+    // fill mail
+    MailDraft draft(REWARD_MAIL_SUBJECT, REWARD_MAIL_BODY);
+    MailSender sender(MAIL_NORMAL, senderGuid, MAIL_STATIONERY_GM);
+    CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
+    if (Item* item = Item::CreateItem(sZoneDifficulty->ZoneDifficultyRewards[category][itemtype][id].Entry, 1, player))
+    {
+        item->SaveToDB(trans); // save for prevent lost at next mail load, if send fail then item will deleted
+        draft.AddItem(item);
+    }
+    draft.SendMailTo(trans, MailReceiver(player, senderGuid), sender);
+    CharacterDatabase.CommitTransaction(trans);
 }
 
 /* @brief Check if the map has assigned any data to tune it.
@@ -1059,11 +1099,11 @@ public:
 
                 if (map->IsHeroic() && map->IsNonRaidDungeon())
                 {
-                    sZoneDifficulty->GrantHardmodeScore(map, sZoneDifficulty->Expansion[mapId]);
+                    sZoneDifficulty->ModHardmodeScore(map, sZoneDifficulty->Expansion[mapId]);
                 }
                 else if (map->IsRaid())
                 {
-                    sZoneDifficulty->GrantHardmodeScore(map, sZoneDifficulty->Expansion[mapId]);
+                    sZoneDifficulty->ModHardmodeScore(map, sZoneDifficulty->Expansion[mapId]);
                 }
                 else
                 {
@@ -1150,16 +1190,6 @@ public:
 
             for (int i = 0; i < sZoneDifficulty->ZoneDifficultyRewards[category][counter].size(); ++i)
             {
-                // hackfix because this auto iterates twice for no reason.
-                if (first == 0)
-                {
-                    first = sZoneDifficulty->ZoneDifficultyRewards[category][counter][i].Entry;
-                }
-                else if (first == sZoneDifficulty->ZoneDifficultyRewards[category][counter][i].Entry)
-                {
-                    break;
-                }
-
                 LOG_INFO("sql", "Adding gossip option for entry {}", sZoneDifficulty->ZoneDifficultyRewards[category][counter][i].Entry);
                 ItemTemplate const* proto = sObjectMgr->GetItemTemplate(sZoneDifficulty->ZoneDifficultyRewards[category][counter][i].Entry);
                 std::string name = proto->Name1;
@@ -1169,11 +1199,11 @@ public:
                 }
 
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, name, GOSSIP_SENDER_MAIN, (1000 * category) + (100 * counter) + i);
+                LOG_INFO("sql", "AddingGossipItem with action {}", (1000 * category) + (100 * counter) + i);
             }
         }
         else if (action < 100000)
         {
-            npctext = NPC_TEXT_CONFIRM;
             uint32 category = 0;
             uint32 itemtype = 0;
             uint32 counter = action;
@@ -1190,15 +1220,45 @@ public:
             }
             LOG_INFO("sql", "Handling item with category {}, itemtype {}, counter {}", category, itemtype, counter);
 
-            ItemTemplate const* proto = sObjectMgr->GetItemTemplate(sZoneDifficulty->ZoneDifficultyRewards[category][counter][i].Entry);
+            // todo: add a check if the player has enough score
+            //{
+            //    npctext = NPC_TEXT_DENIED;
+            //    SendGossipMenuFor(player, npctext, creature);
+            //    return true;
+            //}
+
+            npctext = NPC_TEXT_CONFIRM;
+            ItemTemplate const* proto = sObjectMgr->GetItemTemplate(sZoneDifficulty->ZoneDifficultyRewards[category][itemtype][counter].Entry);
             std::string gossip;
             std::string name = proto->Name1;
-            if (ItemLocale const* leftIl = sObjectMgr->GetItemLocale(sZoneDifficulty->ZoneDifficultyRewards[category][counter][i].Entry))
+            if (ItemLocale const* leftIl = sObjectMgr->GetItemLocale(sZoneDifficulty->ZoneDifficultyRewards[category][itemtype][counter].Entry))
             {
                 ObjectMgr::GetLocaleString(leftIl->Name, player->GetSession()->GetSessionDbcLocale(), name);
             }
             gossip.append("Yes, ").append(name).append(" is the item i want.");
             AddGossipItemFor(player, GOSSIP_ICON_CHAT, gossip, GOSSIP_SENDER_MAIN, 100000 + (1000 * category) + (100 * itemtype) + counter);
+            LOG_INFO("sql", "AddingGossipItem with action {}", 100000 + (1000 * category) + (100 * itemtype) + counter);
+        }
+        else
+        {
+            npctext = NPC_TEXT_GRANT;
+            uint32 category = 0;
+            uint32 itemtype = 0;
+            uint32 counter = action;
+            uint32 i;
+            counter = counter - 100000;
+            while (counter > 999)
+            {
+                ++category;
+                counter = counter - 1000;
+            }
+            while (counter > 99)
+            {
+                ++itemtype;
+                counter = counter - 100;
+            }
+            LOG_INFO("sql", "Sending item with category {}, itemtype {}, counter {}", category, itemtype, counter);
+
         }
 
         SendGossipMenuFor(player, npctext, creature);

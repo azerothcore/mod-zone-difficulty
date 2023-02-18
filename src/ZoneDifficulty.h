@@ -82,6 +82,9 @@ const uint32 ITEMTYPE_MAIL = 4;
 const uint32 ITEMTYPE_PLATE = 5;
 const uint32 ITEMTYPE_WEAPONS = 6;
 
+const std::string REWARD_MAIL_SUBJECT = "Chromie's Reward for you";
+const std::string REWARD_MAIL_BODY = "Enjoy your new item!";
+
 class ZoneDifficulty
 {
 public:
@@ -94,7 +97,8 @@ public:
     void SendWhisperToRaid(std::string message, Creature* creature, Player* player);
     std::string GetItemTypeString(uint32 type);
     std::string GetContentTypeString(uint32 type);
-    void GrantHardmodeScore(Map* map, uint32 type);
+    void ModHardmodeScore(Map* map, int32 type);
+    void SendItem(Player* player, uint32 category, uint32 itemtype, uint32 id);
     [[nodiscard]] bool IsValidNerfTarget(Unit* target);
     [[nodiscard]] bool VectorContains(std::vector<uint32> vec, uint32 element);
     [[nodiscard]] bool IsHardmodeMap(uint32 mapid);
