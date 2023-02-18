@@ -1013,10 +1013,6 @@ public:
 
     void OnStartup() override
     {
-        sZoneDifficulty->IsEnabled = sConfigMgr->GetOption<bool>("ModZoneDifficulty.Enable", false);
-        sZoneDifficulty->IsDebugInfoEnabled = sConfigMgr->GetOption<bool>("ModZoneDifficulty.DebugInfo", false);
-        sZoneDifficulty->HardmodeHpModifier = sConfigMgr->GetOption<float>("ModZoneDifficulty.Hardmode.HpModifier", 2);
-        sZoneDifficulty->LoadMapDifficultySettings();
         sZoneDifficulty->LoadHardmodeInstanceData();
         sZoneDifficulty->LoadHardmodeScoreData();
     }
