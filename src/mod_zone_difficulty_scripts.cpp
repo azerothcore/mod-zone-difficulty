@@ -1146,6 +1146,7 @@ public:
             }
             LOG_INFO("sql", "Building gossip with category {} and counter {}", category, counter);
             uint32 first = 0;
+            auto rewards = sZoneDifficulty->ZoneDifficultyRewards[category][counter];
 
             for (auto& item : sZoneDifficulty->ZoneDifficultyRewards[category][counter])
             {
@@ -1189,7 +1190,7 @@ public:
             std::string gossip;
             std::string typestring = sZoneDifficulty->GetContentTypeString(typedata.first);
             gossip.append("I want to redeem rewards ").append(typestring);
-            LOG_INFO("sql", "typestring is: {} gossip is: ", typestring, gossip);
+            LOG_INFO("sql", "typestring is: {} gossip is: {}", typestring, gossip);
             // typedata.first is the ContentType
             AddGossipItemFor(player, GOSSIP_ICON_CHAT, gossip, GOSSIP_SENDER_MAIN, typedata.first);
         }
