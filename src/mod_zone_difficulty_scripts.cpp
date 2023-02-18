@@ -1148,34 +1148,60 @@ public:
             uint32 first = 0;
             auto rewards = sZoneDifficulty->ZoneDifficultyRewards[category][counter];
 
-            for (auto& item : sZoneDifficulty->ZoneDifficultyRewards[category][counter])
+            for (int i = 0; i < sZoneDifficulty->ZoneDifficultyRewards[category][counter].size(); ++i)
             {
+                // hackfix because this auto iterates twice for no reason.
                 if (first == 0)
                 {
-                    first = item.Entry;
+                    first = sZoneDifficulty->ZoneDifficultyRewards[category][counter][i].Entry;
                 }
-                else if (first == item.Entry)
+                else if (first == sZoneDifficulty->ZoneDifficultyRewards[category][counter][i].Entry)
                 {
                     break;
                 }
-                LOG_INFO("sql", "Adding gossip option for entry {}", item.Entry);
-                std::string gossip;
-                ItemTemplate const* proto = sObjectMgr->GetItemTemplate(item.Entry);
+
+                LOG_INFO("sql", "Adding gossip option for entry {}", sZoneDifficulty->ZoneDifficultyRewards[category][counter][i].Entry);
+                ItemTemplate const* proto = sObjectMgr->GetItemTemplate(sZoneDifficulty->ZoneDifficultyRewards[category][counter][i].Entry);
                 std::string name = proto->Name1;
-                if (ItemLocale const* leftIl = sObjectMgr->GetItemLocale(item.Entry))
+                if (ItemLocale const* leftIl = sObjectMgr->GetItemLocale(sZoneDifficulty->ZoneDifficultyRewards[category][counter][i].Entry))
                 {
                     ObjectMgr::GetLocaleString(leftIl->Name, player->GetSession()->GetSessionDbcLocale(), name);
                 }
 
-                AddGossipItemFor(player, GOSSIP_ICON_CHAT, name, GOSSIP_SENDER_MAIN, (1000 * category) + (100 * counter) + item.Entry);
+                AddGossipItemFor(player, GOSSIP_ICON_CHAT, name, GOSSIP_SENDER_MAIN, (1000 * category) + (100 * counter) + i);
             }
         }
-        else
+        else if (action < 100000)
         {
+            npctext = NPC_TEXT_CONFIRM;
+            uint32 category = 0;
+            uint32 itemtype = 0;
+            uint32 counter = action;
+            uint32 i;
+            while (counter > 999)
+            {
+                ++category;
+                counter = counter - 1000;
+            }
+            while (counter > 99)
+            {
+                ++itemtype;
+                counter = counter - 100;
+            }
+            LOG_INFO("sql", "Handling item with category {}, itemtype {}, counter {}", category, itemtype, counter);
 
+            ItemTemplate const* proto = sObjectMgr->GetItemTemplate(sZoneDifficulty->ZoneDifficultyRewards[category][counter][i].Entry);
+            std::string gossip;
+            std::string name = proto->Name1;
+            if (ItemLocale const* leftIl = sObjectMgr->GetItemLocale(sZoneDifficulty->ZoneDifficultyRewards[category][counter][i].Entry))
+            {
+                ObjectMgr::GetLocaleString(leftIl->Name, player->GetSession()->GetSessionDbcLocale(), name);
+            }
+            gossip.append("Yes, ").append(name).append(" is the item i want.");
+            AddGossipItemFor(player, GOSSIP_ICON_CHAT, gossip, GOSSIP_SENDER_MAIN, 100000 + (1000 * category) + (100 * itemtype) + counter);
         }
 
-                SendGossipMenuFor(player, npctext, creature);
+        SendGossipMenuFor(player, npctext, creature);
         return true;
     }
 

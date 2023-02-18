@@ -33,8 +33,17 @@ struct ZoneDifficultyHardmodeMapData
     uint32 RewardType;
 };
 
+struct ZoneDifficultyRewardData
+{
+    uint32 Entry;
+    uint32 Price;
+    uint32 Enchant;
+    uint8 EnchantSlot;
+};
+
 const int32 DUEL_INDEX = 0x7FFFFFFF;
 const int32 DUEL_AREA = 2402;       // Forbidding Sea (Wetlands)
+
 const uint32 NPC_TEXT_LEADER_NORMAL = 91301;
 const uint32 NPC_TEXT_OTHER = 91302;
 const uint32 NPC_TEXT_LEADER_HARD = 91303;
@@ -45,8 +54,10 @@ const uint32 NPC_TEXT_ITEM = 91307;
 const uint32 NPC_TEXT_CONFIRM = 91308;
 const uint32 NPC_TEXT_GRANT = 91309;
 const uint32 NPC_TEXT_DENIED = 91310;
+
 const int32 MODE_NORMAL = 1;
 const int32 MODE_HARD = 64;
+
 const int32 TYPE_VANILLA = 1;
 const int32 TYPE_RAID_MC = 2;
 const int32 TYPE_RAID_ONY = 3;
@@ -64,6 +75,13 @@ const int32 TYPE_RAID_T8 = 14;
 const int32 TYPE_RAID_T9 = 15;
 const int32 TYPE_RAID_T10 = 16;
 
+const uint32 ITEMTYPE_MISC = 1;
+const uint32 ITEMTYPE_CLOTH = 2;
+const uint32 ITEMTYPE_LEATHER = 3;
+const uint32 ITEMTYPE_MAIL = 4;
+const uint32 ITEMTYPE_PLATE = 5;
+const uint32 ITEMTYPE_WEAPONS = 6;
+
 class ZoneDifficulty
 {
 public:
@@ -74,6 +92,8 @@ public:
     void LoadHardmodeInstanceData();
     void LoadHardmodeScoreData();
     void SendWhisperToRaid(std::string message, Creature* creature, Player* player);
+    std::string GetItemTypeString(uint32 type);
+    std::string GetContentTypeString(uint32 type);
     void GrantHardmodeScore(Map* map, uint32 type);
     [[nodiscard]] bool IsValidNerfTarget(Unit* target);
     [[nodiscard]] bool VectorContains(std::vector<uint32> vec, uint32 element);
@@ -100,6 +120,8 @@ public:
     ZoneDifficultyHardmodeLootMap HardmodeLoot;
     typedef std::map<uint32, std::map<uint32, uint32> > ZoneDifficultyDualUintMap;
     ZoneDifficultyDualUintMap ZoneDifficultyHardmodeScore;
+    typedef std::map<uint32, std::map<uint32, std::vector<ZoneDifficultyRewardData> > > ZoneDifficultyRewardMap;
+    ZoneDifficultyRewardMap ZoneDifficultyRewards;
 };
 
 #define sZoneDifficulty ZoneDifficulty::instance()
