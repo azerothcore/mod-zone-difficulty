@@ -384,34 +384,38 @@ std::string ZoneDifficulty::GetContentTypeString(uint32 type)
         break;
     default:
         typestring = "-";
-        return typestring;
     }
+    return typestring;
 }
 
 /* @brief Grants every player in the group one score for the hardmode.
  *
- * @param player One of the players in the group.
- * @param map The map where the player is currently
+ * @param map The map where the player is currently.
+ * @param type The type of instance the score is awarded for.
  */
-void ZoneDifficulty::ModHardmodeScore(Map* map, int32 type)
+void ZoneDifficulty::AddHardmodeScore(Map* map, uint32 type)
 {
     if (!map || type > 255)
     {
-        LOG_ERROR("sql", "No object for map or wrong value for type: {} in ModHardmodeScore.", type);
+        LOG_ERROR("sql", "No object for map or wrong value for type: {} in AddHardmodeScore.", type);
         return;
     }
-    LOG_INFO("sql", "Called ModHardmodeScore for map id: {} and type: {}", map->GetId(), type);
+    LOG_INFO("sql", "Called AddHardmodeScore for map id: {} and type: {}", map->GetId(), type);
     Map::PlayerList const& PlayerList = map->GetPlayers();
     for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
     {
         Player* player = i->GetSource();
-        if (sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()].find(type) == sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()].end())
+        if (sZoneDifficulty->ZoneDifficultyHardmodeScore.find(player->GetGUID().GetCounter()) == sZoneDifficulty->ZoneDifficultyHardmodeScore.end())
+        {
+            sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][type] = 1;
+        }
+        else if (sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()].find(type) == sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()].end())
         {
             sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][type] = 1;
         }
         else
         {
-            ++sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][type];
+            sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][type] = sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][type] + 1;
         }
         LOG_INFO("sql", "Player {} new score: {}", player->GetName(), sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][type]);
 
@@ -419,6 +423,18 @@ void ZoneDifficulty::ModHardmodeScore(Map* map, int32 type)
         ChatHandler(player->GetSession()).PSendSysMessage("You have received hardmode score %s New score: %i", typestring, sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][type]);
         CharacterDatabase.Execute("REPLACE INTO zone_difficulty_hardmode_score VALUES({}, {}, {})", player->GetGUID().GetCounter(), type, sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][type]);
     }
+}
+
+/* @brief Reduce the score of players when they pay for rewards.
+ *
+ * @param player The one who pays with their score.
+ * @param type The type of instance the score is deducted for.
+ */
+void DeductHardmodeScore(Player* player, uint32 type, uint32 score)
+{
+    // NULL check happens in the calling function
+    LOG_INFO("sql", "Reducing score with type {} from player with guid {} by {}.", type, player->GetGUID().GetCounter(), score);
+    sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][type] = sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][type] - score;
 }
 
 /* @brief Send and item to the player using the data from ZoneDifficultyRewards.
@@ -1097,11 +1113,11 @@ public:
 
                 if (map->IsHeroic() && map->IsNonRaidDungeon())
                 {
-                    sZoneDifficulty->ModHardmodeScore(map, sZoneDifficulty->Expansion[mapId]);
+                    sZoneDifficulty->AddHardmodeScore(map, sZoneDifficulty->Expansion[mapId]);
                 }
                 else if (map->IsRaid())
                 {
-                    sZoneDifficulty->ModHardmodeScore(map, sZoneDifficulty->Expansion[mapId]);
+                    sZoneDifficulty->AddHardmodeScore(map, sZoneDifficulty->Expansion[mapId]);
                 }
                 else
                 {
@@ -1158,9 +1174,30 @@ public:
         LOG_INFO("sql", "OnGossipSelectRewardNpc action: {}", action);
         ClearGossipMenuFor(player);
         uint32 npctext;
-
+        if (action == 999999)
+        {
+            for (int i = 1; i <= 16; ++i)
+            {
+                std::string whisper;
+                whisper.append("You score is ");
+                if (sZoneDifficulty->ZoneDifficultyHardmodeScore.find(player->GetGUID().GetCounter()) == sZoneDifficulty->ZoneDifficultyHardmodeScore.end())
+                {
+                    whisper.append("0 ");
+                }
+                else if (sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()].find(i) == sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()].end())
+                {
+                    whisper.append("0 ");
+                }
+                else
+                {
+                    whisper.append(std::to_string(sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][i])).append(" ");
+                }
+                whisper.append(sZoneDifficulty->GetContentTypeString(i));
+                creature->Whisper(whisper, LANG_UNIVERSAL, player);
+            }
+        }
         // player has selected a content type
-        if (action < 100)
+        else if (action < 100)
         {
             npctext = NPC_TEXT_CATEGORY;
             for (auto& itemtype : sZoneDifficulty->ZoneDifficultyRewards[action])
@@ -1218,12 +1255,30 @@ public:
             }
             LOG_INFO("sql", "Handling item with category {}, itemtype {}, counter {}", category, itemtype, counter);
 
-            // todo: add a check if the player has enough score
-            //{
-            //    npctext = NPC_TEXT_DENIED;
-            //    SendGossipMenuFor(player, npctext, creature);
-            //    return true;
-            //}
+            // Check if the player has enough score in the respective category.
+            uint32 availablescore = 0;
+            if (sZoneDifficulty->ZoneDifficultyHardmodeScore.find(player->GetGUID().GetCounter()) != sZoneDifficulty->ZoneDifficultyHardmodeScore.end())
+            {
+                if (sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()].find(category) != sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()].end())
+                {
+                    availablescore = sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][category];
+                }
+            }
+
+            if (availablescore < sZoneDifficulty->ZoneDifficultyRewards[category][itemtype][counter].Price)
+            {
+                npctext = NPC_TEXT_DENIED;
+                SendGossipMenuFor(player, npctext, creature);
+                std::string whisper;
+                whisper.append("I am sorry, time-traveler. This item costs ");
+                whisper.append(std::to_string(sZoneDifficulty->ZoneDifficultyRewards[category][itemtype][counter].Price));
+                whisper.append(" but you only have ");
+                whisper.append(std::to_string(sZoneDifficulty->ZoneDifficultyHardmodeScore[category][player->GetGUID().GetCounter()]));
+                whisper.append(" ");
+                whisper.append(sZoneDifficulty->GetContentTypeString(category));
+                creature->Whisper(whisper, LANG_UNIVERSAL, player);
+                return true;
+            }
 
             npctext = NPC_TEXT_CONFIRM;
             ItemTemplate const* proto = sObjectMgr->GetItemTemplate(sZoneDifficulty->ZoneDifficultyRewards[category][itemtype][counter].Entry);
@@ -1256,6 +1311,7 @@ public:
                 counter = counter - 100;
             }
             LOG_INFO("sql", "Sending item with category {}, itemtype {}, counter {}", category, itemtype, counter);
+            DeductHardmodeScore(player, category, sZoneDifficulty->ZoneDifficultyRewards[category][itemtype][counter].Price);
             SendItem(player, category, itemtype, counter);
         }
 
@@ -1267,6 +1323,7 @@ public:
     {
         LOG_INFO("sql", "OnGossipHelloRewardNpc");
         uint32 npctext = NPC_TEXT_OFFER;
+        AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Can you please remind me of my score?", GOSSIP_SENDER_MAIN, 999999);
 
         for (auto& typedata : sZoneDifficulty->ZoneDifficultyRewards)
         {

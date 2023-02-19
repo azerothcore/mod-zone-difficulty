@@ -97,7 +97,8 @@ public:
     void SendWhisperToRaid(std::string message, Creature* creature, Player* player);
     std::string GetItemTypeString(uint32 type);
     std::string GetContentTypeString(uint32 type);
-    void ModHardmodeScore(Map* map, int32 type);
+    void AddHardmodeScore(Map* map, uint32 type);
+    void DeductHardmodeScore(Player* player, uint32 type, uint32 score);
     void SendItem(Player* player, uint32 category, uint32 itemtype, uint32 id);
     [[nodiscard]] bool IsValidNerfTarget(Unit* target);
     [[nodiscard]] bool VectorContains(std::vector<uint32> vec, uint32 element);
