@@ -10,6 +10,8 @@ INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entr
 (1128002, 0, 0, 0, 0, 0, 27568, 0, 0, 0, 'Chromie', '', 0, 63, 63, 0, 35, 1, 1, 1.14286, 1, 0, 0, 1, 2000, 2000, 1, 1, 1, 33536, 2048, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.35, 1, 1, 0, 0, 1, 0, 0, 2, 'mod_zone_difficulty_rewardnpc', 0);
 
 INSERT INTO `creature` (`guid`, `id1`, `id2`, `id3`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `ScriptName`, `VerifiedBuild`) VALUES
+ -- Reward NPC
+(303000, 1128002, 0, 0, 530, 3703, 3703, 1, 1, 0, -1809.08, 5294.03, -12.4, 1.98, 1000000, 0, 0, 0, 0, 0, 0, 0, 0, 'mod_zone_difficulty_rewardnpc', 0),
   -- Gruul's Lair
 (303001, 1128001, 0, 0, 565, 3923, 3923, 1, 1, 0, 76.64, 55.82, -5.38, 3.29, 1000000, 0, 0, 0, 0, 0, 0, 0, 0, 'mod_zone_difficulty_dungeonmaster', 0),
  -- Magtheridon's Lair
