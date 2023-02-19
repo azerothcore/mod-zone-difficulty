@@ -1299,7 +1299,6 @@ public:
             uint32 category = 0;
             uint32 itemtype = 0;
             uint32 counter = action;
-            uint32 i;
             counter = counter - 100000;
             while (counter > 999)
             {
