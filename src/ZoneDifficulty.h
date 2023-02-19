@@ -54,6 +54,7 @@ const uint32 NPC_TEXT_ITEM = 91307;
 const uint32 NPC_TEXT_CONFIRM = 91308;
 const uint32 NPC_TEXT_GRANT = 91309;
 const uint32 NPC_TEXT_DENIED = 91310;
+const uint32 NPC_TEXT_SCORE = 91311;
 
 const int32 MODE_NORMAL = 1;
 const int32 MODE_HARD = 64;
@@ -113,6 +114,7 @@ public:
     std::map<uint32, uint32> HeroicTBCQuestMapList;
     std::map<uint32, uint8> Expansion;
     std::map<uint32, float> CreatureOverrides;
+    std::map<uint32, uint32> EncountersInProgress;
 
     typedef std::map<uint32, std::map<uint32, ZoneDifficultyNerfData> > ZoneDifficultyNerfDataMap;
     ZoneDifficultyNerfDataMap NerfInfo;

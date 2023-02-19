@@ -2,12 +2,23 @@ CREATE TABLE IF NOT EXISTS `zone_difficulty_instance_saves` (
     `InstanceID` INT NOT NULL DEFAULT 0,
     `HardmodeOn` TINYINT NOT NULL DEFAULT 0,
     `HardmodePossible` TINYINT NOT NULL DEFAULT 1,
-	PRIMARY KEY (`InstanceID`)
+    PRIMARY KEY (`InstanceID`)
 );
 
 CREATE TABLE IF NOT EXISTS zone_difficulty_hardmode_score(
     `GUID` INT NOT NULL DEFAULT 0,
     `Type` TINYINT NOT NULL DEFAULT 0,
     `Score` TINYINT NOT NULL DEFAULT 0,
-	PRIMARY KEY (`GUID`, `Type`)
+    PRIMARY KEY (`GUID`, `Type`)
+);
+
+CREATE TABLE IF NOT EXISTS zone_difficulty_encounter_logs(
+    `InstanceId` INT NOT NULL DEFAULT 0,
+    `TimestampStart` INT NOT NULL DEFAULT 0,
+    `TimestampEnd` INT NOT NULL DEFAULT 0,
+    `Map` INT NOT NULL DEFAULT 0,
+    `BossId` INT NOT NULL DEFAULT 0,
+    `PlayerGuid` INT NOT NULL DEFAULT 0,
+    `Mode` INT NOT NULL DEFAULT 0,
+    PRIMARY KEY (`InstanceId`, `TimestampStart`, `PlayerGuid`)
 );

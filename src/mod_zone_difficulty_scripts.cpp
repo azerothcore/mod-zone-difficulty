@@ -4,6 +4,7 @@
 
 #include "Config.h"
 #include "Chat.h"
+#include "GameTime.h"
 #include "ItemTemplate.h"
 #include "MapMgr.h"
 #include "Pet.h"
@@ -1048,23 +1049,47 @@ public:
     void OnBeforeSetBossState(uint32 id, EncounterState newState, EncounterState oldState, Map* instance) override
     {
         LOG_INFO("sql", "OnBeforeSetBossState: bossId = {}, newState = {}, oldState = {}, MapId = {}, InstanceId = {}", id, newState, oldState, instance->GetId(), instance->GetInstanceId());
+        uint32 instanceId = instance->GetInstanceId();
         if (!sZoneDifficulty->IsHardmodeMap(instance->GetId()))
         {
             LOG_INFO("sql", "OnBeforeSetBossState: Instance not handled because there is no hardmode loot data for map id: {}", instance->GetId());
             return;
         }
-        if (oldState == 1 && newState == 3)
+        if (oldState != 1 && newState == 1)
         {
-            sZoneDifficulty->HardmodeInstanceData[instance->GetId()].HardmodePossible = false;
-            if (sZoneDifficulty->HardmodeInstanceData[instance->GetId()].HardmodeOn == true)
+            sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodePossible = false;
+            if (sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodeOn == true)
             {
-                for (auto player : instance->GetPlayers())
-                {
-                    //todo: Send to all players
-                }
-
+                sZoneDifficulty->EncountersInProgress[instanceId] = GameTime::GetGameTime().count();
             }
         }
+        else if (oldState == 1 && newState == 3)
+        {
+            sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodePossible = false;
+            if (sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodeOn == true)
+            {
+                LOG_INFO("sql", "Hardmode is on.");
+                if (sZoneDifficulty->EncountersInProgress.find(instanceId) != sZoneDifficulty->EncountersInProgress.end() && sZoneDifficulty->EncountersInProgress[instanceId] != 0)
+                {
+                    Map::PlayerList const& PlayerList = instance->GetPlayers();
+                    for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                    {
+                        Player* player = i->GetSource();
+                        CharacterDatabase.Execute(
+                            "REPLACE INTO `zone_difficulty_encounter_logs` VALUES({}, {}, {}, {}, {}, {}, {})",
+                            instanceId, sZoneDifficulty->EncountersInProgress[instanceId], GameTime::GetGameTime().count(), instance->GetId(), id, player->GetGUID().GetCounter(), 64);
+                    }
+                }
+            }
+        }
+//        else if (oldState == 1 && newState != 3)
+//        {
+//            sZoneDifficulty->HardmodeInstanceData[id].HardmodePossible = false;
+//            if (sZoneDifficulty->HardmodeInstanceData[id].HardmodeOn == true)
+//            {
+//                sZoneDifficulty->EncountersInProgress[id] = 0;
+//            }
+//        }
     }
 
     void OnInstanceIdRemoved(uint32 instanceId) override
@@ -1177,9 +1202,10 @@ public:
     {
         LOG_INFO("sql", "OnGossipSelectRewardNpc action: {}", action);
         ClearGossipMenuFor(player);
-        uint32 npctext;
+        uint32 npctext = 0;
         if (action == 999999)
         {
+            npctext = NPC_TEXT_SCORE;
             for (int i = 1; i <= 16; ++i)
             {
                 std::string whisper;
@@ -1545,7 +1571,7 @@ public:
         uint32 baseHealth = origCreatureStats->GenerateHealth(creatureTemplate);
         uint32 newHp;
         uint32 entry = creature->GetEntry();
-        LOG_INFO("sql", "Checking hp for creature with entry {}.", entry);
+        //LOG_INFO("sql", "Checking hp for creature with entry {}.", entry);
         if (sZoneDifficulty->CreatureOverrides.find(entry) == sZoneDifficulty->CreatureOverrides.end())
         {
             if (creature->IsDungeonBoss())
@@ -1570,7 +1596,7 @@ public:
                 {
                     return;
                 }
-                LOG_INFO("sql", "Modify creature hp for hard mode: {} to {}", baseHealth, newHp);
+                //LOG_INFO("sql", "Modify creature hp for hard mode: {} to {}", baseHealth, newHp);
                 bool hpIsFull = false;
                 if (creature->GetHealthPct() >= 100)
                 {
