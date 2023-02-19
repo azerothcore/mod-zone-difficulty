@@ -110,12 +110,12 @@ public:
     bool IsDebugInfoEnabled{ false };
     float HardmodeHpModifier{ 2.0 };
     std::vector<uint32> DailyHeroicQuests;
-    std::map<uint32, uint32> HeroicQuestMapList;
+    std::map<uint32, uint32> HeroicTBCQuestMapList;
     std::map<uint32, uint8> Expansion;
-    std::map<uint32, float> ZoneDifficultyCreatureOverrides;
+    std::map<uint32, float> CreatureOverrides;
 
     typedef std::map<uint32, std::map<uint32, ZoneDifficultyNerfData> > ZoneDifficultyNerfDataMap;
-    ZoneDifficultyNerfDataMap ZoneDifficultyNerfInfo;
+    ZoneDifficultyNerfDataMap NerfInfo;
     std::map<uint32, float> SpellNerfOverrides;
     typedef std::map<uint32, std::vector<uint32> > ZoneDifficultyDisablesMap;
     ZoneDifficultyDisablesMap DisallowedBuffs;
@@ -124,9 +124,9 @@ public:
     typedef std::map<uint32, std::vector<ZoneDifficultyHardmodeMapData> > ZoneDifficultyHardmodeLootMap;
     ZoneDifficultyHardmodeLootMap HardmodeLoot;
     typedef std::map<uint32, std::map<uint32, uint32> > ZoneDifficultyDualUintMap;
-    ZoneDifficultyDualUintMap ZoneDifficultyHardmodeScore;
+    ZoneDifficultyDualUintMap HardmodeScore;
     typedef std::map<uint32, std::map<uint32, std::vector<ZoneDifficultyRewardData> > > ZoneDifficultyRewardMap;
-    ZoneDifficultyRewardMap ZoneDifficultyRewards;
+    ZoneDifficultyRewardMap Rewards;
 };
 
 #define sZoneDifficulty ZoneDifficulty::instance()

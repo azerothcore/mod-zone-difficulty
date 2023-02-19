@@ -32,31 +32,31 @@ void ZoneDifficulty::LoadMapDifficultySettings()
         return;
     }
 
-    sZoneDifficulty->ZoneDifficultyRewards.clear();
+    sZoneDifficulty->Rewards.clear();
 
     // Default values for when there is no entry in the db for duels (index 0xFFFFFFFF)
-    ZoneDifficultyNerfInfo[DUEL_INDEX][0].HealingNerfPct = 1;
-    ZoneDifficultyNerfInfo[DUEL_INDEX][0].AbsorbNerfPct = 1;
-    ZoneDifficultyNerfInfo[DUEL_INDEX][0].MeleeDamageBuffPct = 1;
-    ZoneDifficultyNerfInfo[DUEL_INDEX][0].SpellDamageBuffPct = 1;
+    NerfInfo[DUEL_INDEX][0].HealingNerfPct = 1;
+    NerfInfo[DUEL_INDEX][0].AbsorbNerfPct = 1;
+    NerfInfo[DUEL_INDEX][0].MeleeDamageBuffPct = 1;
+    NerfInfo[DUEL_INDEX][0].SpellDamageBuffPct = 1;
 
     // Heroic Quest -> MapId Translation
-    HeroicQuestMapList[542] = 11362;
-    HeroicQuestMapList[543] = 11354;
-    HeroicQuestMapList[547] = 11368;
-    HeroicQuestMapList[546] = 11369;
-    HeroicQuestMapList[557] = 11373;
-    HeroicQuestMapList[558] = 11374;
-    HeroicQuestMapList[560] = 11378;
-    HeroicQuestMapList[556] = 11372;
-    HeroicQuestMapList[585] = 11499;
-    HeroicQuestMapList[555] = 11375;
-    HeroicQuestMapList[540] = 11363;
-    HeroicQuestMapList[552] = 11388;
-    HeroicQuestMapList[269] = 11382;
-    HeroicQuestMapList[553] = 11384;
-    HeroicQuestMapList[554] = 11386;
-    HeroicQuestMapList[545] = 11370;
+    HeroicTBCQuestMapList[542] = 11362;
+    HeroicTBCQuestMapList[543] = 11354;
+    HeroicTBCQuestMapList[547] = 11368;
+    HeroicTBCQuestMapList[546] = 11369;
+    HeroicTBCQuestMapList[557] = 11373;
+    HeroicTBCQuestMapList[558] = 11374;
+    HeroicTBCQuestMapList[560] = 11378;
+    HeroicTBCQuestMapList[556] = 11372;
+    HeroicTBCQuestMapList[585] = 11499;
+    HeroicTBCQuestMapList[555] = 11375;
+    HeroicTBCQuestMapList[540] = 11363;
+    HeroicTBCQuestMapList[552] = 11388;
+    HeroicTBCQuestMapList[269] = 11382;
+    HeroicTBCQuestMapList[553] = 11384;
+    HeroicTBCQuestMapList[554] = 11386;
+    HeroicTBCQuestMapList[545] = 11370;
 
     if (QueryResult result = WorldDatabase.Query("SELECT * FROM zone_difficulty_info"))
     {
@@ -73,7 +73,7 @@ void ZoneDifficulty::LoadMapDifficultySettings()
                 data.MeleeDamageBuffPct = (*result)[4].Get<float>();
                 data.SpellDamageBuffPct = (*result)[5].Get<float>();
                 data.Enabled = data.Enabled | mode;
-                sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][phaseMask] = data;
+                sZoneDifficulty->NerfInfo[mapId][phaseMask] = data;
             }
             else if (mode == MODE_HARD)
             {
@@ -82,7 +82,7 @@ void ZoneDifficulty::LoadMapDifficultySettings()
                 data.MeleeDamageBuffPctHard = (*result)[4].Get<float>();
                 data.SpellDamageBuffPctHard = (*result)[5].Get<float>();
                 data.Enabled = data.Enabled | mode;
-                sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][phaseMask] = data;
+                sZoneDifficulty->NerfInfo[mapId][phaseMask] = data;
             }
 
             // duels do not check for phases. Only 0 is allowed.
@@ -177,7 +177,7 @@ void ZoneDifficulty::LoadMapDifficultySettings()
 
             if (enabled)
             {
-                sZoneDifficulty->ZoneDifficultyCreatureOverrides[creatureentry] = hpmodifier;
+                sZoneDifficulty->CreatureOverrides[creatureentry] = hpmodifier;
                 LOG_INFO("sql", "New creature with entry: {} has exception for hp: {}", creatureentry, hpmodifier);
             }
         } while (result->NextRow());
@@ -204,7 +204,7 @@ void ZoneDifficulty::LoadMapDifficultySettings()
 
             if (enabled)
             {
-                sZoneDifficulty->ZoneDifficultyRewards[contenttype][itemtype].push_back(data);
+                sZoneDifficulty->Rewards[contenttype][itemtype].push_back(data);
                 LOG_INFO("sql", "Loading item with entry {} has enchant {} in slot {}.", data.Entry, data.Enchant, data.EnchantSlot);
             }
             LOG_INFO("sql", "Total items in vector: {}.", i);
@@ -274,7 +274,7 @@ void ZoneDifficulty::LoadHardmodeScoreData()
             uint32 Score = (*result)[2].Get<uint32>();
 
             LOG_INFO("sql", "Loading from DB for player with GUID {}: Type = {}, Score = {}", GUID, Type, Score);
-            sZoneDifficulty->ZoneDifficultyHardmodeScore[GUID][Type] = Score;
+            sZoneDifficulty->HardmodeScore[GUID][Type] = Score;
 
         } while (result->NextRow());
     }
@@ -405,23 +405,23 @@ void ZoneDifficulty::AddHardmodeScore(Map* map, uint32 type)
     for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
     {
         Player* player = i->GetSource();
-        if (sZoneDifficulty->ZoneDifficultyHardmodeScore.find(player->GetGUID().GetCounter()) == sZoneDifficulty->ZoneDifficultyHardmodeScore.end())
+        if (sZoneDifficulty->HardmodeScore.find(player->GetGUID().GetCounter()) == sZoneDifficulty->HardmodeScore.end())
         {
-            sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][type] = 1;
+            sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()][type] = 1;
         }
-        else if (sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()].find(type) == sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()].end())
+        else if (sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()].find(type) == sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()].end())
         {
-            sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][type] = 1;
+            sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()][type] = 1;
         }
         else
         {
-            sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][type] = sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][type] + 1;
+            sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()][type] = sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()][type] + 1;
         }
-        LOG_INFO("sql", "Player {} new score: {}", player->GetName(), sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][type]);
+        LOG_INFO("sql", "Player {} new score: {}", player->GetName(), sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()][type]);
 
         std::string typestring = sZoneDifficulty->GetContentTypeString(type);
-        ChatHandler(player->GetSession()).PSendSysMessage("You have received hardmode score %s New score: %i", typestring, sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][type]);
-        CharacterDatabase.Execute("REPLACE INTO zone_difficulty_hardmode_score VALUES({}, {}, {})", player->GetGUID().GetCounter(), type, sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][type]);
+        ChatHandler(player->GetSession()).PSendSysMessage("You have received hardmode score %s New score: %i", typestring, sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()][type]);
+        CharacterDatabase.Execute("REPLACE INTO zone_difficulty_hardmode_score VALUES({}, {}, {})", player->GetGUID().GetCounter(), type, sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()][type]);
     }
 }
 
@@ -434,10 +434,10 @@ void DeductHardmodeScore(Player* player, uint32 type, uint32 score)
 {
     // NULL check happens in the calling function
     LOG_INFO("sql", "Reducing score with type {} from player with guid {} by {}.", type, player->GetGUID().GetCounter(), score);
-    sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][type] = sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][type] - score;
+    sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()][type] = sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()][type] - score;
 }
 
-/* @brief Send and item to the player using the data from ZoneDifficultyRewards.
+/* @brief Send and item to the player using the data from sZoneDifficulty->Rewards.
  *
  * @param player The recipient of the mail.
  * @param category The content level e.g. TYPE_HEROIC_TBC.
@@ -446,7 +446,7 @@ void DeductHardmodeScore(Player* player, uint32 type, uint32 score)
  */
 void SendItem(Player* player, uint32 category, uint32 itemtype, uint32 id)
 {
-    ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(sZoneDifficulty->ZoneDifficultyRewards[category][itemtype][id].Entry);
+    ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(sZoneDifficulty->Rewards[category][itemtype][id].Entry);
     if (!itemTemplate)
     {
         LOG_ERROR("sql", "itemTemplate could not be constructed in sZoneDifficulty->SendItem for category {}, itemtype {}, id {}.", category, itemtype, id);
@@ -459,12 +459,12 @@ void SendItem(Player* player, uint32 category, uint32 itemtype, uint32 id)
     MailDraft draft(REWARD_MAIL_SUBJECT, REWARD_MAIL_BODY);
     MailSender sender(MAIL_NORMAL, senderGuid, MAIL_STATIONERY_GM);
     CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
-    if (Item* item = Item::CreateItem(sZoneDifficulty->ZoneDifficultyRewards[category][itemtype][id].Entry, 1, player))
+    if (Item* item = Item::CreateItem(sZoneDifficulty->Rewards[category][itemtype][id].Entry, 1, player))
     {
-        if (sZoneDifficulty->ZoneDifficultyRewards[category][itemtype][id].EnchantSlot != 0 && sZoneDifficulty->ZoneDifficultyRewards[category][itemtype][id].Enchant != 0)
+        if (sZoneDifficulty->Rewards[category][itemtype][id].EnchantSlot != 0 && sZoneDifficulty->Rewards[category][itemtype][id].Enchant != 0)
         {
-            item->SetEnchantment(EnchantmentSlot(sZoneDifficulty->ZoneDifficultyRewards[category][itemtype][id].EnchantSlot), sZoneDifficulty->ZoneDifficultyRewards[category][itemtype][id].Enchant, 0, 0, player->GetGUID());
-            player->ApplyEnchantment(item, EnchantmentSlot(sZoneDifficulty->ZoneDifficultyRewards[category][itemtype][id].EnchantSlot), true, true, true);
+            item->SetEnchantment(EnchantmentSlot(sZoneDifficulty->Rewards[category][itemtype][id].EnchantSlot), sZoneDifficulty->Rewards[category][itemtype][id].Enchant, 0, 0, player->GetGUID());
+            player->ApplyEnchantment(item, EnchantmentSlot(sZoneDifficulty->Rewards[category][itemtype][id].EnchantSlot), true, true, true);
         }
         item->SaveToDB(trans); // save for prevent lost at next mail load, if send fail then item will deleted
         draft.AddItem(item);
@@ -562,17 +562,17 @@ bool ZoneDifficulty::ShouldNerfInDuels(Unit* target)
 int32 ZoneDifficulty::GetLowestMatchingPhase(uint32 mapId, uint32 phaseMask)
 {
     // Check if there is an entry for the mapid at all
-    if (sZoneDifficulty->ZoneDifficultyNerfInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyNerfInfo.end())
+    if (sZoneDifficulty->NerfInfo.find(mapId) != sZoneDifficulty->NerfInfo.end())
     {
 
         // Check if 0 is assigned as a phase to cover all phases
-        if (sZoneDifficulty->ZoneDifficultyNerfInfo[mapId].find(0) != sZoneDifficulty->ZoneDifficultyNerfInfo[mapId].end())
+        if (sZoneDifficulty->NerfInfo[mapId].find(0) != sZoneDifficulty->NerfInfo[mapId].end())
         {
             return 0;
         }
 
         // Check all $key in [mapId][$key] if they match the target's visible phases
-        for (auto const& [key, value] : sZoneDifficulty->ZoneDifficultyNerfInfo[mapId])
+        for (auto const& [key, value] : sZoneDifficulty->NerfInfo[mapId])
         {
             if (key & phaseMask)
             {
@@ -619,7 +619,7 @@ public:
             bool nerfInDuel = sZoneDifficulty->ShouldNerfInDuels(target);
 
             //Check if the map of the target is subject of a nerf at all OR if the target is subject of a nerf in a duel
-            if (sZoneDifficulty->ZoneDifficultyNerfInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyNerfInfo.end() || nerfInDuel)
+            if (sZoneDifficulty->NerfInfo.find(mapId) != sZoneDifficulty->NerfInfo.end() || nerfInDuel)
             {
                 if (SpellInfo const* spellInfo = aura->GetSpellInfo())
                 {
@@ -654,26 +654,26 @@ public:
                             int32 absorb = eff->GetAmount();
                             uint32 phaseMask = target->GetPhaseMask();
                             int matchingPhase = sZoneDifficulty->GetLowestMatchingPhase(mapId, phaseMask);
-                            int8 mode = sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].Enabled;
+                            int8 mode = sZoneDifficulty->NerfInfo[mapId][matchingPhase].Enabled;
                             if (matchingPhase != -1)
                             {
                                 Map* map = target->GetMap();
                                 if ((mode & MODE_NORMAL) == MODE_NORMAL)
                                 {
-                                    absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].AbsorbNerfPct;
+                                    absorb = eff->GetAmount() * sZoneDifficulty->NerfInfo[mapId][matchingPhase].AbsorbNerfPct;
                                 }
                                 if ((mode & MODE_HARD) == MODE_HARD && sZoneDifficulty->HardmodeInstanceData[target->GetMap()->GetInstanceId()].HardmodeOn == true)
                                 {
                                     if (map->IsRaid() ||
                                         (map->IsHeroic() && map->IsDungeon()))
                                     {
-                                        absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].AbsorbNerfPctHard;
+                                        absorb = eff->GetAmount() * sZoneDifficulty->NerfInfo[mapId][matchingPhase].AbsorbNerfPctHard;
                                     }
                                 }
                             }
-                            else if (sZoneDifficulty->ZoneDifficultyNerfInfo[DUEL_INDEX][0].Enabled > 0 && nerfInDuel)
+                            else if (sZoneDifficulty->NerfInfo[DUEL_INDEX][0].Enabled > 0 && nerfInDuel)
                             {
-                                absorb = eff->GetAmount() * sZoneDifficulty->ZoneDifficultyNerfInfo[DUEL_INDEX][0].AbsorbNerfPct;
+                                absorb = eff->GetAmount() * sZoneDifficulty->NerfInfo[DUEL_INDEX][0].AbsorbNerfPct;
                             }
 
                             //This check must be last and override duel and map adjustments
@@ -722,7 +722,7 @@ public:
             uint32 mapId = target->GetMapId();
             bool nerfInDuel = sZoneDifficulty->ShouldNerfInDuels(target);
             //Check if the map of the target is subject of a nerf at all OR if the target is subject of a nerf in a duel
-            if (sZoneDifficulty->ZoneDifficultyNerfInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyNerfInfo.end() || sZoneDifficulty->ShouldNerfInDuels(target))
+            if (sZoneDifficulty->NerfInfo.find(mapId) != sZoneDifficulty->NerfInfo.end() || sZoneDifficulty->ShouldNerfInDuels(target))
             {
                 //This check must be first and skip the rest to override everything else.
                 if (spellInfo)
@@ -736,26 +736,26 @@ public:
 
                 uint32 phaseMask = target->GetPhaseMask();
                 int matchingPhase = sZoneDifficulty->GetLowestMatchingPhase(mapId, phaseMask);
-                int8 mode = sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].Enabled;
+                int8 mode = sZoneDifficulty->NerfInfo[mapId][matchingPhase].Enabled;
                 if (matchingPhase != -1)
                 {
                     Map* map = target->GetMap();
                     if ((mode & MODE_NORMAL) == MODE_NORMAL)
                     {
-                        heal = heal * sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].HealingNerfPct;
+                        heal = heal * sZoneDifficulty->NerfInfo[mapId][matchingPhase].HealingNerfPct;
                     }
                     if ((mode & MODE_HARD) == MODE_HARD && sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].HardmodeOn == true)
                     {
                         if (map->IsRaid() ||
                             (map->IsHeroic() && map->IsDungeon()))
                         {
-                            heal = heal * sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].HealingNerfPctHard;
+                            heal = heal * sZoneDifficulty->NerfInfo[mapId][matchingPhase].HealingNerfPctHard;
                         }
                     }
                 }
-                else if (sZoneDifficulty->ZoneDifficultyNerfInfo[DUEL_INDEX][0].Enabled > 0 && nerfInDuel)
+                else if (sZoneDifficulty->NerfInfo[DUEL_INDEX][0].Enabled > 0 && nerfInDuel)
                 {
-                    heal = heal * sZoneDifficulty->ZoneDifficultyNerfInfo[DUEL_INDEX][0].HealingNerfPct;
+                    heal = heal * sZoneDifficulty->NerfInfo[DUEL_INDEX][0].HealingNerfPct;
                 }
             }
         }
@@ -812,28 +812,28 @@ public:
                 }
             }
 
-            if (sZoneDifficulty->ZoneDifficultyNerfInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyNerfInfo.end() && matchingPhase != -1)
+            if (sZoneDifficulty->NerfInfo.find(mapId) != sZoneDifficulty->NerfInfo.end() && matchingPhase != -1)
             {
-                int8 mode = sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].Enabled;
+                int8 mode = sZoneDifficulty->NerfInfo[mapId][matchingPhase].Enabled;
                 Map* map = target->GetMap();
                 if ((mode & MODE_NORMAL) == MODE_NORMAL)
                 {
-                    damage = damage * sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].SpellDamageBuffPct;
+                    damage = damage * sZoneDifficulty->NerfInfo[mapId][matchingPhase].SpellDamageBuffPct;
                 }
                 if ((mode & MODE_HARD) == MODE_HARD && sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].HardmodeOn == true)
                 {
                     if (map->IsRaid() ||
                         (map->IsHeroic() && map->IsDungeon()))
                     {
-                        damage = damage * sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].SpellDamageBuffPctHard;
+                        damage = damage * sZoneDifficulty->NerfInfo[mapId][matchingPhase].SpellDamageBuffPctHard;
                     }
                 }
             }
             else if (sZoneDifficulty->ShouldNerfInDuels(target))
             {
-                if (sZoneDifficulty->ZoneDifficultyNerfInfo[DUEL_INDEX][0].Enabled > 0)
+                if (sZoneDifficulty->NerfInfo[DUEL_INDEX][0].Enabled > 0)
                 {
-                    damage = damage * sZoneDifficulty->ZoneDifficultyNerfInfo[DUEL_INDEX][0].SpellDamageBuffPct;
+                    damage = damage * sZoneDifficulty->NerfInfo[DUEL_INDEX][0].SpellDamageBuffPct;
                 }
             }
 
@@ -886,35 +886,35 @@ public:
                     {
                         if (player->GetSession())
                         {
-                            ChatHandler(player->GetSession()).PSendSysMessage("Spell: %s (%u) Before Nerf Value: %i (%f Normal Mode)", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, damage, sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].SpellDamageBuffPct);
-                            ChatHandler(player->GetSession()).PSendSysMessage("Spell: %s (%u) Before Nerf Value: %i (%f Hard Mode)", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, damage, sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].SpellDamageBuffPctHard);
+                            ChatHandler(player->GetSession()).PSendSysMessage("Spell: %s (%u) Before Nerf Value: %i (%f Normal Mode)", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, damage, sZoneDifficulty->NerfInfo[mapId][matchingPhase].SpellDamageBuffPct);
+                            ChatHandler(player->GetSession()).PSendSysMessage("Spell: %s (%u) Before Nerf Value: %i (%f Hard Mode)", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, damage, sZoneDifficulty->NerfInfo[mapId][matchingPhase].SpellDamageBuffPctHard);
                         }
                     }
                 }
             }
 
-            if (sZoneDifficulty->ZoneDifficultyNerfInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyNerfInfo.end() && matchingPhase != -1)
+            if (sZoneDifficulty->NerfInfo.find(mapId) != sZoneDifficulty->NerfInfo.end() && matchingPhase != -1)
             {
-                int8 mode = sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].Enabled;
+                int8 mode = sZoneDifficulty->NerfInfo[mapId][matchingPhase].Enabled;
                 Map* map = target->GetMap();
                 if ((mode & MODE_NORMAL) == MODE_NORMAL)
                 {
-                    damage = damage * sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].SpellDamageBuffPct;
+                    damage = damage * sZoneDifficulty->NerfInfo[mapId][matchingPhase].SpellDamageBuffPct;
                 }
                 if ((mode & MODE_HARD) == MODE_HARD && sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].HardmodeOn == true)
                 {
                     if (map->IsRaid() ||
                         (map->IsHeroic() && map->IsDungeon()))
                     {
-                        damage = damage * sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].SpellDamageBuffPctHard;
+                        damage = damage * sZoneDifficulty->NerfInfo[mapId][matchingPhase].SpellDamageBuffPctHard;
                     }
                 }
             }
             else if (sZoneDifficulty->ShouldNerfInDuels(target))
             {
-                if (sZoneDifficulty->ZoneDifficultyNerfInfo[DUEL_INDEX][0].Enabled > 0)
+                if (sZoneDifficulty->NerfInfo[DUEL_INDEX][0].Enabled > 0)
                 {
-                    damage = damage * sZoneDifficulty->ZoneDifficultyNerfInfo[DUEL_INDEX][0].SpellDamageBuffPct;
+                    damage = damage * sZoneDifficulty->NerfInfo[DUEL_INDEX][0].SpellDamageBuffPct;
                 }
             }
 
@@ -952,28 +952,28 @@ public:
             uint32 mapId = target->GetMapId();
             uint32 phaseMask = target->GetPhaseMask();
             int matchingPhase = sZoneDifficulty->GetLowestMatchingPhase(mapId, phaseMask);
-            if (sZoneDifficulty->ZoneDifficultyNerfInfo.find(mapId) != sZoneDifficulty->ZoneDifficultyNerfInfo.end() && matchingPhase != -1)
+            if (sZoneDifficulty->NerfInfo.find(mapId) != sZoneDifficulty->NerfInfo.end() && matchingPhase != -1)
             {
-                int8 mode = sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].Enabled;
+                int8 mode = sZoneDifficulty->NerfInfo[mapId][matchingPhase].Enabled;
                 Map* map = target->GetMap();
                 if ((mode & MODE_NORMAL) == MODE_NORMAL)
                 {
-                    damage = damage * sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].MeleeDamageBuffPct;
+                    damage = damage * sZoneDifficulty->NerfInfo[mapId][matchingPhase].MeleeDamageBuffPct;
                 }
                 if ((mode & MODE_HARD) == MODE_HARD && sZoneDifficulty->HardmodeInstanceData[target->GetMap()->GetInstanceId()].HardmodeOn == true)
                 {
                     if (map->IsRaid() ||
                         (map->IsHeroic() && map->IsDungeon()))
                     {
-                        damage = damage * sZoneDifficulty->ZoneDifficultyNerfInfo[mapId][matchingPhase].MeleeDamageBuffPctHard;
+                        damage = damage * sZoneDifficulty->NerfInfo[mapId][matchingPhase].MeleeDamageBuffPctHard;
                     }
                 }
             }
             else if (sZoneDifficulty->ShouldNerfInDuels(target))
             {
-                if (sZoneDifficulty->ZoneDifficultyNerfInfo[DUEL_INDEX][0].Enabled > 0)
+                if (sZoneDifficulty->NerfInfo[DUEL_INDEX][0].Enabled > 0)
                 {
-                    damage = damage * sZoneDifficulty->ZoneDifficultyNerfInfo[DUEL_INDEX][0].MeleeDamageBuffPct;
+                    damage = damage * sZoneDifficulty->NerfInfo[DUEL_INDEX][0].MeleeDamageBuffPct;
                 }
             }
         }
@@ -1183,17 +1183,17 @@ public:
             {
                 std::string whisper;
                 whisper.append("You score is ");
-                if (sZoneDifficulty->ZoneDifficultyHardmodeScore.find(player->GetGUID().GetCounter()) == sZoneDifficulty->ZoneDifficultyHardmodeScore.end())
+                if (sZoneDifficulty->HardmodeScore.find(player->GetGUID().GetCounter()) == sZoneDifficulty->HardmodeScore.end())
                 {
                     whisper.append("0 ");
                 }
-                else if (sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()].find(i) == sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()].end())
+                else if (sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()].find(i) == sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()].end())
                 {
                     whisper.append("0 ");
                 }
                 else
                 {
-                    whisper.append(std::to_string(sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][i])).append(" ");
+                    whisper.append(std::to_string(sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()][i])).append(" ");
                 }
                 whisper.append(sZoneDifficulty->GetContentTypeString(i));
                 creature->Whisper(whisper, LANG_UNIVERSAL, player);
@@ -1203,7 +1203,7 @@ public:
         else if (action < 100)
         {
             npctext = NPC_TEXT_CATEGORY;
-            for (auto& itemtype : sZoneDifficulty->ZoneDifficultyRewards[action])
+            for (auto& itemtype : sZoneDifficulty->Rewards[action])
             {
                 LOG_INFO("sql", "typedata.first is {}", itemtype.first);
                 std::string gossip;
@@ -1223,14 +1223,14 @@ public:
                 counter = counter - 100;
             }
             LOG_INFO("sql", "Building gossip with category {} and counter {}", category, counter);
-            auto rewards = sZoneDifficulty->ZoneDifficultyRewards[category][counter];
+            auto rewards = sZoneDifficulty->Rewards[category][counter];
 
-            for (int i = 0; i < sZoneDifficulty->ZoneDifficultyRewards[category][counter].size(); ++i)
+            for (int i = 0; i < sZoneDifficulty->Rewards[category][counter].size(); ++i)
             {
-                LOG_INFO("sql", "Adding gossip option for entry {}", sZoneDifficulty->ZoneDifficultyRewards[category][counter][i].Entry);
-                ItemTemplate const* proto = sObjectMgr->GetItemTemplate(sZoneDifficulty->ZoneDifficultyRewards[category][counter][i].Entry);
+                LOG_INFO("sql", "Adding gossip option for entry {}", sZoneDifficulty->Rewards[category][counter][i].Entry);
+                ItemTemplate const* proto = sObjectMgr->GetItemTemplate(sZoneDifficulty->Rewards[category][counter][i].Entry);
                 std::string name = proto->Name1;
-                if (ItemLocale const* leftIl = sObjectMgr->GetItemLocale(sZoneDifficulty->ZoneDifficultyRewards[category][counter][i].Entry))
+                if (ItemLocale const* leftIl = sObjectMgr->GetItemLocale(sZoneDifficulty->Rewards[category][counter][i].Entry))
                 {
                     ObjectMgr::GetLocaleString(leftIl->Name, player->GetSession()->GetSessionDbcLocale(), name);
                 }
@@ -1244,7 +1244,6 @@ public:
             uint32 category = 0;
             uint32 itemtype = 0;
             uint32 counter = action;
-            uint32 i;
             while (counter > 999)
             {
                 ++category;
@@ -1259,23 +1258,23 @@ public:
 
             // Check if the player has enough score in the respective category.
             uint32 availablescore = 0;
-            if (sZoneDifficulty->ZoneDifficultyHardmodeScore.find(player->GetGUID().GetCounter()) != sZoneDifficulty->ZoneDifficultyHardmodeScore.end())
+            if (sZoneDifficulty->HardmodeScore.find(player->GetGUID().GetCounter()) != sZoneDifficulty->HardmodeScore.end())
             {
-                if (sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()].find(category) != sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()].end())
+                if (sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()].find(category) != sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()].end())
                 {
-                    availablescore = sZoneDifficulty->ZoneDifficultyHardmodeScore[player->GetGUID().GetCounter()][category];
+                    availablescore = sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()][category];
                 }
             }
 
-            if (availablescore < sZoneDifficulty->ZoneDifficultyRewards[category][itemtype][counter].Price)
+            if (availablescore < sZoneDifficulty->Rewards[category][itemtype][counter].Price)
             {
                 npctext = NPC_TEXT_DENIED;
                 SendGossipMenuFor(player, npctext, creature);
                 std::string whisper;
                 whisper.append("I am sorry, time-traveler. This item costs ");
-                whisper.append(std::to_string(sZoneDifficulty->ZoneDifficultyRewards[category][itemtype][counter].Price));
+                whisper.append(std::to_string(sZoneDifficulty->Rewards[category][itemtype][counter].Price));
                 whisper.append(" but you only have ");
-                whisper.append(std::to_string(sZoneDifficulty->ZoneDifficultyHardmodeScore[category][player->GetGUID().GetCounter()]));
+                whisper.append(std::to_string(sZoneDifficulty->HardmodeScore[category][player->GetGUID().GetCounter()]));
                 whisper.append(" ");
                 whisper.append(sZoneDifficulty->GetContentTypeString(category));
                 creature->Whisper(whisper, LANG_UNIVERSAL, player);
@@ -1283,10 +1282,10 @@ public:
             }
 
             npctext = NPC_TEXT_CONFIRM;
-            ItemTemplate const* proto = sObjectMgr->GetItemTemplate(sZoneDifficulty->ZoneDifficultyRewards[category][itemtype][counter].Entry);
+            ItemTemplate const* proto = sObjectMgr->GetItemTemplate(sZoneDifficulty->Rewards[category][itemtype][counter].Entry);
             std::string gossip;
             std::string name = proto->Name1;
-            if (ItemLocale const* leftIl = sObjectMgr->GetItemLocale(sZoneDifficulty->ZoneDifficultyRewards[category][itemtype][counter].Entry))
+            if (ItemLocale const* leftIl = sObjectMgr->GetItemLocale(sZoneDifficulty->Rewards[category][itemtype][counter].Entry))
             {
                 ObjectMgr::GetLocaleString(leftIl->Name, player->GetSession()->GetSessionDbcLocale(), name);
             }
@@ -1313,7 +1312,7 @@ public:
                 counter = counter - 100;
             }
             LOG_INFO("sql", "Sending item with category {}, itemtype {}, counter {}", category, itemtype, counter);
-            DeductHardmodeScore(player, category, sZoneDifficulty->ZoneDifficultyRewards[category][itemtype][counter].Price);
+            DeductHardmodeScore(player, category, sZoneDifficulty->Rewards[category][itemtype][counter].Price);
             SendItem(player, category, itemtype, counter);
         }
 
@@ -1327,7 +1326,7 @@ public:
         uint32 npctext = NPC_TEXT_OFFER;
         AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Can you please remind me of my score?", GOSSIP_SENDER_MAIN, 999999);
 
-        for (auto& typedata : sZoneDifficulty->ZoneDifficultyRewards)
+        for (auto& typedata : sZoneDifficulty->Rewards)
         {
             LOG_INFO("sql", "typedata.first is {}", typedata.first);
             std::string gossip;
@@ -1358,12 +1357,13 @@ public:
             if (me->GetMap() && me->GetMap()->IsHeroic() && !me->GetMap()->IsRaid())
             {
                 LOG_INFO("sql", "We're inside a heroic 5man now.");
+                //todo: add the list for the wotlk heroic dungeons quests
                 for (auto& quest : sZoneDifficulty->DailyHeroicQuests)
                 {
                     LOG_INFO("sql", "Checking quest {} and MapId {}", quest, me->GetMapId());
                     if (sPoolMgr->IsSpawnedObject<Quest>(quest))
                     {
-                        if (sZoneDifficulty->HeroicQuestMapList[me->GetMapId()] == quest)
+                        if (sZoneDifficulty->HeroicTBCQuestMapList[me->GetMapId()] == quest)
                         {
                             LOG_INFO("sql", "mod_zone_difficulty_dungeonmasterAI: Quest with id {} is active.", quest);
                             me->SetPhaseMask(1, true);
@@ -1517,7 +1517,7 @@ public:
         }
 
         uint32 mapid = creature->GetMapId();
-        if (sZoneDifficulty->ZoneDifficultyNerfInfo.find(mapid) == sZoneDifficulty->ZoneDifficultyNerfInfo.end())
+        if (sZoneDifficulty->NerfInfo.find(mapid) == sZoneDifficulty->NerfInfo.end())
         {
             return;
         }
@@ -1546,7 +1546,7 @@ public:
         uint32 newHp;
         uint32 entry = creature->GetEntry();
         LOG_INFO("sql", "Checking hp for creature with entry {}.", entry);
-        if (sZoneDifficulty->ZoneDifficultyCreatureOverrides.find(entry) == sZoneDifficulty->ZoneDifficultyCreatureOverrides.end())
+        if (sZoneDifficulty->CreatureOverrides.find(entry) == sZoneDifficulty->CreatureOverrides.end())
         {
             if (creature->IsDungeonBoss())
             {
@@ -1556,12 +1556,12 @@ public:
         }
         else
         {
-            newHp = round(baseHealth * sZoneDifficulty->ZoneDifficultyCreatureOverrides[entry]);
+            newHp = round(baseHealth * sZoneDifficulty->CreatureOverrides[entry]);
         }
 
         uint32 phaseMask = creature->GetPhaseMask();
         int matchingPhase = sZoneDifficulty->GetLowestMatchingPhase(creature->GetMapId(), phaseMask);
-        int8 mode = sZoneDifficulty->ZoneDifficultyNerfInfo[mapid][matchingPhase].Enabled;
+        int8 mode = sZoneDifficulty->NerfInfo[mapid][matchingPhase].Enabled;
         if (matchingPhase != -1)
         {
             if ((mode & MODE_HARD) == MODE_HARD && sZoneDifficulty->HardmodeInstanceData[creature->GetMap()->GetInstanceId()].HardmodeOn == true)
