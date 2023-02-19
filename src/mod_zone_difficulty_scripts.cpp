@@ -1273,7 +1273,7 @@ public:
                 std::string whisper;
                 whisper.append("I am sorry, time-traveler. This item costs ");
                 whisper.append(std::to_string(sZoneDifficulty->Rewards[category][itemtype][counter].Price));
-                whisper.append(" but you only have ");
+                whisper.append(" score but you only have ");
                 whisper.append(std::to_string(sZoneDifficulty->HardmodeScore[category][player->GetGUID().GetCounter()]));
                 whisper.append(" ");
                 whisper.append(sZoneDifficulty->GetContentTypeString(category));
