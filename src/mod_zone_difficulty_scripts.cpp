@@ -435,6 +435,7 @@ void DeductHardmodeScore(Player* player, uint32 type, uint32 score)
     // NULL check happens in the calling function
     LOG_INFO("sql", "Reducing score with type {} from player with guid {} by {}.", type, player->GetGUID().GetCounter(), score);
     sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()][type] = sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()][type] - score;
+    CharacterDatabase.Execute("REPLACE INTO zone_difficulty_hardmode_score VALUES({}, {}, {})", player->GetGUID().GetCounter(), type, sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()][type]);
 }
 
 /* @brief Send and item to the player using the data from sZoneDifficulty->Rewards.
