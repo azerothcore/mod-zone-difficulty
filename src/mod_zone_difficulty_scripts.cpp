@@ -1225,7 +1225,7 @@ public:
             LOG_INFO("sql", "Building gossip with category {} and counter {}", category, counter);
             auto rewards = sZoneDifficulty->Rewards[category][counter];
 
-            for (int i = 0; i < sZoneDifficulty->Rewards[category][counter].size(); ++i)
+            for (size_t i = 0; i < sZoneDifficulty->Rewards[category][counter].size(); ++i)
             {
                 LOG_INFO("sql", "Adding gossip option for entry {}", sZoneDifficulty->Rewards[category][counter][i].Entry);
                 ItemTemplate const* proto = sObjectMgr->GetItemTemplate(sZoneDifficulty->Rewards[category][counter][i].Entry);
