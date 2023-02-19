@@ -1223,7 +1223,6 @@ public:
                 counter = counter - 100;
             }
             LOG_INFO("sql", "Building gossip with category {} and counter {}", category, counter);
-            uint32 first = 0;
             auto rewards = sZoneDifficulty->ZoneDifficultyRewards[category][counter];
 
             for (int i = 0; i < sZoneDifficulty->ZoneDifficultyRewards[category][counter].size(); ++i)
