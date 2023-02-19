@@ -28,10 +28,10 @@ DROP TABLE IF EXISTS `zone_difficulty_hardmode_rewards`;
 CREATE TABLE `zone_difficulty_hardmode_rewards` (
     `ContentType` INT NOT NULL DEFAULT 0,
     `ItemType` INT NOT NULL DEFAULT 0,
-	`Entry` INT NOT NULL DEFAULT 0,
-	`Price` INT NOT NULL DEFAULT 0,
-	`Enchant` INT NOT NULL DEFAULT 0,
-	`EnchantSlot` TINYINT NOT NULL DEFAULT 0,
+    `Entry` INT NOT NULL DEFAULT 0,
+    `Price` INT NOT NULL DEFAULT 0,
+    `Enchant` INT NOT NULL DEFAULT 0,
+    `EnchantSlot` TINYINT NOT NULL DEFAULT 0,
     `Enabled` TINYINT DEFAULT 0,
 	`Comment` TEXT,
 	PRIMARY KEY (`ContentType`, `Entry`, `Enchant`)

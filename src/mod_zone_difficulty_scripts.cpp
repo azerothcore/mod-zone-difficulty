@@ -461,8 +461,11 @@ void SendItem(Player* player, uint32 category, uint32 itemtype, uint32 id)
     CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
     if (Item* item = Item::CreateItem(sZoneDifficulty->ZoneDifficultyRewards[category][itemtype][id].Entry, 1, player))
     {
-        item->SetEnchantment(EnchantmentSlot(sZoneDifficulty->ZoneDifficultyRewards[category][itemtype][id].EnchantSlot), sZoneDifficulty->ZoneDifficultyRewards[category][itemtype][id].Enchant, 0, 0, player->GetGUID());
-        player->ApplyEnchantment(item, EnchantmentSlot(sZoneDifficulty->ZoneDifficultyRewards[category][itemtype][id].EnchantSlot), true, true, true);
+        if (sZoneDifficulty->ZoneDifficultyRewards[category][itemtype][id].EnchantSlot != 0 && sZoneDifficulty->ZoneDifficultyRewards[category][itemtype][id].Enchant != 0)
+        {
+            item->SetEnchantment(EnchantmentSlot(sZoneDifficulty->ZoneDifficultyRewards[category][itemtype][id].EnchantSlot), sZoneDifficulty->ZoneDifficultyRewards[category][itemtype][id].Enchant, 0, 0, player->GetGUID());
+            player->ApplyEnchantment(item, EnchantmentSlot(sZoneDifficulty->ZoneDifficultyRewards[category][itemtype][id].EnchantSlot), true, true, true);
+        }
         item->SaveToDB(trans); // save for prevent lost at next mail load, if send fail then item will deleted
         draft.AddItem(item);
     }
