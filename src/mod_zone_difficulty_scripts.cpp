@@ -1206,6 +1206,7 @@ public:
         if (action == 999998)
         {
             CloseGossipMenuFor(player);
+            return true;
         }
         if (action == 999999)
         {
