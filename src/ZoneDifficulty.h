@@ -102,7 +102,7 @@ public:
     void DeductHardmodeScore(Player* player, uint32 type, uint32 score);
     void SendItem(Player* player, uint32 category, uint32 itemtype, uint32 id);
     [[nodiscard]] bool IsValidNerfTarget(Unit* target);
-    [[nodiscard]] bool VectorContains(std::vector<uint32> vec, uint32 element);
+    [[nodiscard]] bool VectorContainsUint32(std::vector<uint32> vec, uint32 element);
     [[nodiscard]] bool IsHardmodeMap(uint32 mapid);
     [[nodiscard]] bool ShouldNerfInDuels(Unit* target);
     [[nodiscard]] int32 GetLowestMatchingPhase(uint32 mapId, uint32 phaseMask);
@@ -115,6 +115,7 @@ public:
     std::map<uint32, uint8> Expansion;
     std::map<uint32, float> CreatureOverrides;
     std::map<uint32, uint32> EncountersInProgress;
+    std::map<uint32, std::string> ItemIcons;
 
     typedef std::map<uint32, std::map<uint32, ZoneDifficultyNerfData> > ZoneDifficultyNerfDataMap;
     ZoneDifficultyNerfDataMap NerfInfo;

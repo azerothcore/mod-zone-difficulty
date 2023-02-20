@@ -59,6 +59,14 @@ void ZoneDifficulty::LoadMapDifficultySettings()
     HeroicTBCQuestMapList[554] = 11386;
     HeroicTBCQuestMapList[545] = 11370;
 
+    // Icons
+    sZoneDifficulty->ItemIcons[ITEMTYPE_MISC] = "|TInterface\\icons\\inv_misc_cape_17:15|t |TInterface\\icons\\inv_misc_gem_topaz_02:15|t |TInterface\\icons\\inv_jewelry_ring_51naxxramas:15|t ";
+    sZoneDifficulty->ItemIcons[ITEMTYPE_CLOTH] = "|TInterface\\icons\\inv_chest_cloth_42:15|t ";
+    sZoneDifficulty->ItemIcons[ITEMTYPE_LEATHER] = "|TInterface\\icons\\inv_helmet_41:15|t ";
+    sZoneDifficulty->ItemIcons[ITEMTYPE_MAIL] = "|TInterface\\icons\\inv_chest_chain_13:15|t ";
+    sZoneDifficulty->ItemIcons[ITEMTYPE_PLATE] = "|TInterface\\icons\\inv_chest_plate12:15|t ";
+    sZoneDifficulty->ItemIcons[ITEMTYPE_WEAPONS] = "|TInterface\\icons\\inv_mace_25:15|t |TInterface\\icons\\inv_shield_27:15|t |TInterface\\icons\\inv_weapon_crossbow_04:15|t ";
+
     if (QueryResult result = WorldDatabase.Query("SELECT * FROM zone_difficulty_info"))
     {
         do
@@ -499,13 +507,13 @@ bool ZoneDifficulty::IsValidNerfTarget(Unit* target)
     return target->IsPlayer() || target->IsPet() || target->IsGuardian();
 }
 
-/* @brief Checks if the element is one of the values in the vector.
+/* @brief Checks if the element is one of the uint32 values in the vector.
  *
  * @param vec A vector
  * @param element One element which can potentially be part of the values in the vector
  * @return The result as bool
  */
-bool ZoneDifficulty::VectorContains(std::vector<uint32> vec, uint32 element)
+bool ZoneDifficulty::VectorContainsUint32(std::vector<uint32> vec, uint32 element)
 {
     return find(vec.begin(), vec.end(), element) != vec.end();
 }
@@ -1082,14 +1090,6 @@ public:
                 }
             }
         }
-//        else if (oldState == 1 && newState != 3)
-//        {
-//            sZoneDifficulty->HardmodeInstanceData[id].HardmodePossible = false;
-//            if (sZoneDifficulty->HardmodeInstanceData[id].HardmodeOn == true)
-//            {
-//                sZoneDifficulty->EncountersInProgress[id] = 0;
-//            }
-//        }
     }
 
     void OnInstanceIdRemoved(uint32 instanceId) override
@@ -1203,6 +1203,10 @@ public:
         LOG_INFO("sql", "OnGossipSelectRewardNpc action: {}", action);
         ClearGossipMenuFor(player);
         uint32 npctext = 0;
+        if (action == 999998)
+        {
+            CloseGossipMenuFor(player);
+        }
         if (action == 999999)
         {
             npctext = NPC_TEXT_SCORE;
@@ -1230,13 +1234,19 @@ public:
         else if (action < 100)
         {
             npctext = NPC_TEXT_CATEGORY;
+            uint32 i = 1;
             for (auto& itemtype : sZoneDifficulty->Rewards[action])
             {
                 LOG_INFO("sql", "typedata.first is {}", itemtype.first);
                 std::string gossip;
                 std::string typestring = sZoneDifficulty->GetItemTypeString(itemtype.first);
-                gossip.append("I am interested in ").append(typestring).append(" items.");
+                if (sZoneDifficulty->ItemIcons.find(i) != sZoneDifficulty->ItemIcons.end())
+                {
+                    gossip.append(sZoneDifficulty->ItemIcons[i]);
+                }
+                gossip.append("I am interested in items from the ").append(typestring).append(" category.");
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, gossip, GOSSIP_SENDER_MAIN, itemtype.first + (action * 100));
+                ++i;
             }
         }
         else if (action < 1000)
@@ -1262,7 +1272,7 @@ public:
                     ObjectMgr::GetLocaleString(leftIl->Name, player->GetSession()->GetSessionDbcLocale(), name);
                 }
 
-                AddGossipItemFor(player, GOSSIP_ICON_CHAT, name, GOSSIP_SENDER_MAIN, (1000 * category) + (100 * counter) + i);
+                AddGossipItemFor(player, GOSSIP_ICON_MONEY_BAG, name, GOSSIP_SENDER_MAIN, (1000 * category) + (100 * counter) + i);
                 LOG_INFO("sql", "AddingGossipItem with action {}", (1000 * category) + (100 * counter) + i);
             }
         }
@@ -1317,10 +1327,11 @@ public:
                 ObjectMgr::GetLocaleString(leftIl->Name, player->GetSession()->GetSessionDbcLocale(), name);
             }
             gossip.append("Yes, ").append(name).append(" is the item i want.");
-            AddGossipItemFor(player, GOSSIP_ICON_CHAT, gossip, GOSSIP_SENDER_MAIN, 100000 + (1000 * category) + (100 * itemtype) + counter);
+            AddGossipItemFor(player, GOSSIP_ICON_CHAT, "No!", GOSSIP_SENDER_MAIN, 999998);
+            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, gossip, GOSSIP_SENDER_MAIN, 100000 + (1000 * category) + (100 * itemtype) + counter);
             LOG_INFO("sql", "AddingGossipItem with action {}", 100000 + (1000 * category) + (100 * itemtype) + counter);
         }
-        else
+        else if (action > 100000)
         {
             npctext = NPC_TEXT_GRANT;
             uint32 category = 0;
@@ -1350,7 +1361,7 @@ public:
     {
         LOG_INFO("sql", "OnGossipHelloRewardNpc");
         uint32 npctext = NPC_TEXT_OFFER;
-        AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Can you please remind me of my score?", GOSSIP_SENDER_MAIN, 999999);
+        AddGossipItemFor(player, GOSSIP_ICON_CHAT, "|TInterface\\icons\\inv_misc_questionmark:15|t Can you please remind me of my score?", GOSSIP_SENDER_MAIN, 999999);
 
         for (auto& typedata : sZoneDifficulty->Rewards)
         {
@@ -1360,7 +1371,7 @@ public:
             gossip.append("I want to redeem rewards ").append(typestring);
             LOG_INFO("sql", "typestring is: {} gossip is: {}", typestring, gossip);
             // typedata.first is the ContentType
-            AddGossipItemFor(player, GOSSIP_ICON_CHAT, gossip, GOSSIP_SENDER_MAIN, typedata.first);
+            AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, gossip, GOSSIP_SENDER_MAIN, typedata.first);
         }
 
         SendGossipMenuFor(player, npctext, creature);
