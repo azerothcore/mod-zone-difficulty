@@ -214,7 +214,7 @@ void ZoneDifficulty::LoadMapDifficultySettings()
             if (enabled)
             {
                 sZoneDifficulty->Rewards[contenttype][itemtype].push_back(data);
-                LOG_INFO("sql", "Loading item with entry {} has enchant {} in slot {}.", data.Entry, data.Enchant, data.EnchantSlot);
+                LOG_INFO("sql", "Loading item with entry {} has enchant {} in slot {}. contenttype: {} itemtype: {}", data.Entry, data.Enchant, data.EnchantSlot, contenttype, itemtype);
             }
             LOG_INFO("sql", "Total items in vector: {}.", i);
         } while (result->NextRow());
