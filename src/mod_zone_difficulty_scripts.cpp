@@ -1084,9 +1084,12 @@ public:
                     for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                     {
                         Player* player = i->GetSource();
-                        CharacterDatabase.Execute(
-                            "REPLACE INTO `zone_difficulty_encounter_logs` VALUES({}, {}, {}, {}, {}, {}, {})",
-                            instanceId, sZoneDifficulty->EncountersInProgress[instanceId], GameTime::GetGameTime().count(), instance->GetId(), id, player->GetGUID().GetCounter(), 64);
+                        if (!player->IsGameMaster() && !player->IsDeveloper())
+                        {
+                            CharacterDatabase.Execute(
+                                "REPLACE INTO `zone_difficulty_encounter_logs` VALUES({}, {}, {}, {}, {}, {}, {})",
+                                instanceId, sZoneDifficulty->EncountersInProgress[instanceId], GameTime::GetGameTime().count(), instance->GetId(), id, player->GetGUID().GetCounter(), 64);
+                        }
                     }
                 }
             }
@@ -1262,7 +1265,6 @@ public:
                 counter = counter - 100;
             }
             LOG_INFO("sql", "Building gossip with category {} and counter {}", category, counter);
-            auto& rewards = sZoneDifficulty->Rewards[category][counter];
 
             for (size_t i = 0; i < sZoneDifficulty->Rewards[category][counter].size(); ++i)
             {
@@ -1372,7 +1374,7 @@ public:
                 {
                     std::string gossip = "You do not have the required achievement with ID ";
                     gossip.append(std::to_string(sZoneDifficulty->Rewards[category][itemtype][counter].Achievement));
-                    gossip.append(" to obtain this item.");
+                    gossip.append(" to receive this item. Before i can give it to you, you need to complete the whole dungeon where it can be obtained.");
                     creature->Whisper(gossip, LANG_UNIVERSAL, player);
                     LOG_INFO("sql", "Player missing achiement with ID {} to obtain item with category {}, itemtype {}, counter {}",
                         sZoneDifficulty->Rewards[category][itemtype][counter].Achievement, category, itemtype, counter);
