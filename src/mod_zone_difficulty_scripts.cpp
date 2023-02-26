@@ -192,7 +192,7 @@ void ZoneDifficulty::LoadMapDifficultySettings()
         } while (result->NextRow());
     }
 
-    if (QueryResult result = WorldDatabase.Query("SELECT ContentType, ItemType, Entry, Price, Enchant, EnchantSlot, Enabled FROM zone_difficulty_hardmode_rewards"))
+    if (QueryResult result = WorldDatabase.Query("SELECT ContentType, ItemType, Entry, Price, Enchant, EnchantSlot, Achievement, Enabled FROM zone_difficulty_hardmode_rewards"))
     {
         // debug
         uint32 i = 0;
@@ -209,7 +209,8 @@ void ZoneDifficulty::LoadMapDifficultySettings()
             data.Price = (*result)[3].Get<uint32>();
             data.Enchant = (*result)[4].Get<uint32>();
             data.EnchantSlot = (*result)[5].Get<uint8>();
-            bool enabled = (*result)[6].Get<bool>();
+            data.Achievement = (*result)[6].Get<uint32>();
+            bool enabled = (*result)[7].Get<bool>();
 
             if (enabled)
             {
@@ -1261,7 +1262,7 @@ public:
                 counter = counter - 100;
             }
             LOG_INFO("sql", "Building gossip with category {} and counter {}", category, counter);
-            auto rewards = sZoneDifficulty->Rewards[category][counter];
+            auto& rewards = sZoneDifficulty->Rewards[category][counter];
 
             for (size_t i = 0; i < sZoneDifficulty->Rewards[category][counter].size(); ++i)
             {
@@ -1349,6 +1350,37 @@ public:
                 ++itemtype;
                 counter = counter - 100;
             }
+
+            // Check (again) if the player has enough score in the respective category.
+            uint32 availablescore = 0;
+            if (sZoneDifficulty->HardmodeScore.find(player->GetGUID().GetCounter()) != sZoneDifficulty->HardmodeScore.end())
+            {
+                if (sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()].find(category) != sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()].end())
+                {
+                    availablescore = sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()][category];
+                }
+            }
+            if (availablescore < sZoneDifficulty->Rewards[category][itemtype][counter].Price)
+            {
+                return true;
+            }
+
+            // Check if the player has the neccesary achievement
+            if (sZoneDifficulty->Rewards[category][itemtype][counter].Achievement != 0)
+            {
+                if (!player->HasAchieved(sZoneDifficulty->Rewards[category][itemtype][counter].Achievement))
+                {
+                    std::string gossip = "You do not have the required achievement with ID ";
+                    gossip.append(std::to_string(sZoneDifficulty->Rewards[category][itemtype][counter].Achievement));
+                    gossip.append(" to obtain this item.");
+                    creature->Whisper(gossip, LANG_UNIVERSAL, player);
+                    LOG_INFO("sql", "Player missing achiement with ID {} to obtain item with category {}, itemtype {}, counter {}",
+                        sZoneDifficulty->Rewards[category][itemtype][counter].Achievement, category, itemtype, counter);
+                    CloseGossipMenuFor(player);
+                    return true;
+                }
+            }
+
             LOG_INFO("sql", "Sending item with category {}, itemtype {}, counter {}", category, itemtype, counter);
             DeductHardmodeScore(player, category, sZoneDifficulty->Rewards[category][itemtype][counter].Price);
             SendItem(player, category, itemtype, counter);
@@ -1367,12 +1399,15 @@ public:
         for (auto& typedata : sZoneDifficulty->Rewards)
         {
             LOG_INFO("sql", "typedata.first is {}", typedata.first);
-            std::string gossip;
-            std::string typestring = sZoneDifficulty->GetContentTypeString(typedata.first);
-            gossip.append("I want to redeem rewards ").append(typestring);
-            LOG_INFO("sql", "typestring is: {} gossip is: {}", typestring, gossip);
-            // typedata.first is the ContentType
-            AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, gossip, GOSSIP_SENDER_MAIN, typedata.first);
+            if (typedata.first != 0)
+            {
+                std::string gossip;
+                std::string typestring = sZoneDifficulty->GetContentTypeString(typedata.first);
+                gossip.append("I want to redeem rewards ").append(typestring);
+                LOG_INFO("sql", "typestring is: {} gossip is: {}", typestring, gossip);
+                // typedata.first is the ContentType
+                AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, gossip, GOSSIP_SENDER_MAIN, typedata.first);
+            }
         }
 
         SendGossipMenuFor(player, npctext, creature);
