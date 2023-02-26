@@ -39,6 +39,7 @@ struct ZoneDifficultyRewardData
     uint32 Price;
     uint32 Enchant;
     uint8 EnchantSlot;
+    uint32 Achievement;
 };
 
 const int32 DUEL_INDEX = 0x7FFFFFFF;
