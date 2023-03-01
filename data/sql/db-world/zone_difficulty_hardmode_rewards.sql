@@ -113,4 +113,40 @@ INSERT INTO `zone_difficulty_hardmode_rewards` (ContentType, ItemType, Entry, Pr
 (8, 6, 29353, 10, 211, 11, 675, 1, 'Shockwave Truncheon +7 SP'),
 
 -- TYPE_RAID_T4 = 9;
-(9, 1, 19965, 10, 847, 11, 0, 1, 'Testitem + 1 AllStats');
+-- Back, Finger, Trinket, Neck = 1
+(9, 1, 28797, 10, 211, 11, 692, 1, 'Brute Cloak of the Ogre-Magi +7 SP'),
+(9, 1, 28830, 10, 1588, 11, 692, 1, 'Dragonspine Trophy +14 AP'),
+(9, 1, 28823, 10, 211, 11, 692, 1, 'Eye of Gruul +7 SP'),
+(9, 1, 28822, 10, 211, 11, 692, 1, 'Teeth of Gruul +7 SP'),
+(9, 1, 28777, 10, 211, 11, 693, 1, 'Cloak of the Pit Stalker +7 SP'),
+(9, 1, 28789, 10, 211, 11, 693, 1, 'Eye of Magtheridon +7 SP'),
+-- Cloth = 2
+(9, 2, 28799, 10, 211, 11, 692, 1, 'Belt of Divine Inspiration +7 SP'),
+(9, 2, 28804, 10, 211, 11, 692, 1, 'Collar of Cho\'gall +7 SP'),
+(9, 2, 28780, 10, 211, 11, 693, 1, 'Soul-Eater\'s Handwraps +7 SP'),
+-- Leather = 3
+(9, 3, 28796, 10, 1588, 11, 692, 1, 'Malefic Mask of the Shadows +14 AP'),
+(9, 3, 28803, 10, 211, 11, 692, 1, 'Cowl of Nature\'s Breath +7 SP'),
+(9, 3, 28828, 10, 1588, 11, 692, 1, 'Gronn-Stitched Girdle +14 AP'),
+(9, 3, 28776, 10, 211, 11, 693, 1, 'Liar\'s Tongue Gloves +14 AP'),
+-- Mail = 4
+(9, 4, 28801, 10, 1588, 11, 692, 1, 'Maulgar\'s Warhelm +14 AP'),
+(9, 4, 28827, 10, 1588, 11, 692, 1, 'Gauntlets of the Dragonslayer +14 AP'),
+(9, 4, 28810, 10, 211, 11, 692, 1, 'Windshear Boots +7 SP'),
+(9, 4, 28778, 10, 1588, 11, 693, 1, 'Terror Pit Girdle +14 AP'),
+-- Plate = 5
+(9, 5, 28795, 10, 1588, 11, 692, 1, 'Bladespire Warbands +14 AP'),
+(9, 5, 28824, 10, 1588, 11, 692, 1, 'Gauntlets of Martial Perfection +14 AP'),
+(9, 5, 28779, 10, 1588, 11, 693, 1, 'Girdle of the Endless Pit +14 AP'),
+(9, 5, 28775, 10, 1588, 11, 693, 1, 'Thundering Greathelm +14 AP'),
+-- Weapons, Holdables, Shields = 6
+(9, 6, 28800, 10, 1588, 11, 692, 1, 'Hammer of the Naaru +14 AP'),
+(9, 6, 28825, 10, 1588, 11, 692, 1, 'Aldori Legacy Defender +14 AP'),
+(9, 6, 28794, 10, 1588, 11, 692, 1, 'Axe of the Gronn Lords +14 AP'),
+(9, 6, 28802, 10, 211, 11, 692, 1, 'Bloodmaw Magus-Blade +7 SP'),
+(9, 6, 28826, 10, 1588, 11, 692, 1, 'Shuriken of Negation +14 AP'),
+(9, 6, 29458, 10, 211, 11, 693, 1, 'Aegis of the Vindicator +7 SP'),
+(9, 6, 28782, 10, 211, 11, 693, 1, 'Crystalheart Pulse-Staff +7 SP'),
+(9, 6, 28783, 10, 211, 11, 693, 1, 'Eredar Wand of Obliteration +7 SP'),
+(9, 6, 28774, 10, 1588, 11, 693, 1, 'Glaive of the Pit +14 AP'),
+(9, 6, 28781, 10, 211, 11, 693, 1, 'Karaborian Talisman +7 SP');
