@@ -1236,11 +1236,19 @@ public:
         }
         ClearGossipMenuFor(player);
         uint32 npcText = 0;
+        //Safety measure. There's a way for action 0 to happen even though it's not provided in the gossip menu.
+        if (action) == 0)
+        {
+            CloseGossipMenuFor(player);
+            return true;
+        }
+
         if (action == 999998)
         {
             CloseGossipMenuFor(player);
             return true;
         }
+
         if (action == 999999)
         {
             npcText = NPC_TEXT_SCORE;
