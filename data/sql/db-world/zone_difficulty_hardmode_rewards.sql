@@ -38,7 +38,7 @@ CREATE TABLE `zone_difficulty_hardmode_rewards` (
     PRIMARY KEY (`ContentType`, `Entry`, `Enchant`)
 );
 
-INSERT INTO `zone_difficulty_hardmode_rewards` (ContentType, ItemType, Entry, Price, Enchant, EnchantSlot, Achievement, Enabled, Comment) VALUES
+INSERT INTO `zone_difficulty_hardmode_rewards` (`ContentType`, `ItemType`, `Entry`, `Price`, `Enchant`, `EnchantSlot`, `Achievement`, `Enabled`, `Comment``) VALUES
 -- TYPE_HEROIC_TBC = 8;
 -- Back, Finger, Trinket, Neck = 1
 (8, 1, 29347, 10, 211, 11, 668, 1, 'Talisman of the Breaker +7 SP'),

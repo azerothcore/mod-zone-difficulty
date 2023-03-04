@@ -42,47 +42,47 @@ struct ZoneDifficultyRewardData
     uint32 Achievement;
 };
 
-const int32 DUEL_INDEX = 0x7FFFFFFF;
-const int32 DUEL_AREA = 2402;       // Forbidding Sea (Wetlands)
+int32 const DUEL_INDEX = 0x7FFFFFFF;
+int32 const DUEL_AREA = 2402;       // Forbidding Sea (Wetlands)
 
-const uint32 NPC_TEXT_LEADER_NORMAL = 91301;
-const uint32 NPC_TEXT_OTHER = 91302;
-const uint32 NPC_TEXT_LEADER_HARD = 91303;
-const uint32 NPC_TEXT_LEADER_FINAL = 91304;
-const uint32 NPC_TEXT_OFFER = 91305;
-const uint32 NPC_TEXT_CATEGORY = 91306;
-const uint32 NPC_TEXT_ITEM = 91307;
-const uint32 NPC_TEXT_CONFIRM = 91308;
-const uint32 NPC_TEXT_GRANT = 91309;
-const uint32 NPC_TEXT_DENIED = 91310;
-const uint32 NPC_TEXT_SCORE = 91311;
+uint32 const NPC_TEXT_LEADER_NORMAL = 91301;
+uint32 const NPC_TEXT_OTHER = 91302;
+uint32 const NPC_TEXT_LEADER_HARD = 91303;
+uint32 const NPC_TEXT_LEADER_FINAL = 91304;
+uint32 const NPC_TEXT_OFFER = 91305;
+uint32 const NPC_TEXT_CATEGORY = 91306;
+uint32 const NPC_TEXT_ITEM = 91307;
+uint32 const NPC_TEXT_CONFIRM = 91308;
+uint32 const NPC_TEXT_GRANT = 91309;
+uint32 const NPC_TEXT_DENIED = 91310;
+uint32 const NPC_TEXT_SCORE = 91311;
 
-const int32 MODE_NORMAL = 1;
-const int32 MODE_HARD = 64;
+int32 const MODE_NORMAL = 1;
+int32 const MODE_HARD = 64;
 
-const int32 TYPE_VANILLA = 1;
-const int32 TYPE_RAID_MC = 2;
-const int32 TYPE_RAID_ONY = 3;
-const int32 TYPE_RAID_BWL = 4;
-const int32 TYPE_RAID_ZG = 5;
-const int32 TYPE_RAID_AQ20 = 6;
-const int32 TYPE_RAID_AQ40 = 7;
-const int32 TYPE_HEROIC_TBC = 8;
-const int32 TYPE_RAID_T4 = 9;
-const int32 TYPE_RAID_T5 = 10;
-const int32 TYPE_RAID_T6 = 11;
-const int32 TYPE_HEROIC_WOTLK = 12;
-const int32 TYPE_RAID_T7 = 13;
-const int32 TYPE_RAID_T8 = 14;
-const int32 TYPE_RAID_T9 = 15;
-const int32 TYPE_RAID_T10 = 16;
+int32 const TYPE_VANILLA = 1;
+int32 const TYPE_RAID_MC = 2;
+int32 const TYPE_RAID_ONY = 3;
+int32 const TYPE_RAID_BWL = 4;
+int32 const TYPE_RAID_ZG = 5;
+int32 const TYPE_RAID_AQ20 = 6;
+int32 const TYPE_RAID_AQ40 = 7;
+int32 const TYPE_HEROIC_TBC = 8;
+int32 const TYPE_RAID_T4 = 9;
+int32 const TYPE_RAID_T5 = 10;
+int32 const TYPE_RAID_T6 = 11;
+int32 const TYPE_HEROIC_WOTLK = 12;
+int32 const TYPE_RAID_T7 = 13;
+int32 const TYPE_RAID_T8 = 14;
+int32 const TYPE_RAID_T9 = 15;
+int32 const TYPE_RAID_T10 = 16;
 
-const uint32 ITEMTYPE_MISC = 1;
-const uint32 ITEMTYPE_CLOTH = 2;
-const uint32 ITEMTYPE_LEATHER = 3;
-const uint32 ITEMTYPE_MAIL = 4;
-const uint32 ITEMTYPE_PLATE = 5;
-const uint32 ITEMTYPE_WEAPONS = 6;
+uint32 const ITEMTYPE_MISC = 1;
+uint32 const ITEMTYPE_CLOTH = 2;
+uint32 const ITEMTYPE_LEATHER = 3;
+uint32 const ITEMTYPE_MAIL = 4;
+uint32 const ITEMTYPE_PLATE = 5;
+uint32 const ITEMTYPE_WEAPONS = 6;
 
 const std::string REWARD_MAIL_SUBJECT = "Chromie's Reward for you";
 const std::string REWARD_MAIL_BODY = "Enjoy your new item!";
@@ -101,7 +101,7 @@ public:
     std::string GetContentTypeString(uint32 type);
     void AddHardmodeScore(Map* map, uint32 type);
     void DeductHardmodeScore(Player* player, uint32 type, uint32 score);
-    void SendItem(Player* player, uint32 category, uint32 itemtype, uint32 id);
+    void SendItem(Player* player, uint32 category, uint32 itemType, uint32 id);
     [[nodiscard]] bool IsValidNerfTarget(Unit* target);
     [[nodiscard]] bool VectorContainsUint32(std::vector<uint32> vec, uint32 element);
     [[nodiscard]] bool IsHardmodeMap(uint32 mapid);
