@@ -96,13 +96,12 @@ void ZoneDifficulty::LoadMapDifficultySettings()
             if ((mode & MODE_HARD) != MODE_HARD && (mode & MODE_NORMAL) != MODE_NORMAL)
             {
                 LOG_ERROR("module", "MOD-ZONE-DIFFICULTY: Invalid mode {} used in Enabled for mapId {}, ignored.", mode, mapId);
-                return;
             }
 
             // duels do not check for phases. Only 0 is allowed.
             if (mapId == DUEL_INDEX && phaseMask != 0)
             {
-                LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Table `zone_difficulty_info` for criteria (duel mapId: {}) has wrong value ({}), must be 0 for duels.", mapId, phaseMask);
+                LOG_ERROR("module", "MOD-ZONE-DIFFICULTY: Table `zone_difficulty_info` for criteria (duel mapId: {}) has wrong value ({}), must be 0 for duels.", mapId, phaseMask);
             }
 
         } while (result->NextRow());
@@ -196,7 +195,7 @@ void ZoneDifficulty::LoadMapDifficultySettings()
             }
         } while (result->NextRow());
     }
-
+    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Starting load of rewards.");
     if (QueryResult result = WorldDatabase.Query("SELECT ContentType, ItemType, Entry, Price, Enchant, EnchantSlot, Achievement, Enabled FROM zone_difficulty_hardmode_rewards"))
     {
         /* debug
@@ -224,12 +223,12 @@ void ZoneDifficulty::LoadMapDifficultySettings()
                 sZoneDifficulty->Rewards[contentType][itemType].push_back(data);
                 //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Loading item with entry {} has enchant {} in slot {}. contentType: {} itemType: {}", data.Entry, data.Enchant, data.EnchantSlot, contentType, itemType);
             }
-            //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Total items in vector: {}.", i);
+            //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Total items in Rewards map: {}.", i);
         } while (result->NextRow());
     }
 }
 
-/* Loads the HardmodeInstanceData from the database.
+/** Loads the HardmodeInstanceData from the database.
 *  Fetch from zone_difficulty_instance_saves.
 *
 *  `InstanceID` INT NOT NULL DEFAULT 0,
@@ -241,14 +240,14 @@ void ZoneDifficulty::LoadMapDifficultySettings()
 */
 void ZoneDifficulty::LoadHardmodeInstanceData()
 {
-     std::vector<bool> instanceIDs = sMapMgr->GetInstanceIDs();
-     /* debugging
-     * for (int i = 0; i < int(instanceIDs.size()); i++)
-     * {
-     *   LOG_INFO("module", "MOD-ZONE-DIFFICULTY: ZoneDifficulty::LoadHardmodeInstanceData: id {} exists: {}:", i, instanceIDs[i]);
-     * }
-     * end debugging
-     */
+    std::vector<bool> instanceIDs = sMapMgr->GetInstanceIDs();
+    /* debugging
+    * for (int i = 0; i < int(instanceIDs.size()); i++)
+    * {
+    *   LOG_INFO("module", "MOD-ZONE-DIFFICULTY: ZoneDifficulty::LoadHardmodeInstanceData: id {} exists: {}:", i, instanceIDs[i]);
+    * }
+    * end debugging
+    */
     if (QueryResult result = CharacterDatabase.Query("SELECT * FROM zone_difficulty_instance_saves"))
     {
         do
