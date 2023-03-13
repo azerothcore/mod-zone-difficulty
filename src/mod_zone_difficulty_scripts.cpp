@@ -186,11 +186,27 @@ void ZoneDifficulty::LoadMapDifficultySettings()
         {
             uint32 creatureEntry = (*result)[0].Get<uint32>();
             float hpModifier = (*result)[1].Get<float>();
-            bool enabled = (*result)[2].Get<bool>();
+
+            ZoneDifficultyHAI data;
+            data.chance = (*result)[2].Get<uint8>();
+            data.spell = (*result)[3].Get<uint32>();
+            data.target = (*result)[4].Get<uint8>();
+            data.delay = (*result)[5].Get<std::chrono::milliseconds>();
+            data.cooldown = (*result)[6].Get<std::chrono::milliseconds>();
+            data.repetitions = (*result)[7].Get<uint8>();
+
+            bool enabled = (*result)[8].Get<bool>();
 
             if (enabled)
             {
-                sZoneDifficulty->CreatureOverrides[creatureEntry] = hpModifier;
+                if (hpModifier != 0)
+                {
+                    sZoneDifficulty->CreatureOverrides[creatureEntry] = hpModifier;
+                }
+                if (data.chance != 0 && data.spell != 0 && data.target >= 1 && data.target <= 6)
+                {
+                    sZoneDifficulty->HardmodeAI[creatureEntry].push_back(data);
+                }
                 //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: New creature with entry: {} has exception for hp: {}", creatureEntry, hpModifier);
             }
         } while (result->NextRow());
@@ -456,7 +472,7 @@ void ZoneDifficulty::AddHardmodeScore(Map* map, uint32 type)
  * @param player The one who pays with their score.
  * @param type The type of instance the score is deducted for.
  */
-void DeductHardmodeScore(Player* player, uint32 type, uint32 score)
+void ZoneDifficulty::DeductHardmodeScore(Player* player, uint32 type, uint32 score)
 {
     // NULL check happens in the calling function
     if (sZoneDifficulty->IsDebugInfoEnabled)
@@ -474,7 +490,7 @@ void DeductHardmodeScore(Player* player, uint32 type, uint32 score)
  * @param itemType The type of the item e.g. ITEMTYPE_CLOTH.
  * @param id the id in the vector.
  */
-void SendItem(Player* player, uint32 category, uint32 itemType, uint32 id)
+void ZoneDifficulty::SendItem(Player* player, uint32 category, uint32 itemType, uint32 id)
 {
     ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(sZoneDifficulty->Rewards[category][itemType][id].Entry);
     if (!itemTemplate)
@@ -629,6 +645,108 @@ void ZoneDifficulty::SaveHardmodeInstanceData(uint32 instanceId)
     }
 
     CharacterDatabase.Execute("REPLACE INTO zone_difficulty_instance_saves (InstanceID, HardmodeOn, HardmodePossible) VALUES ({}, {}, {})", instanceId, sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodeOn, sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodePossible);
+}
+
+void ZoneDifficulty::HardmodeEvent(Unit* unit, uint32 entry, uint32 key)
+{
+    if (unit && unit->IsAlive())
+    {
+        // Try again in 1s if the unit is currently casting
+        if (unit->HasUnitState(UNIT_STATE_CASTING))
+        {
+            unit->m_Events.AddEventAtOffset([unit, entry, key]()
+                {
+                    sZoneDifficulty->HardmodeEvent(unit, entry, key);
+                }, 1s, EVENT_GROUP);
+            return;
+        }
+
+        //Re-schedule the event
+        if (sZoneDifficulty->HardmodeAI[entry][key].repetitions >= 1)
+        {
+            unit->m_Events.AddEventAtOffset([unit, entry, key]()
+                {
+                    sZoneDifficulty->HardmodeEvent(unit, entry, key);
+                }, sZoneDifficulty->HardmodeAI[entry][key].cooldown, EVENT_GROUP);
+        }
+
+        // Select target
+        Unit* target;
+        if (sZoneDifficulty->HardmodeAI[entry][key].target == TARGET_SELF)
+        {
+            target = unit;
+        }
+        else if (sZoneDifficulty->HardmodeAI[entry][key].target == TARGET_VICTIM)
+        {
+            target = unit->GetVictim();
+        }
+        else
+        {
+            auto const& threatlist = unit->GetThreatMgr().GetThreatList();
+            if (threatlist.empty() && sZoneDifficulty->HardmodeAI[entry][key].target != TARGET_SELF)
+                LOG_INFO("module", "Threatlist is empty for unit {}", unit->GetName());
+            return;
+
+            std::list<Unit*> targetList;
+            for (auto itr = threatlist.begin(); itr != threatlist.end(); ++itr)
+            {
+                Unit* target = (*itr)->getTarget();
+                if (!target)
+                {
+                    continue;
+                }
+                if (target->GetTypeId() != TYPEID_PLAYER)
+                {
+                    continue;
+                }
+                SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(sZoneDifficulty->HardmodeAI[entry][key].spell);
+                if (spellInfo)
+                {
+                    if (unit->IsWithinDist(target, spellInfo->GetMinRange()))
+                    {
+                        continue;
+                    }
+                    if (!unit->IsWithinDist(target, spellInfo->GetMaxRange()))
+                    {
+                        continue;
+                    }
+                }
+                targetList.push_back(target);
+            }
+
+            if (targetList.empty())
+                return;
+            if (targetList.size() < 2)
+            {
+                target = unit->GetVictim();
+            }
+            else
+            {
+                switch (sZoneDifficulty->HardmodeAI[entry][key].target)
+                {
+                    case TARGET_HOSTILE_SECOND_AGGRO:
+                        //Todo: Select target from targetList
+                        break;
+                    case TARGET_HOSTILE_LAST_AGGRO:
+                        //Todo: Select target from targetList
+                        break;
+                    case TARGET_HOSTILE_RANDOM:
+                        //Todo: Select target from targetList
+                        break;
+                    case TARGET_HOSTILE_RANDOM_NOT_TOP:
+                        //Todo: Select target from targetList
+                        break;
+                }
+            }
+        }
+
+        if (!target)
+        {
+            return;
+        }
+
+        //Todo: Cast spell on the target
+    }
 }
 
 class mod_zone_difficulty_unitscript : public UnitScript
@@ -1008,6 +1126,46 @@ public:
             }
         }
     }
+
+    void OnUnitEnterEvadeMode(Unit* unit, uint8 /*why*/) override
+    {
+        uint32 entry = unit->GetEntry();
+        LOG_INFO("module", "OnUnitEnterEvadeMode fired. Entry: {}", entry);
+        if (entry == 19389)
+        {
+            unit->m_Events.CancelEventGroup(EVENT_GROUP);
+            LOG_INFO("module", "Unit evading, events reset.");
+        }
+    }
+
+    void OnUnitEnterCombat(Unit* unit, Unit* /*victim*/) override
+    {
+        uint32 entry = unit->GetEntry();
+
+        if (sZoneDifficulty->HardmodeAI.find(entry) == sZoneDifficulty->HardmodeAI.end())
+        {
+            return;
+        }
+
+        uint32 i = 1;
+        for (ZoneDifficultyHAI data : sZoneDifficulty->HardmodeAI[entry])
+        {
+            if (data.chance == 100 || data.chance >= urand(1, 100))
+            {
+                  unit->m_Events.AddEventAtOffset([unit, entry, i]()
+                    {
+                        sZoneDifficulty->HardmodeEvent(unit, entry, i);
+                    }, data.delay, EVENT_GROUP);
+            }
+            ++i;
+        }
+    }
+
+    //void BeforeSendNonMeleeDamage(Unit* caster, SpellNonMeleeDamage* log)
+    //void BeforeSendHeal(Unit* caster, HealInfo* healInfo) override
+    //{
+    //    LOG_INFO("module", "GetHeal {}, GetAbsorb {}, Healer {}, Target {} ", healInfo->GetHeal(), healInfo->GetAbsorb(), healInfo->GetHealer()->GetName(), healInfo->GetTarget()->GetName());
+    //}
 };
 
 class mod_zone_difficulty_playerscript : public PlayerScript
@@ -1423,8 +1581,8 @@ public:
             }
 
             //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Sending item with category {}, itemType {}, counter {}", category, itemType, counter);
-            DeductHardmodeScore(player, category, sZoneDifficulty->Rewards[category][itemType][counter].Price);
-            SendItem(player, category, itemType, counter);
+            sZoneDifficulty->DeductHardmodeScore(player, category, sZoneDifficulty->Rewards[category][itemType][counter].Price);
+            sZoneDifficulty->SendItem(player, category, itemType, counter);
         }
 
         SendGossipMenuFor(player, npcText, creature);
@@ -1686,7 +1844,7 @@ public:
                 }
                 if (sZoneDifficulty->IsDebugInfoEnabled)
                 {
-                    LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Modify creature hp for hard mode: {} to {}", baseHealth, newHp);
+                    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Modify creature hp for hard mode: {} to {}", baseHealth, newHp);
                 }
                 bool hpIsFull = false;
                 if (creature->GetHealthPct() >= 100)
@@ -1710,7 +1868,7 @@ public:
                 {
                     if (sZoneDifficulty->IsDebugInfoEnabled)
                     {
-                        LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Modify creature hp for normal mode: {} to {}", baseHealth, baseHealth);
+                        //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Modify creature hp for normal mode: {} to {}", baseHealth, baseHealth);
                     }
                     bool hpIsFull = false;
                     if (creature->GetHealthPct() >= 100)

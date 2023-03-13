@@ -42,6 +42,16 @@ struct ZoneDifficultyRewardData
     uint32 Achievement;
 };
 
+struct ZoneDifficultyHAI
+{
+    uint8 chance;
+    uint32 spell;
+    uint8 target;
+    std::chrono::milliseconds delay;
+    std::chrono::milliseconds cooldown;
+    uint8 repetitions;
+};
+
 int32 const DUEL_INDEX = 0x7FFFFFFF;
 int32 const DUEL_AREA = 2402;       // Forbidding Sea (Wetlands)
 
@@ -59,6 +69,9 @@ uint32 const NPC_TEXT_SCORE = 91311;
 
 int32 const MODE_NORMAL = 1;
 int32 const MODE_HARD = 64;
+
+// EVENT_GROUP is used for unit->m_Events.AddEventAtOffset
+uint8 const EVENT_GROUP = 64;
 
 int32 const TYPE_VANILLA = 1;
 int32 const TYPE_RAID_MC = 2;
@@ -84,6 +97,13 @@ uint32 const ITEMTYPE_MAIL = 4;
 uint32 const ITEMTYPE_PLATE = 5;
 uint32 const ITEMTYPE_WEAPONS = 6;
 
+uint8 const TARGET_SELF = 1;
+uint8 const TARGET_VICTIM = 2;                  // current target
+uint8 const TARGET_HOSTILE_SECOND_AGGRO = 3;    // second highest aggro
+uint8 const TARGET_HOSTILE_LAST_AGGRO = 4;      // lowest aggro
+uint8 const TARGET_HOSTILE_RANDOM = 5;          // any random player from the threat list
+uint8 const TARGET_HOSTILE_RANDOM_NOT_TOP = 6;  // any random player from the threat list except the current target
+
 const std::string REWARD_MAIL_SUBJECT = "Chromie's Reward for you";
 const std::string REWARD_MAIL_BODY = "Enjoy your new item!";
 
@@ -102,6 +122,7 @@ public:
     void AddHardmodeScore(Map* map, uint32 type);
     void DeductHardmodeScore(Player* player, uint32 type, uint32 score);
     void SendItem(Player* player, uint32 category, uint32 itemType, uint32 id);
+    void HardmodeEvent(Unit* unit, uint32 entry, uint32 key);
     [[nodiscard]] bool IsValidNerfTarget(Unit* target);
     [[nodiscard]] bool VectorContainsUint32(std::vector<uint32> vec, uint32 element);
     [[nodiscard]] bool IsHardmodeMap(uint32 mapid);
@@ -131,6 +152,8 @@ public:
     ZoneDifficultyDualUintMap HardmodeScore;
     typedef std::map<uint32, std::map<uint32, std::vector<ZoneDifficultyRewardData> > > ZoneDifficultyRewardMap;
     ZoneDifficultyRewardMap Rewards;
+    typedef std::map<uint32, std::vector<ZoneDifficultyHAI> > ZoneDifficultyHAIMap;
+    ZoneDifficultyHAIMap HardmodeAI;
 };
 
 #define sZoneDifficulty ZoneDifficulty::instance()
