@@ -6,6 +6,7 @@ SET @TARGET_HOSTILE_SECOND_AGGRO = 3;       -- Second highest aggro.
 SET @TARGET_HOSTILE_LAST_AGGRO = 4;         -- Lowest aggro.
 SET @TARGET_HOSTILE_RANDOM = 5;             -- Just any random player on our threat list.
 SET @TARGET_HOSTILE_RANDOM_NOT_TOP = 6;     -- Just any random player on our threat list except the current target.
+SET @TARGET_PLAYER_DISTANCE = 18;           -- All players in range. TargetArg = max range.
 -- ************************************************************************
 
 DROP TABLE IF EXISTS `zone_difficulty_hardmode_ai`;
@@ -14,6 +15,7 @@ CREATE TABLE `zone_difficulty_hardmode_ai` (
     `Chance` TINYINT NOT NULL DEFAULT 100,          -- 0-100% chance for the creature to gain this spell
     `Spell` INT NOT NULL,                           -- spell id
     `Target` TINYINT NOT NULL DEFAULT 1,            -- see above
+    `TargetArg` TINYINT NOT NULL DEFAULT 0,         -- optional argument for the target. Max range for TARGET_PLAYER_RANGE
     `Delay` INT NOT NULL DEFAULT 1,                 -- time in ms before first cast
     `Cooldown` INT NOT NULL DEFAULT 1,              -- time in ms between casts
     `Repetitions` TINYINT NOT NULL DEFAULT 0,       -- 0 = forever, 1 = just once

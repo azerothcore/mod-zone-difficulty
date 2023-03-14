@@ -207,30 +207,35 @@ void ZoneDifficulty::LoadMapDifficultySettings()
     }
 
     if (QueryResult result = WorldDatabase.Query("SELECT * FROM zone_difficulty_hardmode_ai"))
+    {
+        do
         {
-            do
+            bool enabled = (*result)[8].Get<bool>();
+
+            if (enabled)
             {
                 uint32 creatureEntry = (*result)[0].Get<uint32>();
                 ZoneDifficultyHAI data;
-                data.chance = (*result)[1].Get<uint8>();
-                data.spell = (*result)[2].Get<uint32>();
-                data.target = (*result)[3].Get<uint8>();
-                data.delay = (*result)[4].Get<std::chrono::milliseconds>();
-                data.cooldown = (*result)[5].Get<std::chrono::milliseconds>();
-                data.repetitions = (*result)[6].Get<uint8>();
+                data.Chance = (*result)[1].Get<uint8>();
+                data.Spell = (*result)[2].Get<uint32>();
+                data.Target = (*result)[3].Get<uint8>();
+                data.TargetArg = (*result)[4].Get<uint8>();
+                data.Delay = (*result)[5].Get<std::chrono::milliseconds>();
+                data.Cooldown = (*result)[6].Get<std::chrono::milliseconds>();
+                data.Repetitions = (*result)[7].Get<uint8>();
 
-                bool enabled = (*result)[7].Get<bool>();
-
-                if (enabled)
+                if (data.Chance != 0 && data.Spell != 0 && (( data.Target >= 1 && data.Target <= 6 ) || data.Target == 18))
                 {
-                    if (data.chance != 0 && data.spell != 0 && data.target >= 1 && data.target <= 6)
-                    {
-                        sZoneDifficulty->HardmodeAI[creatureEntry].push_back(data);
-                    }
-                    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: New creature with entry: {} has exception for hp: {}", creatureEntry, hpModifier);
+                    sZoneDifficulty->HardmodeAI[creatureEntry].push_back(data);
                 }
-            } while (result->NextRow());
-        }
+                else
+                {
+                    LOG_ERROR("module", "Unknown type for `Target`: {} in zone_difficulty_hardmode_ai");
+                }
+                //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: New creature with entry: {} has exception for hp: {}", creatureEntry, hpModifier);
+            }
+        } while (result->NextRow());
+    }
 
     //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Starting load of rewards.");
     if (QueryResult result = WorldDatabase.Query("SELECT ContentType, ItemType, Entry, Price, Enchant, EnchantSlot, Achievement, Enabled FROM zone_difficulty_hardmode_rewards"))
@@ -683,28 +688,32 @@ void ZoneDifficulty::HardmodeEvent(Unit* unit, uint32 entry, uint32 key)
         }
 
         //Re-schedule the event
-        if (sZoneDifficulty->HardmodeAI[entry][key].repetitions >= 1)
+        if (sZoneDifficulty->HardmodeAI[entry][key].Repetitions >= 1)
         {
             unit->m_Events.AddEventAtOffset([unit, entry, key]()
                 {
                     sZoneDifficulty->HardmodeEvent(unit, entry, key);
-                }, sZoneDifficulty->HardmodeAI[entry][key].cooldown, EVENT_GROUP);
+                }, sZoneDifficulty->HardmodeAI[entry][key].Cooldown, EVENT_GROUP);
         }
 
         // Select target
         Unit* target;
-        if (sZoneDifficulty->HardmodeAI[entry][key].target == TARGET_SELF)
+        if (sZoneDifficulty->HardmodeAI[entry][key].Target == TARGET_SELF)
         {
             target = unit;
         }
-        else if (sZoneDifficulty->HardmodeAI[entry][key].target == TARGET_VICTIM)
+        else if (sZoneDifficulty->HardmodeAI[entry][key].Target == TARGET_VICTIM)
         {
             target = unit->GetVictim();
+        }
+        else if (sZoneDifficulty->HardmodeAI[entry][key].Target == TARGET_PLAYER_DISTANCE)
+        {
+            // todo: create a list of all players in range and cast the spell on all of them
         }
         else
         {
             auto const& threatlist = unit->GetThreatMgr().GetThreatList();
-            if (threatlist.empty() && sZoneDifficulty->HardmodeAI[entry][key].target != TARGET_SELF)
+            if (threatlist.empty() && sZoneDifficulty->HardmodeAI[entry][key].Target != TARGET_SELF)
                 LOG_INFO("module", "Threatlist is empty for unit {}", unit->GetName());
             return;
 
@@ -720,7 +729,7 @@ void ZoneDifficulty::HardmodeEvent(Unit* unit, uint32 entry, uint32 key)
                 {
                     continue;
                 }
-                SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(sZoneDifficulty->HardmodeAI[entry][key].spell);
+                SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(sZoneDifficulty->HardmodeAI[entry][key].Spell);
                 if (spellInfo)
                 {
                     if (unit->IsWithinDist(target, spellInfo->GetMinRange()))
@@ -743,20 +752,39 @@ void ZoneDifficulty::HardmodeEvent(Unit* unit, uint32 entry, uint32 key)
             }
             else
             {
-                switch (sZoneDifficulty->HardmodeAI[entry][key].target)
+                switch (sZoneDifficulty->HardmodeAI[entry][key].Target)
                 {
                     case TARGET_HOSTILE_SECOND_AGGRO:
-                        //Todo: Select target from targetList
+                    {
+                        std::list<Unit*>::const_iterator itr = targetList.begin();
+                        std::advance(itr, 1);
+                        target = *itr;
                         break;
+                    }
                     case TARGET_HOSTILE_LAST_AGGRO:
-                        //Todo: Select target from targetList
+                    {
+                        std::list<Unit*>::reverse_iterator ritr = targetList.rbegin();
+                        target = *ritr;
                         break;
+                    }
                     case TARGET_HOSTILE_RANDOM:
-                        //Todo: Select target from targetList
+                    {
+                        std::list<Unit*>::const_iterator itr = targetList.begin();
+                        std::advance(itr, urand(0, targetList.size() - 1));
+                        target = *itr;
                         break;
+                    }
                     case TARGET_HOSTILE_RANDOM_NOT_TOP:
-                        //Todo: Select target from targetList
+                    {
+                        std::list<Unit*>::const_iterator itr = targetList.begin();
+                        std::advance(itr, urand(1, targetList.size() - 1));
+                        target = *itr;
                         break;
+                    }
+                    default:
+                    {
+                        LOG_ERROR("module", "Unknown type for `Target`: {} in zone_difficulty_hardmode_ai");
+                    }
                 }
             }
         }
@@ -765,8 +793,7 @@ void ZoneDifficulty::HardmodeEvent(Unit* unit, uint32 entry, uint32 key)
         {
             return;
         }
-
-        //Todo: Cast spell on the target
+        unit->CastSpell(target, sZoneDifficulty->HardmodeAI[entry][key].Spell, true);
     }
 }
 
@@ -1171,12 +1198,12 @@ public:
         uint32 i = 1;
         for (ZoneDifficultyHAI data : sZoneDifficulty->HardmodeAI[entry])
         {
-            if (data.chance == 100 || data.chance >= urand(1, 100))
+            if (data.Chance == 100 || data.Chance >= urand(1, 100))
             {
-                  unit->m_Events.AddEventAtOffset([unit, entry, i]()
+                unit->m_Events.AddEventAtOffset([unit, entry, i]()
                     {
                         sZoneDifficulty->HardmodeEvent(unit, entry, i);
-                    }, data.delay, EVENT_GROUP);
+                    }, data.Delay, EVENT_GROUP);
             }
             ++i;
         }

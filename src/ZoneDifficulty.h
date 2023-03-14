@@ -44,12 +44,13 @@ struct ZoneDifficultyRewardData
 
 struct ZoneDifficultyHAI
 {
-    uint8 chance;
-    uint32 spell;
-    uint8 target;
-    std::chrono::milliseconds delay;
-    std::chrono::milliseconds cooldown;
-    uint8 repetitions;
+    uint8 Chance;
+    uint32 Spell;
+    uint8 Target;
+    uint8 TargetArg;
+    std::chrono::milliseconds Delay;
+    std::chrono::milliseconds Cooldown;
+    uint8 Repetitions;
 };
 
 int32 const DUEL_INDEX = 0x7FFFFFFF;
@@ -103,6 +104,7 @@ uint8 const TARGET_HOSTILE_SECOND_AGGRO = 3;    // second highest aggro
 uint8 const TARGET_HOSTILE_LAST_AGGRO = 4;      // lowest aggro
 uint8 const TARGET_HOSTILE_RANDOM = 5;          // any random player from the threat list
 uint8 const TARGET_HOSTILE_RANDOM_NOT_TOP = 6;  // any random player from the threat list except the current target
+uint8 const TARGET_PLAYER_DISTANCE = 18;        // all players within TargetArg range
 
 const std::string REWARD_MAIL_SUBJECT = "Chromie's Reward for you";
 const std::string REWARD_MAIL_BODY = "Enjoy your new item!";
