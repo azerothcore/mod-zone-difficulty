@@ -748,18 +748,25 @@ void ZoneDifficulty::HardmodeEvent(Unit* unit, uint32 entry, uint32 key)
             }
             else
             {
+                uint8 counter = targetList.size() - 1;
+                if (sZoneDifficulty->HardmodeAI[entry][key].TargetArg > counter)
+                {
+                    counter = sZoneDifficulty->HardmodeAI[entry][key].TargetArg;
+                }
+
                 switch (sZoneDifficulty->HardmodeAI[entry][key].Target)
                 {
-                    case TARGET_HOSTILE_SECOND_AGGRO:
+                    case TARGET_HOSTILE_AGGRO_FROM_TOP:
                     {
                         std::list<Unit*>::const_iterator itr = targetList.begin();
-                        std::advance(itr, 1);
+                        std::advance(itr, counter);
                         target = *itr;
                         break;
                     }
-                    case TARGET_HOSTILE_LAST_AGGRO:
+                    case TARGET_HOSTILE_AGGRO_FROM_BOTTOM:
                     {
                         std::list<Unit*>::reverse_iterator ritr = targetList.rbegin();
+                        std::advance(ritr, counter);
                         target = *ritr;
                         break;
                     }
