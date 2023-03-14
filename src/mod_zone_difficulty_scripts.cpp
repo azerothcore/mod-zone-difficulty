@@ -34,6 +34,13 @@ void ZoneDifficulty::LoadMapDifficultySettings()
     }
 
     sZoneDifficulty->Rewards.clear();
+    sZoneDifficulty->HardmodeAI.clear();
+    sZoneDifficulty->CreatureOverrides.clear();
+    sZoneDifficulty->DailyHeroicQuests.clear();
+    sZoneDifficulty->HardmodeLoot.clear();
+    sZoneDifficulty->DisallowedBuffs.clear();
+    sZoneDifficulty->SpellNerfOverrides.clear();
+    sZoneDifficulty->NerfInfo.clear();
 
     // Default values for when there is no entry in the db for duels (index 0xFFFFFFFF)
     NerfInfo[DUEL_INDEX][0].HealingNerfPct = 1;
@@ -153,7 +160,7 @@ void ZoneDifficulty::LoadMapDifficultySettings()
         } while (result->NextRow());
     }
 
-    if (QueryResult result = WorldDatabase.Query("SELECT * FROM zone_difficulty_instance_data"))
+    if (QueryResult result = WorldDatabase.Query("SELECT * FROM zone_difficulty_hardmode_instance_data"))
     {
         do
         {
@@ -180,22 +187,13 @@ void ZoneDifficulty::LoadMapDifficultySettings()
         } while (result->NextRow());
     }
 
-    if (QueryResult result = WorldDatabase.Query("SELECT * FROM zone_difficulty_creatureoverrides"))
+    if (QueryResult result = WorldDatabase.Query("SELECT * FROM zone_difficulty_hardmode_creatureoverrides"))
     {
         do
         {
             uint32 creatureEntry = (*result)[0].Get<uint32>();
             float hpModifier = (*result)[1].Get<float>();
-
-            ZoneDifficultyHAI data;
-            data.chance = (*result)[2].Get<uint8>();
-            data.spell = (*result)[3].Get<uint32>();
-            data.target = (*result)[4].Get<uint8>();
-            data.delay = (*result)[5].Get<std::chrono::milliseconds>();
-            data.cooldown = (*result)[6].Get<std::chrono::milliseconds>();
-            data.repetitions = (*result)[7].Get<uint8>();
-
-            bool enabled = (*result)[8].Get<bool>();
+            bool enabled = (*result)[2].Get<bool>();
 
             if (enabled)
             {
@@ -203,14 +201,37 @@ void ZoneDifficulty::LoadMapDifficultySettings()
                 {
                     sZoneDifficulty->CreatureOverrides[creatureEntry] = hpModifier;
                 }
-                if (data.chance != 0 && data.spell != 0 && data.target >= 1 && data.target <= 6)
-                {
-                    sZoneDifficulty->HardmodeAI[creatureEntry].push_back(data);
-                }
                 //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: New creature with entry: {} has exception for hp: {}", creatureEntry, hpModifier);
             }
         } while (result->NextRow());
     }
+
+    if (QueryResult result = WorldDatabase.Query("SELECT * FROM zone_difficulty_hardmode_ai"))
+        {
+            do
+            {
+                uint32 creatureEntry = (*result)[0].Get<uint32>();
+                ZoneDifficultyHAI data;
+                data.chance = (*result)[1].Get<uint8>();
+                data.spell = (*result)[2].Get<uint32>();
+                data.target = (*result)[3].Get<uint8>();
+                data.delay = (*result)[4].Get<std::chrono::milliseconds>();
+                data.cooldown = (*result)[5].Get<std::chrono::milliseconds>();
+                data.repetitions = (*result)[6].Get<uint8>();
+
+                bool enabled = (*result)[7].Get<bool>();
+
+                if (enabled)
+                {
+                    if (data.chance != 0 && data.spell != 0 && data.target >= 1 && data.target <= 6)
+                    {
+                        sZoneDifficulty->HardmodeAI[creatureEntry].push_back(data);
+                    }
+                    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: New creature with entry: {} has exception for hp: {}", creatureEntry, hpModifier);
+                }
+            } while (result->NextRow());
+        }
+
     //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Starting load of rewards.");
     if (QueryResult result = WorldDatabase.Query("SELECT ContentType, ItemType, Entry, Price, Enchant, EnchantSlot, Achievement, Enabled FROM zone_difficulty_hardmode_rewards"))
     {
