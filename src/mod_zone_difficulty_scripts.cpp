@@ -696,13 +696,9 @@ void ZoneDifficulty::HardmodeEvent(Unit* unit, uint32 entry, uint32 key)
                 }, sZoneDifficulty->HardmodeAI[entry][key].Cooldown, EVENT_GROUP);
         }
 
-        // Select target
-        Unit* target;
-        if (sZoneDifficulty->HardmodeAI[entry][key].Target == TARGET_SELF)
-        {
-            target = unit;
-        }
-        else if (sZoneDifficulty->HardmodeAI[entry][key].Target == TARGET_VICTIM)
+        // Select target. Default = TARGET_SELF
+        Unit* target = unit;
+        if (sZoneDifficulty->HardmodeAI[entry][key].Target == TARGET_VICTIM)
         {
             target = unit->GetVictim();
         }
@@ -789,11 +785,10 @@ void ZoneDifficulty::HardmodeEvent(Unit* unit, uint32 entry, uint32 key)
             }
         }
 
-        if (!target)
+        if (target)
         {
-            return;
+            unit->CastSpell(target, sZoneDifficulty->HardmodeAI[entry][key].Spell, true);
         }
-        unit->CastSpell(target, sZoneDifficulty->HardmodeAI[entry][key].Spell, true);
     }
 }
 
