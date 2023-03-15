@@ -733,6 +733,12 @@ void ZoneDifficulty::HardmodeEvent(Unit* unit, uint32 entry, uint32 key)
 {
     if (unit && unit->IsAlive())
     {
+        if (!unit->IsInCombat())
+        {
+            unit->m_Events.CancelEventGroup(EVENT_GROUP);
+            return;
+        }
+
         // Try again in 1s if the unit is currently casting
         if (unit->HasUnitState(UNIT_STATE_CASTING))
         {
@@ -1216,16 +1222,16 @@ public:
         }
     }
 
-    void OnUnitEnterEvadeMode(Unit* unit, uint8 /*why*/) override
-    {
-        uint32 entry = unit->GetEntry();
-        LOG_INFO("module", "OnUnitEnterEvadeMode fired. Entry: {}", entry);
-        if (entry == 19389)
-        {
-            unit->m_Events.CancelEventGroup(EVENT_GROUP);
-            LOG_INFO("module", "Unit evading, events reset.");
-        }
-    }
+    //void OnUnitEnterEvadeMode(Unit* unit, uint8 /*why*/) override
+    //{
+    //    uint32 entry = unit->GetEntry();
+    //    LOG_INFO("module", "OnUnitEnterEvadeMode fired. Entry: {}", entry);
+    //    if (entry == 19389)
+    //    {
+    //        unit->m_Events.CancelEventGroup(EVENT_GROUP);
+    //        LOG_INFO("module", "Unit evading, events reset.");
+    //    }
+    //}
 
     /** @brief Check if the Hardmode is activated for the instance and if the creature has any hardmode AI assigned. Schedule the events, if so.
      */
@@ -1239,6 +1245,8 @@ public:
         {
             return;
         }
+
+        unit->m_Events.CancelEventGroup(EVENT_GROUP);
 
         uint32 entry = unit->GetEntry();
         if (sZoneDifficulty->HardmodeAI.find(entry) == sZoneDifficulty->HardmodeAI.end())
