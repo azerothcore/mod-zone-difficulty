@@ -673,6 +673,60 @@ void ZoneDifficulty::SaveHardmodeInstanceData(uint32 instanceId)
     CharacterDatabase.Execute("REPLACE INTO zone_difficulty_instance_saves (InstanceID, HardmodeOn, HardmodePossible) VALUES ({}, {}, {})", instanceId, sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodeOn, sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodePossible);
 }
 
+/** @brief Fetch all players on the [Unit]s threat list
+ *
+ *  @param unit The one to check for their threat list.
+ */
+std::list<Unit*> ZoneDifficulty::GetTargetList(Unit* unit, uint32 entry, uint32 key)
+{
+    auto const& threatlist = unit->GetThreatMgr().GetThreatList();
+    std::list<Unit*> targetList;
+    if (threatlist.empty())
+    {
+        LOG_INFO("module", "Threatlist is empty for unit {}", unit->GetName());
+        return targetList;
+    }
+
+    for (auto itr = threatlist.begin(); itr != threatlist.end(); ++itr)
+    {
+        Unit* target = (*itr)->getTarget();
+        if (!target)
+        {
+            continue;
+        }
+        if (target->GetTypeId() != TYPEID_PLAYER)
+        {
+            continue;
+        }
+        //Target chosen based on a distance give in TargetArg (for TARGET_PLAYER_DISTANCE)
+        if (sZoneDifficulty->HardmodeAI[entry][key].Target == TARGET_PLAYER_DISTANCE)
+        {
+            if (!unit->IsWithinDist(target, sZoneDifficulty->HardmodeAI[entry][key].TargetArg))
+            {
+                continue;
+            }
+        }
+        //Target chosen based on the min/max distance of the spell
+        else
+        {
+            SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(sZoneDifficulty->HardmodeAI[entry][key].Spell);
+            if (spellInfo)
+            {
+                if (unit->IsWithinDist(target, spellInfo->GetMinRange()))
+                {
+                    continue;
+                }
+                if (!unit->IsWithinDist(target, spellInfo->GetMaxRange()))
+                {
+                    continue;
+                }
+            }
+        }
+        targetList.push_back(target);
+    }
+    return targetList;
+}
+
 void ZoneDifficulty::HardmodeEvent(Unit* unit, uint32 entry, uint32 key)
 {
     if (unit && unit->IsAlive())
@@ -704,44 +758,27 @@ void ZoneDifficulty::HardmodeEvent(Unit* unit, uint32 entry, uint32 key)
         }
         else if (sZoneDifficulty->HardmodeAI[entry][key].Target == TARGET_PLAYER_DISTANCE)
         {
-            // todo: create a list of all players in range and cast the spell on all of them
+            std::list<Unit*> targetList = sZoneDifficulty->GetTargetList(unit, entry, key);
+            if (targetList.empty())
+            {
+                return;
+            }
+            for (Unit* trg : targetList)
+            {
+                if (trg)
+                {
+                    unit->CastSpell(trg, sZoneDifficulty->HardmodeAI[entry][key].Spell, true);
+                }
+            }
+            return;
         }
         else
         {
-            auto const& threatlist = unit->GetThreatMgr().GetThreatList();
-            if (threatlist.empty() && sZoneDifficulty->HardmodeAI[entry][key].Target != TARGET_SELF)
-                LOG_INFO("module", "Threatlist is empty for unit {}", unit->GetName());
-            return;
-
-            std::list<Unit*> targetList;
-            for (auto itr = threatlist.begin(); itr != threatlist.end(); ++itr)
-            {
-                Unit* target = (*itr)->getTarget();
-                if (!target)
-                {
-                    continue;
-                }
-                if (target->GetTypeId() != TYPEID_PLAYER)
-                {
-                    continue;
-                }
-                SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(sZoneDifficulty->HardmodeAI[entry][key].Spell);
-                if (spellInfo)
-                {
-                    if (unit->IsWithinDist(target, spellInfo->GetMinRange()))
-                    {
-                        continue;
-                    }
-                    if (!unit->IsWithinDist(target, spellInfo->GetMaxRange()))
-                    {
-                        continue;
-                    }
-                }
-                targetList.push_back(target);
-            }
-
+            std::list<Unit*> targetList = sZoneDifficulty->GetTargetList(unit, entry, key);
             if (targetList.empty())
+            {
                 return;
+            }
             if (targetList.size() < 2)
             {
                 target = unit->GetVictim();
@@ -786,7 +823,7 @@ void ZoneDifficulty::HardmodeEvent(Unit* unit, uint32 entry, uint32 key)
                     }
                     default:
                     {
-                        LOG_ERROR("module", "Unknown type for `Target`: {} in zone_difficulty_hardmode_ai");
+                        LOG_ERROR("module", "Unknown type for Target: {} in zone_difficulty_hardmode_ai", sZoneDifficulty->HardmodeAI[entry][key].Target);
                     }
                 }
             }

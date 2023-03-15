@@ -99,12 +99,12 @@ uint32 const ITEMTYPE_PLATE = 5;
 uint32 const ITEMTYPE_WEAPONS = 6;
 
 uint8 const TARGET_SELF = 1;
-uint8 const TARGET_VICTIM = 2;                  // current target
-uint8 const TARGET_HOSTILE_SECOND_AGGRO = 3;    // second highest aggro
-uint8 const TARGET_HOSTILE_LAST_AGGRO = 4;      // lowest aggro
-uint8 const TARGET_HOSTILE_RANDOM = 5;          // any random player from the threat list
-uint8 const TARGET_HOSTILE_RANDOM_NOT_TOP = 6;  // any random player from the threat list except the current target
-uint8 const TARGET_PLAYER_DISTANCE = 18;        // all players within TargetArg range
+uint8 const TARGET_VICTIM = 2;                      // current target
+uint8 const TARGET_HOSTILE_AGGRO_FROM_TOP = 3;      // count TargetArg highest aggro from top
+uint8 const TARGET_HOSTILE_AGGRO_FROM_BOTTOM = 4;   // count TargetArg lowest aggro from bottom
+uint8 const TARGET_HOSTILE_RANDOM = 5;              // any random player from the threat list
+uint8 const TARGET_HOSTILE_RANDOM_NOT_TOP = 6;      // any random player from the threat list except the current target
+uint8 const TARGET_PLAYER_DISTANCE = 18;            // all players within TargetArg range
 
 const std::string REWARD_MAIL_SUBJECT = "Chromie's Reward for you";
 const std::string REWARD_MAIL_BODY = "Enjoy your new item!";
@@ -124,6 +124,7 @@ public:
     void AddHardmodeScore(Map* map, uint32 type);
     void DeductHardmodeScore(Player* player, uint32 type, uint32 score);
     void SendItem(Player* player, uint32 category, uint32 itemType, uint32 id);
+    std::list<Unit*> GetTargetList(Unit* unit, uint32 entry, uint32 key);
     void HardmodeEvent(Unit* unit, uint32 entry, uint32 key);
     [[nodiscard]] bool IsValidNerfTarget(Unit* target);
     [[nodiscard]] bool VectorContainsUint32(std::vector<uint32> vec, uint32 element);
