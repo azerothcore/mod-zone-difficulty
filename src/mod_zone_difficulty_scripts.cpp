@@ -676,6 +676,8 @@ void ZoneDifficulty::SaveHardmodeInstanceData(uint32 instanceId)
 /** @brief Fetch all players on the [Unit]s threat list
  *
  *  @param unit The one to check for their threat list.
+ *  @param entry Key value to access HardmodeAI map/vector data
+ *  @param key Key value to access HardmodeAI map/vector
  */
 std::list<Unit*> ZoneDifficulty::GetTargetList(Unit* unit, uint32 entry, uint32 key)
 {
@@ -1225,10 +1227,20 @@ public:
         }
     }
 
+    /** @brief Check if the Hardmode is activated for the instance and if the creature has any hardmode AI assigned. Schedule the events, if so.
+     */
     void OnUnitEnterCombat(Unit* unit, Unit* /*victim*/) override
     {
-        uint32 entry = unit->GetEntry();
+        if (sZoneDifficulty->HardmodeInstanceData.find(unit->GetInstanceId()) == sZoneDifficulty->HardmodeInstanceData.end())
+        {
+            return;
+        }
+        if (!sZoneDifficulty->HardmodeInstanceData[unit->GetInstanceId()].HardmodeOn)
+        {
+            return;
+        }
 
+        uint32 entry = unit->GetEntry();
         if (sZoneDifficulty->HardmodeAI.find(entry) == sZoneDifficulty->HardmodeAI.end())
         {
             return;
@@ -1768,7 +1780,7 @@ public:
             //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Try turn on");
             bool canTurnOn = true;
 
-            // Forbid turning harmode on ...
+            // Forbid turning hardmode on ...
             // ...if a single encounter was completed on normal mode
             if (sZoneDifficulty->HardmodeInstanceData.find(instanceId) != sZoneDifficulty->HardmodeInstanceData.end())
             {
