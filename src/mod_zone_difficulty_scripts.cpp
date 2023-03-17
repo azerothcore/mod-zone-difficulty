@@ -798,6 +798,7 @@ void ZoneDifficulty::HardmodeEvent(Unit* unit, uint32 entry, uint32 key)
             {
                 if (trg)
                 {
+                    LOG_INFO("module", "Creature casting HardmodeAI spell: {} at target {}", sZoneDifficulty->HardmodeAI[entry][key].Spell, trg->GetName());
                     unit->CastSpell(trg, sZoneDifficulty->HardmodeAI[entry][key].Spell, true);
                 }
             }
@@ -863,7 +864,7 @@ void ZoneDifficulty::HardmodeEvent(Unit* unit, uint32 entry, uint32 key)
         if (target)
         {
             LOG_INFO("module", "Creature casting HardmodeAI spell: {} at target {}", sZoneDifficulty->HardmodeAI[entry][key].Spell, target->GetName());
-            unit->CastSpell(target, sZoneDifficulty->HardmodeAI[entry][key].Spell, false);
+            unit->CastSpell(target, sZoneDifficulty->HardmodeAI[entry][key].Spell, true);
         }
     }
 }
