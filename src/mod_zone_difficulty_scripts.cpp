@@ -177,6 +177,10 @@ void ZoneDifficulty::LoadMapDifficultySettings()
 
         } while (result->NextRow());
     }
+    else
+    {
+        LOG_ERROR("module", "MOD-ZONE-DIFFICULTY: Query failed: SELECT * FROM zone_difficulty_hardmode_instance_data");
+    }
 
     if (QueryResult result = WorldDatabase.Query("SELECT entry FROM `pool_quest` WHERE `pool_entry`=356"))
     {
@@ -185,6 +189,10 @@ void ZoneDifficulty::LoadMapDifficultySettings()
             sZoneDifficulty->DailyHeroicQuests.push_back((*result)[0].Get<uint32>());
             //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Adding daily heroic quest with id {}.", (*result)[0].Get<uint32>());
         } while (result->NextRow());
+    }
+    else
+    {
+        LOG_ERROR("module", "MOD-ZONE-DIFFICULTY: Query failed: SELECT entry FROM `pool_quest` WHERE `pool_entry`=356");
     }
 
     if (QueryResult result = WorldDatabase.Query("SELECT * FROM zone_difficulty_hardmode_creatureoverrides"))
@@ -204,6 +212,10 @@ void ZoneDifficulty::LoadMapDifficultySettings()
                 //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: New creature with entry: {} has exception for hp: {}", creatureEntry, hpModifier);
             }
         } while (result->NextRow());
+    }
+    else
+    {
+        LOG_ERROR("module", "MOD-ZONE-DIFFICULTY: Query failed: SELECT * FROM zone_difficulty_hardmode_creatureoverrides");
     }
 
     if (QueryResult result = WorldDatabase.Query("SELECT * FROM zone_difficulty_hardmode_ai"))
@@ -227,14 +239,19 @@ void ZoneDifficulty::LoadMapDifficultySettings()
                 if (data.Chance != 0 && data.Spell != 0 && (( data.Target >= 1 && data.Target <= 6 ) || data.Target == 18))
                 {
                     sZoneDifficulty->HardmodeAI[creatureEntry].push_back(data);
+                    LOG_INFO("module", "MOD-ZONE-DIFFICULTY: New AI for entry {} with spell {}", creatureEntry, data.Spell);
                 }
                 else
                 {
-                    LOG_ERROR("module", "Unknown type for `Target`: {} in zone_difficulty_hardmode_ai");
+                    LOG_ERROR("module", "MOD-ZONE-DIFFICULTY: Unknown type for `Target`: {} in zone_difficulty_hardmode_ai", data.Target);
                 }
                 //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: New creature with entry: {} has exception for hp: {}", creatureEntry, hpModifier);
             }
         } while (result->NextRow());
+    }
+    else
+    {
+        LOG_ERROR("module", "MOD-ZONE-DIFFICULTY: Query failed: SELECT * FROM zone_difficulty_hardmode_ai");
     }
 
     //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Starting load of rewards.");
@@ -267,6 +284,10 @@ void ZoneDifficulty::LoadMapDifficultySettings()
             }
             //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Total items in Rewards map: {}.", i);
         } while (result->NextRow());
+    }
+    else
+    {
+        LOG_ERROR("module", "MOD-ZONE-DIFFICULTY: Query failed: SELECT ContentType, ItemType, Entry, Price, Enchant, EnchantSlot, Achievement, Enabled FROM zone_difficulty_hardmode_rewards");
     }
 }
 
@@ -685,7 +706,7 @@ std::list<Unit*> ZoneDifficulty::GetTargetList(Unit* unit, uint32 entry, uint32 
     std::list<Unit*> targetList;
     if (threatlist.empty())
     {
-        LOG_INFO("module", "Threatlist is empty for unit {}", unit->GetName());
+        LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Threatlist is empty for unit {}", unit->GetName());
         return targetList;
     }
 
@@ -731,6 +752,7 @@ std::list<Unit*> ZoneDifficulty::GetTargetList(Unit* unit, uint32 entry, uint32 
 
 void ZoneDifficulty::HardmodeEvent(Unit* unit, uint32 entry, uint32 key)
 {
+    LOG_INFO("module", "MOD-ZONE-DIFFICULTY: HardmodeEvent for entry {} with key {}", entry, key);
     if (unit && unit->IsAlive())
     {
         if (!unit->IsInCombat())
@@ -738,10 +760,11 @@ void ZoneDifficulty::HardmodeEvent(Unit* unit, uint32 entry, uint32 key)
             unit->m_Events.CancelEventGroup(EVENT_GROUP);
             return;
         }
-
+        LOG_INFO("module", "MOD-ZONE-DIFFICULTY: HardmodeEvent IsInCombat for entry {} with key {}", entry, key);
         // Try again in 1s if the unit is currently casting
         if (unit->HasUnitState(UNIT_STATE_CASTING))
         {
+            LOG_INFO("module", "MOD-ZONE-DIFFICULTY: HardmodeEvent Re-schedule AI event in 1s because unit is casting for entry {} with key {}", entry, key);
             unit->m_Events.AddEventAtOffset([unit, entry, key]()
                 {
                     sZoneDifficulty->HardmodeEvent(unit, entry, key);
@@ -750,7 +773,7 @@ void ZoneDifficulty::HardmodeEvent(Unit* unit, uint32 entry, uint32 key)
         }
 
         //Re-schedule the event
-        if (sZoneDifficulty->HardmodeAI[entry][key].Repetitions >= 1)
+        if (sZoneDifficulty->HardmodeAI[entry][key].Repetitions == 0)
         {
             unit->m_Events.AddEventAtOffset([unit, entry, key]()
                 {
@@ -831,7 +854,7 @@ void ZoneDifficulty::HardmodeEvent(Unit* unit, uint32 entry, uint32 key)
                     }
                     default:
                     {
-                        LOG_ERROR("module", "Unknown type for Target: {} in zone_difficulty_hardmode_ai", sZoneDifficulty->HardmodeAI[entry][key].Target);
+                        LOG_ERROR("module", "MOD-ZONE-DIFFICULTY: Unknown type for Target: {} in zone_difficulty_hardmode_ai", sZoneDifficulty->HardmodeAI[entry][key].Target);
                     }
                 }
             }
@@ -839,7 +862,8 @@ void ZoneDifficulty::HardmodeEvent(Unit* unit, uint32 entry, uint32 key)
 
         if (target)
         {
-            unit->CastSpell(target, sZoneDifficulty->HardmodeAI[entry][key].Spell, true);
+            LOG_INFO("module", "Creature casting HardmodeAI spell: {} at target {}", sZoneDifficulty->HardmodeAI[entry][key].Spell, target->GetName());
+            unit->CastSpell(target, sZoneDifficulty->HardmodeAI[entry][key].Spell, false);
         }
     }
 }
@@ -1237,6 +1261,7 @@ public:
      */
     void OnUnitEnterCombat(Unit* unit, Unit* /*victim*/) override
     {
+        //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnUnitEnterCombat for unit {}", unit->GetEntry());
         if (sZoneDifficulty->HardmodeInstanceData.find(unit->GetInstanceId()) == sZoneDifficulty->HardmodeInstanceData.end())
         {
             return;
@@ -1254,8 +1279,9 @@ public:
             return;
         }
 
-        uint32 i = 1;
-        for (ZoneDifficultyHAI data : sZoneDifficulty->HardmodeAI[entry])
+        LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnUnitEnterCombat checks passed for unit {}", unit->GetEntry());
+        uint32 i = 0;
+        for (ZoneDifficultyHAI &data : sZoneDifficulty->HardmodeAI[entry])
         {
             if (data.Chance == 100 || data.Chance >= urand(1, 100))
             {
