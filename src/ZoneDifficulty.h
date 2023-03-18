@@ -20,12 +20,6 @@ struct ZoneDifficultyNerfData
     float MeleeDamageBuffPctHard;
 };
 
-struct ZoneDifficultyHardmodeInstData
-{
-    bool HardmodeOn;
-    bool HardmodePossible;
-};
-
 struct ZoneDifficultyHardmodeMapData
 {
     uint32 EncounterEntry;
@@ -149,7 +143,7 @@ public:
     std::map<uint32, float> SpellNerfOverrides;
     typedef std::map<uint32, std::vector<uint32> > ZoneDifficultyDisablesMap;
     ZoneDifficultyDisablesMap DisallowedBuffs;
-    typedef std::map<uint32, ZoneDifficultyHardmodeInstData> ZoneDifficultyHardmodeInstDataMap;
+    typedef std::map<uint32, bool> ZoneDifficultyHardmodeInstDataMap;
     ZoneDifficultyHardmodeInstDataMap HardmodeInstanceData;
     typedef std::map<uint32, std::vector<ZoneDifficultyHardmodeMapData> > ZoneDifficultyHardmodeLootMap;
     ZoneDifficultyHardmodeLootMap HardmodeLoot;

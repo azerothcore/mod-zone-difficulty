@@ -296,7 +296,6 @@ void ZoneDifficulty::LoadMapDifficultySettings()
  *
  *  `InstanceID` INT NOT NULL DEFAULT 0,
  *  `HardmodeOn` TINYINT NOT NULL DEFAULT 0,
- *  `HardmodePossible` TINYINT NOT NULL DEFAULT 1,
  *
  *  Exclude data not in the IDs stored in GetInstanceIDs() and delete
  *  zone_difficulty_instance_saves for instances that no longer exist.
@@ -317,13 +316,11 @@ void ZoneDifficulty::LoadHardmodeInstanceData()
         {
             uint32 InstanceId = (*result)[0].Get<uint32>();
             bool HardmodeOn = (*result)[1].Get<bool>();
-            bool HardmodePossible = (*result)[2].Get<bool>();
 
             if (instanceIDs[InstanceId])
             {
-                LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Loading from DB for instanceId {}: HardmodeOn = {}, HardmodePossible = {}", InstanceId, HardmodeOn, HardmodePossible);
-                sZoneDifficulty->HardmodeInstanceData[InstanceId].HardmodeOn = HardmodeOn;
-                sZoneDifficulty->HardmodeInstanceData[InstanceId].HardmodePossible = HardmodePossible;
+                LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Loading from DB for instanceId {}: HardmodeOn = {}", InstanceId, HardmodeOn);
+                sZoneDifficulty->HardmodeInstanceData[InstanceId] = HardmodeOn;
             }
             else
             {
@@ -692,7 +689,6 @@ int32 ZoneDifficulty::GetLowestMatchingPhase(uint32 mapId, uint32 phaseMask)
  *
  *  @param InstanceID INT NOT NULL DEFAULT 0,
  *  @param HardmodeOn TINYINT NOT NULL DEFAULT 0,
- *  @param HardmodePossible TINYINT NOT NULL DEFAULT 1,
  */
 void ZoneDifficulty::SaveHardmodeInstanceData(uint32 instanceId)
 {
@@ -701,8 +697,8 @@ void ZoneDifficulty::SaveHardmodeInstanceData(uint32 instanceId)
         LOG_INFO("module", "MOD-ZONE-DIFFICULTY: ZoneDifficulty::SaveHardmodeInstanceData: InstanceId {} not found in HardmodeInstanceData.", instanceId);
         return;
     }
-    LOG_INFO("module", "MOD-ZONE-DIFFICULTY: ZoneDifficulty::SaveHardmodeInstanceData: Saving instanceId {} with HardmodeOn {} and HardmodePossible {}", instanceId, sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodeOn, sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodePossible);
-    CharacterDatabase.Execute("REPLACE INTO zone_difficulty_instance_saves (InstanceID, HardmodeOn, HardmodePossible) VALUES ({}, {}, {})", instanceId, sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodeOn, sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodePossible);
+    LOG_INFO("module", "MOD-ZONE-DIFFICULTY: ZoneDifficulty::SaveHardmodeInstanceData: Saving instanceId {} with HardmodeOn {}", instanceId, sZoneDifficulty->HardmodeInstanceData[instanceId]);
+    CharacterDatabase.Execute("REPLACE INTO zone_difficulty_instance_saves (InstanceID, HardmodeOn) VALUES ({}, {})", instanceId, sZoneDifficulty->HardmodeInstanceData[instanceId]);
 }
 
 /**
@@ -942,7 +938,7 @@ public:
                                 {
                                     absorb = eff->GetAmount() * sZoneDifficulty->NerfInfo[mapId][matchingPhase].AbsorbNerfPct;
                                 }
-                                if (sZoneDifficulty->HasHardMode(mode) && sZoneDifficulty->HardmodeInstanceData[target->GetMap()->GetInstanceId()].HardmodeOn)
+                                if (sZoneDifficulty->HasHardMode(mode) && sZoneDifficulty->HardmodeInstanceData[target->GetMap()->GetInstanceId()])
                                 {
                                     if (map->IsRaid() ||
                                         (map->IsHeroic() && map->IsDungeon()))
@@ -1024,7 +1020,7 @@ public:
                     {
                         heal = heal * sZoneDifficulty->NerfInfo[mapId][matchingPhase].HealingNerfPct;
                     }
-                    if (sZoneDifficulty->HasHardMode(mode) && sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].HardmodeOn)
+                    if (sZoneDifficulty->HasHardMode(mode) && sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()])
                     {
                         if (map->IsRaid() ||
                             (map->IsHeroic() && map->IsDungeon()))
@@ -1100,7 +1096,7 @@ public:
                 {
                     damage = damage * sZoneDifficulty->NerfInfo[mapId][matchingPhase].SpellDamageBuffPct;
                 }
-                if (sZoneDifficulty->HasHardMode(mode) && sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].HardmodeOn)
+                if (sZoneDifficulty->HasHardMode(mode) && sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()])
                 {
                     if (map->IsRaid() ||
                         (map->IsHeroic() && map->IsDungeon()))
@@ -1181,7 +1177,7 @@ public:
                 {
                     damage = damage * sZoneDifficulty->NerfInfo[mapId][matchingPhase].SpellDamageBuffPct;
                 }
-                if (sZoneDifficulty->HasHardMode(mode) && sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].HardmodeOn)
+                if (sZoneDifficulty->HasHardMode(mode) && sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()])
                 {
                     if (map->IsRaid() ||
                         (map->IsHeroic() && map->IsDungeon()))
@@ -1240,7 +1236,7 @@ public:
                 {
                     damage = damage * sZoneDifficulty->NerfInfo[mapId][matchingPhase].MeleeDamageBuffPct;
                 }
-                if (sZoneDifficulty->HasHardMode(mode) && sZoneDifficulty->HardmodeInstanceData[target->GetMap()->GetInstanceId()].HardmodeOn)
+                if (sZoneDifficulty->HasHardMode(mode) && sZoneDifficulty->HardmodeInstanceData[target->GetMap()->GetInstanceId()])
                 {
                     if (map->IsRaid() ||
                         (map->IsHeroic() && map->IsDungeon()))
@@ -1280,7 +1276,7 @@ public:
         {
             return;
         }
-        if (!sZoneDifficulty->HardmodeInstanceData[unit->GetInstanceId()].HardmodeOn)
+        if (!sZoneDifficulty->HardmodeInstanceData[unit->GetInstanceId()])
         {
             return;
         }
@@ -1393,16 +1389,14 @@ public:
         }
         if (oldState != IN_PROGRESS && newState == IN_PROGRESS)
         {
-            sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodePossible = false;
-            if (sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodeOn)
+            if (sZoneDifficulty->HardmodeInstanceData[instanceId])
             {
                 sZoneDifficulty->EncountersInProgress[instanceId] = GameTime::GetGameTime().count();
             }
         }
         else if (oldState == IN_PROGRESS && newState == DONE)
         {
-            sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodePossible = false;
-            if (sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodeOn)
+            if (sZoneDifficulty->HardmodeInstanceData[instanceId])
             {
                 //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Hardmode is on.");
                 if (sZoneDifficulty->EncountersInProgress.find(instanceId) != sZoneDifficulty->EncountersInProgress.end() && sZoneDifficulty->EncountersInProgress[instanceId] != 0)
@@ -1446,7 +1440,7 @@ public:
         {
             //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Encounter completed. Map relevant. Checking for source: {}", source->GetEntry());
             // Give additional loot, if the encounter was in hardmode.
-            if (sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].HardmodeOn)
+            if (sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()])
             {
                 uint32 mapId = map->GetId();
                 if (!sZoneDifficulty->IsHardmodeMap(mapId))
@@ -1486,13 +1480,6 @@ public:
                  * }
                  */
             }
-            // Must set HardmodePossible to false, if the encounter wasn't in hardmode.
-            else
-            {
-                //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Hardmode for instance id {} is {}. Setting HardmodePossible to false.", map->GetInstanceId(), sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].HardmodeOn);
-                sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].HardmodePossible = false;
-                sZoneDifficulty->SaveHardmodeInstanceData(map->GetInstanceId());
-            }
         }
     }
 };
@@ -1517,12 +1504,6 @@ public:
         {
             //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: New instance not handled because there is no hardmode loot data for map id: {}", instanceMap->GetId());
             return;
-        }
-
-        if (completedEncounterMask == 0)
-        {
-            //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Initializing instance with HardmodePossible == true for instanceId: {} with mapId: {}", instanceMap->GetInstanceId(), instanceMap->GetId());
-            sZoneDifficulty->HardmodeInstanceData[instanceMap->GetInstanceId()].HardmodePossible = true;
         }
     }
 };
@@ -1832,11 +1813,12 @@ public:
             // ...if a single encounter was completed on normal mode
             if (sZoneDifficulty->HardmodeInstanceData.find(instanceId) != sZoneDifficulty->HardmodeInstanceData.end())
             {
-                if (sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodePossible == false || player->GetInstanceScript()->GetBossState(0) == DONE)
+                if (player->GetInstanceScript()->GetBossState(0) == DONE)
                 {
-                    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Hardmode is not Possible for instanceId {}: {}", instanceId, sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodePossible);
+                    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Hardmode is not Possible for instanceId {}", instanceId);
                     canTurnOn = false;
                     creature->Whisper("I am sorry, time-traveler. You can not return to this version of the time-line anymore. You have already completed one of the lessons.", LANG_UNIVERSAL, player);
+                    sZoneDifficulty->SaveHardmodeInstanceData(instanceId);
                 }
             }
             // ... if there is an encounter in progress
@@ -1850,7 +1832,7 @@ public:
             if (canTurnOn)
             {
                 //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Turn on hardmode for id {}", instanceId);
-                sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodeOn = true;
+                sZoneDifficulty->HardmodeInstanceData[instanceId] = true;
                 sZoneDifficulty->SaveHardmodeInstanceData(instanceId);
                 sZoneDifficulty->SendWhisperToRaid("We're switching to the challenging version of the history lesson now. (Hard mode)", creature, player);
             }
@@ -1859,10 +1841,10 @@ public:
         }
         else if (action == 101)
         {
-            if (sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodePossible)
+            if (!player->GetInstanceScript()->GetBossState(0) == DONE)
             {
                 //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Turn off hardmode for id {}", instanceId);
-                sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodeOn = false;
+                sZoneDifficulty->HardmodeInstanceData[instanceId] = false;
                 sZoneDifficulty->SaveHardmodeInstanceData(instanceId);
                 sZoneDifficulty->SendWhisperToRaid("We're switching to the cinematic version of the history lesson now. (Normal mode)", creature, player);
                 CloseGossipMenuFor(player);
@@ -1876,7 +1858,7 @@ public:
         else if (action == 102)
         {
             //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Turn off hardmode for id {}", instanceId);
-            sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodeOn = false;
+            sZoneDifficulty->HardmodeInstanceData[instanceId] = false;
             sZoneDifficulty->SaveHardmodeInstanceData(instanceId);
             sZoneDifficulty->SendWhisperToRaid("We're switching to the cinematic version of the history lesson now. (Normal mode)", creature, player);
             CloseGossipMenuFor(player);
@@ -1898,7 +1880,7 @@ public:
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Please Chromie, let us re-experience how all the things really happened back then. (Hard mode)", GOSSIP_SENDER_MAIN, 100);
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, "I think we will be fine with the cinematic version from here. (Normal mode)", GOSSIP_SENDER_MAIN, 101);
 
-                if (sZoneDifficulty->HardmodeInstanceData[player->GetMap()->GetInstanceId()].HardmodeOn)
+                if (sZoneDifficulty->HardmodeInstanceData[player->GetMap()->GetInstanceId()])
                 {
                     npcText = NPC_TEXT_LEADER_HARD;
                 }
@@ -1983,7 +1965,7 @@ public:
         int8 mode = sZoneDifficulty->NerfInfo[mapId][matchingPhase].Enabled;
         if (matchingPhase != -1)
         {
-            if (sZoneDifficulty->HasHardMode(mode) && sZoneDifficulty->HardmodeInstanceData[creature->GetMap()->GetInstanceId()].HardmodeOn)
+            if (sZoneDifficulty->HasHardMode(mode) && sZoneDifficulty->HardmodeInstanceData[creature->GetMap()->GetInstanceId()])
             {
                 if (creature->GetMaxHealth() == newHp)
                 {
@@ -2009,7 +1991,7 @@ public:
                 return;
             }
 
-            if (sZoneDifficulty->HardmodeInstanceData[creature->GetMap()->GetInstanceId()].HardmodeOn == false)
+            if (sZoneDifficulty->HardmodeInstanceData[creature->GetMap()->GetInstanceId()] == false)
             {
                 if (creature->GetMaxHealth() == newHp)
                 {
