@@ -48,8 +48,8 @@ struct ZoneDifficultyHAI
     uint32 Spell;
     uint8 Target;
     uint8 TargetArg;
-    std::chrono::milliseconds Delay;
-    std::chrono::milliseconds Cooldown;
+    Milliseconds Delay;
+    Milliseconds Cooldown;
     uint8 Repetitions;
 };
 
