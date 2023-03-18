@@ -1484,30 +1484,6 @@ public:
     }
 };
 
-class mod_zone_difficulty_instancemapscript : public AllMapScript
-{
-public:
-    mod_zone_difficulty_instancemapscript() : AllMapScript("mod_zone_difficulty_instancemapscript") { }
-
-    void OnBeforeCreateInstanceScript(InstanceMap* instanceMap, InstanceScript* /*instanceData*/, bool /*load*/, std::string /*data*/, uint32 completedEncounterMask)
-    {
-        /* debug start
-         * for (auto mapdata : sZoneDifficulty->HardmodeLoot)
-         * {
-         *    LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Maps with loot data: {}", mapdata.first);
-         * }
-         * debug end
-         */
-
-
-        if (!sZoneDifficulty->IsHardmodeMap(instanceMap->GetId()))
-        {
-            //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: New instance not handled because there is no hardmode loot data for map id: {}", instanceMap->GetId());
-            return;
-        }
-    }
-};
-
 class mod_zone_difficulty_rewardnpc : public CreatureScript
 {
 public:
@@ -2027,7 +2003,6 @@ void AddModZoneDifficultyScripts()
     new mod_zone_difficulty_petscript();
     new mod_zone_difficulty_worldscript();
     new mod_zone_difficulty_globalscript();
-    new mod_zone_difficulty_instancemapscript();
     new mod_zone_difficulty_rewardnpc();
     new mod_zone_difficulty_dungeonmaster();
     new mod_zone_difficulty_allcreaturescript();
