@@ -1836,7 +1836,7 @@ public:
                 {
                     //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Hardmode is not Possible for instanceId {}: {}", instanceId, sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodePossible);
                     canTurnOn = false;
-                    creature->Whisper("I am sorry, time-traveler. You can not return to this version of the time-line anymore. You have already completed one of the .", LANG_UNIVERSAL, player);
+                    creature->Whisper("I am sorry, time-traveler. You can not return to this version of the time-line anymore. You have already completed one of the lessons.", LANG_UNIVERSAL, player);
                 }
             }
             // ... if there is an encounter in progress
