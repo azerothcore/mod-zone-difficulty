@@ -48,8 +48,8 @@ struct ZoneDifficultyHAI
     uint32 Spell;
     uint8 Target;
     uint8 TargetArg;
-    Milliseconds Delay;
-    Milliseconds Cooldown;
+    std::chrono::milliseconds Delay;
+    std::chrono::milliseconds Cooldown;
     uint8 Repetitions;
 };
 
@@ -126,6 +126,8 @@ public:
     void SendItem(Player* player, uint32 category, uint32 itemType, uint32 id);
     std::list<Unit*> GetTargetList(Unit* unit, uint32 entry, uint32 key);
     void HardmodeEvent(Unit* unit, uint32 entry, uint32 key);
+    bool HasNormalMode(int8 mode) { return (mode & MODE_NORMAL) == MODE_NORMAL; }
+    bool HasHardMode(int8 mode) { return (mode & MODE_HARD) == MODE_HARD; }
     [[nodiscard]] bool IsValidNerfTarget(Unit* target);
     [[nodiscard]] bool VectorContainsUint32(std::vector<uint32> vec, uint32 element);
     [[nodiscard]] bool IsHardmodeMap(uint32 mapid);

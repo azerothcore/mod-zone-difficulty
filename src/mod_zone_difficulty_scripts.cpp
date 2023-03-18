@@ -82,7 +82,7 @@ void ZoneDifficulty::LoadMapDifficultySettings()
             uint32 phaseMask = (*result)[1].Get<uint32>();
             ZoneDifficultyNerfData data;
             int8 mode = (*result)[6].Get<int8>();
-            if ((mode & MODE_NORMAL) == MODE_NORMAL)
+            if (sZoneDifficulty->HasNormalMode(mode))
             {
                 data.HealingNerfPct = (*result)[2].Get<float>();
                 data.AbsorbNerfPct = (*result)[3].Get<float>();
@@ -91,7 +91,7 @@ void ZoneDifficulty::LoadMapDifficultySettings()
                 data.Enabled = data.Enabled | mode;
                 sZoneDifficulty->NerfInfo[mapId][phaseMask] = data;
             }
-            if ((mode & MODE_HARD) == MODE_HARD)
+            if (sZoneDifficulty->HasHardMode(mode))
             {
                 data.HealingNerfPctHard = (*result)[2].Get<float>();
                 data.AbsorbNerfPctHard = (*result)[3].Get<float>();
@@ -938,11 +938,11 @@ public:
                             if (matchingPhase != -1)
                             {
                                 Map* map = target->GetMap();
-                                if ((mode & MODE_NORMAL) == MODE_NORMAL)
+                                if (sZoneDifficulty->HasNormalMode(mode))
                                 {
                                     absorb = eff->GetAmount() * sZoneDifficulty->NerfInfo[mapId][matchingPhase].AbsorbNerfPct;
                                 }
-                                if ((mode & MODE_HARD) == MODE_HARD && sZoneDifficulty->HardmodeInstanceData[target->GetMap()->GetInstanceId()].HardmodeOn)
+                                if (sZoneDifficulty->HasHardMode(mode) && sZoneDifficulty->HardmodeInstanceData[target->GetMap()->GetInstanceId()].HardmodeOn)
                                 {
                                     if (map->IsRaid() ||
                                         (map->IsHeroic() && map->IsDungeon()))
@@ -1020,11 +1020,11 @@ public:
                 if (matchingPhase != -1)
                 {
                     Map* map = target->GetMap();
-                    if ((mode & MODE_NORMAL) == MODE_NORMAL)
+                    if (sZoneDifficulty->HasNormalMode(mode))
                     {
                         heal = heal * sZoneDifficulty->NerfInfo[mapId][matchingPhase].HealingNerfPct;
                     }
-                    if ((mode & MODE_HARD) == MODE_HARD && sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].HardmodeOn)
+                    if (sZoneDifficulty->HasHardMode(mode) && sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].HardmodeOn)
                     {
                         if (map->IsRaid() ||
                             (map->IsHeroic() && map->IsDungeon()))
@@ -1096,11 +1096,11 @@ public:
             {
                 int8 mode = sZoneDifficulty->NerfInfo[mapId][matchingPhase].Enabled;
                 Map* map = target->GetMap();
-                if ((mode & MODE_NORMAL) == MODE_NORMAL)
+                if (sZoneDifficulty->HasNormalMode(mode))
                 {
                     damage = damage * sZoneDifficulty->NerfInfo[mapId][matchingPhase].SpellDamageBuffPct;
                 }
-                if ((mode & MODE_HARD) == MODE_HARD && sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].HardmodeOn)
+                if (sZoneDifficulty->HasHardMode(mode) && sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].HardmodeOn)
                 {
                     if (map->IsRaid() ||
                         (map->IsHeroic() && map->IsDungeon()))
@@ -1177,11 +1177,11 @@ public:
             {
                 int8 mode = sZoneDifficulty->NerfInfo[mapId][matchingPhase].Enabled;
                 Map* map = target->GetMap();
-                if ((mode & MODE_NORMAL) == MODE_NORMAL)
+                if (sZoneDifficulty->HasNormalMode(mode))
                 {
                     damage = damage * sZoneDifficulty->NerfInfo[mapId][matchingPhase].SpellDamageBuffPct;
                 }
-                if ((mode & MODE_HARD) == MODE_HARD && sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].HardmodeOn)
+                if (sZoneDifficulty->HasHardMode(mode) && sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()].HardmodeOn)
                 {
                     if (map->IsRaid() ||
                         (map->IsHeroic() && map->IsDungeon()))
@@ -1236,11 +1236,11 @@ public:
             {
                 int8 mode = sZoneDifficulty->NerfInfo[mapId][matchingPhase].Enabled;
                 Map* map = target->GetMap();
-                if ((mode & MODE_NORMAL) == MODE_NORMAL)
+                if (sZoneDifficulty->HasNormalMode(mode))
                 {
                     damage = damage * sZoneDifficulty->NerfInfo[mapId][matchingPhase].MeleeDamageBuffPct;
                 }
-                if ((mode & MODE_HARD) == MODE_HARD && sZoneDifficulty->HardmodeInstanceData[target->GetMap()->GetInstanceId()].HardmodeOn)
+                if (sZoneDifficulty->HasHardMode(mode) && sZoneDifficulty->HardmodeInstanceData[target->GetMap()->GetInstanceId()].HardmodeOn)
                 {
                     if (map->IsRaid() ||
                         (map->IsHeroic() && map->IsDungeon()))
@@ -1983,7 +1983,7 @@ public:
         int8 mode = sZoneDifficulty->NerfInfo[mapId][matchingPhase].Enabled;
         if (matchingPhase != -1)
         {
-            if ((mode & MODE_HARD) == MODE_HARD && sZoneDifficulty->HardmodeInstanceData[creature->GetMap()->GetInstanceId()].HardmodeOn)
+            if (sZoneDifficulty->HasHardMode(mode) && sZoneDifficulty->HardmodeInstanceData[creature->GetMap()->GetInstanceId()].HardmodeOn)
             {
                 if (creature->GetMaxHealth() == newHp)
                 {
