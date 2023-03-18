@@ -232,11 +232,11 @@ void ZoneDifficulty::LoadMapDifficultySettings()
                 data.Spell = (*result)[2].Get<uint32>();
                 data.Target = (*result)[3].Get<uint8>();
                 data.TargetArg = (*result)[4].Get<uint8>();
-                data.Delay = (*result)[5].Get<std::chrono::milliseconds>();
-                data.Cooldown = (*result)[6].Get<std::chrono::milliseconds>();
+                data.Delay = (*result)[5].Get<Milliseconds>();
+                data.Cooldown = (*result)[6].Get<Milliseconds>();
                 data.Repetitions = (*result)[7].Get<uint8>();
 
-                if (data.Chance != 0 && data.Spell != 0 && (( data.Target >= 1 && data.Target <= 6 ) || data.Target == 18))
+                if (data.Chance != 0 && data.Spell != 0 && ((data.Target >= 1 && data.Target <= 6) || data.Target == 18))
                 {
                     sZoneDifficulty->HardmodeAI[creatureEntry].push_back(data);
                     LOG_INFO("module", "MOD-ZONE-DIFFICULTY: New AI for entry {} with spell {}", creatureEntry, data.Spell);
@@ -291,16 +291,16 @@ void ZoneDifficulty::LoadMapDifficultySettings()
     }
 }
 
-/** Loads the HardmodeInstanceData from the database.
-*  Fetch from zone_difficulty_instance_saves.
-*
-*  `InstanceID` INT NOT NULL DEFAULT 0,
-*  `HardmodeOn` TINYINT NOT NULL DEFAULT 0,
-*  `HardmodePossible` TINYINT NOT NULL DEFAULT 1,
-*
-*  Exclude data not in the IDs stored in GetInstanceIDs() and delete
-*  zone_difficulty_instance_saves for instances that no longer exist.
-*/
+/**
+ *  @brief Loads the HardmodeInstanceData from the database. Fetch from zone_difficulty_instance_saves.
+ *
+ *  `InstanceID` INT NOT NULL DEFAULT 0,
+ *  `HardmodeOn` TINYINT NOT NULL DEFAULT 0,
+ *  `HardmodePossible` TINYINT NOT NULL DEFAULT 1,
+ *
+ *  Exclude data not in the IDs stored in GetInstanceIDs() and delete
+ *  zone_difficulty_instance_saves for instances that no longer exist.
+ */
 void ZoneDifficulty::LoadHardmodeInstanceData()
 {
     std::vector<bool> instanceIDs = sMapMgr->GetInstanceIDs();
@@ -321,7 +321,7 @@ void ZoneDifficulty::LoadHardmodeInstanceData()
 
             if (instanceIDs[InstanceId])
             {
-                //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Loading from DB for instanceId {}: HardmodeOn = {}, HardmodePossible = {}", InstanceId, HardmodeOn, HardmodePossible);
+                LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Loading from DB for instanceId {}: HardmodeOn = {}, HardmodePossible = {}", InstanceId, HardmodeOn, HardmodePossible);
                 sZoneDifficulty->HardmodeInstanceData[InstanceId].HardmodeOn = HardmodeOn;
                 sZoneDifficulty->HardmodeInstanceData[InstanceId].HardmodePossible = HardmodePossible;
             }
@@ -335,14 +335,15 @@ void ZoneDifficulty::LoadHardmodeInstanceData()
     }
 }
 
-/** @brief Loads the score data from the database.
-*  Fetch from zone_difficulty_hardmode_score.
-*
-*  `CharacterGuid` INT NOT NULL DEFAULT 0,
-*  `Type` TINYINT NOT NULL DEFAULT 0,
-*  `Score` INT NOT NULL DEFAULT 0,
-**
-*/
+/**
+ *  @brief Loads the score data from the database.
+ *  Fetch from zone_difficulty_hardmode_score.
+ *
+ *  `CharacterGuid` INT NOT NULL DEFAULT 0,
+ *  `Type` TINYINT NOT NULL DEFAULT 0,
+ *  `Score` INT NOT NULL DEFAULT 0,
+ *
+ */
 void ZoneDifficulty::LoadHardmodeScoreData()
 {
     if (QueryResult result = CharacterDatabase.Query("SELECT * FROM zone_difficulty_hardmode_score"))
@@ -360,11 +361,12 @@ void ZoneDifficulty::LoadHardmodeScoreData()
     }
 }
 
-/** @brief Sends a whisper to all members of the player's raid in the same instance as the creature.
+/**
+ *  @brief Sends a whisper to all members of the player's raid in the same instance as the creature.
  *
- * @param message The message which should be sent to the <Player>.
- * @param creature The creature who sends the whisper.
- * @param player The object of the player, whose whole group should receive the message.
+ *  @param message The message which should be sent to the <Player>.
+ *  @param creature The creature who sends the whisper.
+ *  @param player The object of the player, whose whole group should receive the message.
  */
 void ZoneDifficulty::SendWhisperToRaid(std::string message, Creature* creature, Player* player)
 {
@@ -468,10 +470,11 @@ std::string ZoneDifficulty::GetContentTypeString(uint32 type)
     return typestring;
 }
 
-/** @brief Grants every player in the group one score for the hardmode.
+/**
+ *  @brief Grants every player in the group one score for the hardmode.
  *
- * @param map The map where the player is currently.
- * @param type The type of instance the score is awarded for.
+ *  @param map The map where the player is currently.
+ *  @param type The type of instance the score is awarded for.
  */
 void ZoneDifficulty::AddHardmodeScore(Map* map, uint32 type)
 {
@@ -514,10 +517,11 @@ void ZoneDifficulty::AddHardmodeScore(Map* map, uint32 type)
     }
 }
 
-/** @brief Reduce the score of players when they pay for rewards.
+/**
+ *  @brief Reduce the score of players when they pay for rewards.
  *
- * @param player The one who pays with their score.
- * @param type The type of instance the score is deducted for.
+ *  @param player The one who pays with their score.
+ *  @param type The type of instance the score is deducted for.
  */
 void ZoneDifficulty::DeductHardmodeScore(Player* player, uint32 type, uint32 score)
 {
@@ -530,7 +534,8 @@ void ZoneDifficulty::DeductHardmodeScore(Player* player, uint32 type, uint32 sco
     CharacterDatabase.Execute("REPLACE INTO zone_difficulty_hardmode_score VALUES({}, {}, {})", player->GetGUID().GetCounter(), type, sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()][type]);
 }
 
-/** @brief Send and item to the player using the data from sZoneDifficulty->Rewards.
+/**
+ * @brief Send and item to the player using the data from sZoneDifficulty->Rewards.
  *
  * @param player The recipient of the mail.
  * @param category The content level e.g. TYPE_HEROIC_TBC.
@@ -566,10 +571,11 @@ void ZoneDifficulty::SendItem(Player* player, uint32 category, uint32 itemType, 
     CharacterDatabase.CommitTransaction(trans);
 }
 
-/** @brief Check if the map has assigned any data to tune it.
+/**
+ *  @brief Check if the map has assigned any data to tune it.
  *
- * @param map The ID of the <Map> to check.
- * @return The result as bool.
+ *  @param map The ID of the <Map> to check.
+ *  @return The result as bool.
  */
 bool ZoneDifficulty::IsHardmodeMap(uint32 mapId)
 {
@@ -580,7 +586,8 @@ bool ZoneDifficulty::IsHardmodeMap(uint32 mapId)
     return true;
 }
 
-/** @brief Check if the target is a player, a pet or a guardian.
+/**
+ *  @brief Check if the target is a player, a pet or a guardian.
  *
  * @param target The affected <Unit>
  * @return The result as bool. True for <Player>, <Pet> or <Guardian>.
@@ -590,7 +597,8 @@ bool ZoneDifficulty::IsValidNerfTarget(Unit* target)
     return target->IsPlayer() || target->IsPet() || target->IsGuardian();
 }
 
-/** @brief Checks if the element is one of the uint32 values in the vector.
+/**
+ *  @brief Checks if the element is one of the uint32 values in the vector.
  *
  * @param vec A vector
  * @param element One element which can potentially be part of the values in the vector
@@ -601,7 +609,8 @@ bool ZoneDifficulty::VectorContainsUint32(std::vector<uint32> vec, uint32 elemen
     return find(vec.begin(), vec.end(), element) != vec.end();
 }
 
-/** @brief Checks if the target is in a duel while residing in the DUEL_AREA and their opponent is a valid object.
+/**
+ *  @brief Checks if the target is in a duel while residing in the DUEL_AREA and their opponent is a valid object.
  *  Used to determine when the duel-specific nerfs should be applied.
  *
  * @param target The affected <Unit>
@@ -642,7 +651,8 @@ bool ZoneDifficulty::ShouldNerfInDuels(Unit* target)
     return true;
 }
 
-/** @brief Find the lowest phase for the target's mapId, which has a db entry for the target's map
+/**
+ *  @brief Find the lowest phase for the target's mapId, which has a db entry for the target's map
  *  and at least partly matches the target's phase.
  *
  *  `mapId` can be the id of a map or `DUEL_INDEX` to use the duel specific settings.
@@ -676,7 +686,8 @@ int32 ZoneDifficulty::GetLowestMatchingPhase(uint32 mapId, uint32 phaseMask)
     return -1;
 }
 
-/** @brief Store the HardmodeInstanceData in the database for the given instance id.
+/**
+ *  @brief Store the HardmodeInstanceData in the database for the given instance id.
  *  zone_difficulty_instance_saves is used to store the data.
  *
  *  @param InstanceID INT NOT NULL DEFAULT 0,
@@ -687,14 +698,15 @@ void ZoneDifficulty::SaveHardmodeInstanceData(uint32 instanceId)
 {
     if (sZoneDifficulty->HardmodeInstanceData.find(instanceId) == sZoneDifficulty->HardmodeInstanceData.end())
     {
-        //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: ZoneDifficulty::SaveHardmodeInstanceData: InstanceId {} not found in HardmodeInstanceData.", instanceId);
+        LOG_INFO("module", "MOD-ZONE-DIFFICULTY: ZoneDifficulty::SaveHardmodeInstanceData: InstanceId {} not found in HardmodeInstanceData.", instanceId);
         return;
     }
-
+    LOG_INFO("module", "MOD-ZONE-DIFFICULTY: ZoneDifficulty::SaveHardmodeInstanceData: Saving instanceId {} with HardmodeOn {} and HardmodePossible {}", instanceId, sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodeOn, sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodePossible);
     CharacterDatabase.Execute("REPLACE INTO zone_difficulty_instance_saves (InstanceID, HardmodeOn, HardmodePossible) VALUES ({}, {}, {})", instanceId, sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodeOn, sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodePossible);
 }
 
-/** @brief Fetch all players on the [Unit]s threat list
+/**
+ *  @brief Fetch all players on the [Unit]s threat list
  *
  *  @param unit The one to check for their threat list.
  *  @param entry Key value to access HardmodeAI map/vector data
@@ -825,38 +837,38 @@ void ZoneDifficulty::HardmodeEvent(Unit* unit, uint32 entry, uint32 key)
 
                 switch (sZoneDifficulty->HardmodeAI[entry][key].Target)
                 {
-                    case TARGET_HOSTILE_AGGRO_FROM_TOP:
-                    {
-                        std::list<Unit*>::const_iterator itr = targetList.begin();
-                        std::advance(itr, counter);
-                        target = *itr;
-                        break;
-                    }
-                    case TARGET_HOSTILE_AGGRO_FROM_BOTTOM:
-                    {
-                        std::list<Unit*>::reverse_iterator ritr = targetList.rbegin();
-                        std::advance(ritr, counter);
-                        target = *ritr;
-                        break;
-                    }
-                    case TARGET_HOSTILE_RANDOM:
-                    {
-                        std::list<Unit*>::const_iterator itr = targetList.begin();
-                        std::advance(itr, urand(0, targetList.size() - 1));
-                        target = *itr;
-                        break;
-                    }
-                    case TARGET_HOSTILE_RANDOM_NOT_TOP:
-                    {
-                        std::list<Unit*>::const_iterator itr = targetList.begin();
-                        std::advance(itr, urand(1, targetList.size() - 1));
-                        target = *itr;
-                        break;
-                    }
-                    default:
-                    {
-                        LOG_ERROR("module", "MOD-ZONE-DIFFICULTY: Unknown type for Target: {} in zone_difficulty_hardmode_ai", sZoneDifficulty->HardmodeAI[entry][key].Target);
-                    }
+                case TARGET_HOSTILE_AGGRO_FROM_TOP:
+                {
+                    std::list<Unit*>::const_iterator itr = targetList.begin();
+                    std::advance(itr, counter);
+                    target = *itr;
+                    break;
+                }
+                case TARGET_HOSTILE_AGGRO_FROM_BOTTOM:
+                {
+                    std::list<Unit*>::reverse_iterator ritr = targetList.rbegin();
+                    std::advance(ritr, counter);
+                    target = *ritr;
+                    break;
+                }
+                case TARGET_HOSTILE_RANDOM:
+                {
+                    std::list<Unit*>::const_iterator itr = targetList.begin();
+                    std::advance(itr, urand(0, targetList.size() - 1));
+                    target = *itr;
+                    break;
+                }
+                case TARGET_HOSTILE_RANDOM_NOT_TOP:
+                {
+                    std::list<Unit*>::const_iterator itr = targetList.begin();
+                    std::advance(itr, urand(1, targetList.size() - 1));
+                    target = *itr;
+                    break;
+                }
+                default:
+                {
+                    LOG_ERROR("module", "MOD-ZONE-DIFFICULTY: Unknown type for Target: {} in zone_difficulty_hardmode_ai", sZoneDifficulty->HardmodeAI[entry][key].Target);
+                }
                 }
             }
         }
@@ -1258,7 +1270,8 @@ public:
     //    }
     //}
 
-    /** @brief Check if the Hardmode is activated for the instance and if the creature has any hardmode AI assigned. Schedule the events, if so.
+    /**
+     *  @brief Check if the Hardmode is activated for the instance and if the creature has any hardmode AI assigned. Schedule the events, if so.
      */
     void OnUnitEnterCombat(Unit* unit, Unit* /*victim*/) override
     {
@@ -1282,7 +1295,7 @@ public:
 
         LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnUnitEnterCombat checks passed for unit {}", unit->GetEntry());
         uint32 i = 0;
-        for (ZoneDifficultyHAI &data : sZoneDifficulty->HardmodeAI[entry])
+        for (ZoneDifficultyHAI& data : sZoneDifficulty->HardmodeAI[entry])
         {
             if (data.Chance == 100 || data.Chance >= urand(1, 100))
             {
