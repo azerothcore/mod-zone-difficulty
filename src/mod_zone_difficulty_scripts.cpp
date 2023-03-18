@@ -1817,7 +1817,7 @@ public:
         }
         else if (action == 101)
         {
-            if (!player->GetInstanceScript()->GetBossState(0) == DONE)
+            if (player->GetInstanceScript()->GetBossState(0) != DONE)
             {
                 //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Turn off hardmode for id {}", instanceId);
                 sZoneDifficulty->HardmodeInstanceData[instanceId] = false;
