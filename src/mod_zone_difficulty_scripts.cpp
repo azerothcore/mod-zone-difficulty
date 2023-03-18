@@ -1391,7 +1391,7 @@ public:
             //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnBeforeSetBossState: Instance not handled because there is no hardmode loot data for map id: {}", instance->GetId());
             return;
         }
-        if (oldState != 1 && newState == 1)
+        if (oldState != IN_PROGRESS && newState == IN_PROGRESS)
         {
             sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodePossible = false;
             if (sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodeOn)
@@ -1399,7 +1399,7 @@ public:
                 sZoneDifficulty->EncountersInProgress[instanceId] = GameTime::GetGameTime().count();
             }
         }
-        else if (oldState == 1 && newState == 3)
+        else if (oldState == IN_PROGRESS && newState == DONE)
         {
             sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodePossible = false;
             if (sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodeOn)
@@ -1832,7 +1832,7 @@ public:
             // ...if a single encounter was completed on normal mode
             if (sZoneDifficulty->HardmodeInstanceData.find(instanceId) != sZoneDifficulty->HardmodeInstanceData.end())
             {
-                if (sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodePossible == false)
+                if (sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodePossible == false || player->GetInstanceScript()->GetBossState(0) == DONE)
                 {
                     //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Hardmode is not Possible for instanceId {}: {}", instanceId, sZoneDifficulty->HardmodeInstanceData[instanceId].HardmodePossible);
                     canTurnOn = false;
