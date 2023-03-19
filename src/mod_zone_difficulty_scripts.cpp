@@ -1898,12 +1898,8 @@ public:
     void OnAllCreatureUpdate(Creature* creature, uint32 /*diff*/) override
     {
         // Heavily inspired by https://github.com/azerothcore/mod-autobalance/blob/1d82080237e62376b9a030502264c90b5b8f272b/src/AutoBalance.cpp
-        if (!creature || !creature->GetMap())
-        {
-            return;
-        }
-
-        if ((creature->IsHunterPet() || creature->IsPet() || creature->IsSummon()) && creature->IsControlledByPlayer())
+        Map* map = creature->GetMap();
+        if (!creature || !map)
         {
             return;
         }
@@ -1914,14 +1910,18 @@ public:
             return;
         }
 
-        if (!creature->IsAlive())
+        if (!map->IsRaid() &&
+            (!(map->IsHeroic() && map->IsDungeon())))
         {
             return;
         }
 
-        Map* map = creature->GetMap();
-        if (!map->IsRaid() &&
-            (!(map->IsHeroic() && map->IsDungeon())))
+        if ((creature->IsHunterPet() || creature->IsPet() || creature->IsSummon()) && creature->IsControlledByPlayer())
+        {
+            return;
+        }
+                
+        if (!creature->IsAlive())
         {
             return;
         }
