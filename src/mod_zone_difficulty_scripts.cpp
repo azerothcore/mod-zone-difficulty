@@ -1827,6 +1827,7 @@ public:
             }
             else
             {
+                ClearGossipMenuFor(player);
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Yes, i am sure. I know we can not go back to the harder version anymore, but we still want to stick with the less challenging route.", GOSSIP_SENDER_MAIN, 102);
                 SendGossipMenuFor(player, NPC_TEXT_LEADER_FINAL, creature);
             }
