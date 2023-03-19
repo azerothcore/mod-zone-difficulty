@@ -1813,6 +1813,12 @@ public:
                 creature->Whisper("I am sorry, time-traveler. You can not return to this version of the time-line currently. There is already a battle in progress.", LANG_UNIVERSAL, player);
             }
 
+            if (player->IsGameMaster())
+            {
+                LOG_ERROR("module", "MOD-ZONE-DIFFICULTY: GM {} has allowed Hardmode for instance {}", player->GetName(), instanceId);
+                canTurnOn = true;
+            }
+
             if (canTurnOn)
             {
                 //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Turn on hardmode for id {}", instanceId);
