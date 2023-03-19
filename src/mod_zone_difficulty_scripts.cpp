@@ -1920,7 +1920,7 @@ public:
         {
             return;
         }
-                
+
         if (!creature->IsAlive())
         {
             return;
