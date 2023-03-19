@@ -1281,6 +1281,14 @@ public:
             return;
         }
 
+        if (Creature* creature = unit->ToCreature())
+        {
+            if (creature->IsTrigger())
+            {
+                return;
+            }
+        }
+
         unit->m_Events.CancelEventGroup(EVENT_GROUP);
 
         uint32 entry = unit->GetEntry();
