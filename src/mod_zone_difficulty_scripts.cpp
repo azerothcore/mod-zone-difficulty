@@ -230,11 +230,14 @@ void ZoneDifficulty::LoadMapDifficultySettings()
                 ZoneDifficultyHAI data;
                 data.Chance = (*result)[1].Get<uint8>();
                 data.Spell = (*result)[2].Get<uint32>();
-                data.Target = (*result)[3].Get<uint8>();
-                data.TargetArg = (*result)[4].Get<uint8>();
-                data.Delay = (*result)[5].Get<Milliseconds>();
-                data.Cooldown = (*result)[6].Get<Milliseconds>();
-                data.Repetitions = (*result)[7].Get<uint8>();
+                data.Spellbp0 = (*result)[3].Get<uint32>();
+                data.Spellbp1 = (*result)[4].Get<uint32>();
+                data.Spellbp2 = (*result)[5].Get<uint32>();
+                data.Target = (*result)[6].Get<uint8>();
+                data.TargetArg = (*result)[7].Get<uint8>();
+                data.Delay = (*result)[8].Get<Milliseconds>();
+                data.Cooldown = (*result)[9].Get<Milliseconds>();
+                data.Repetitions = (*result)[10].Get<uint8>();
 
                 if (data.Chance != 0 && data.Spell != 0 && ((data.Target >= 1 && data.Target <= 6) || data.Target == 18))
                 {
@@ -802,12 +805,29 @@ void ZoneDifficulty::HardmodeEvent(Unit* unit, uint32 entry, uint32 key)
             {
                 return;
             }
+            
+            bool has_bp0 = sZoneDifficulty->HardmodeAI[entry][key].Spellbp0;
+            bool has_bp1 = sZoneDifficulty->HardmodeAI[entry][key].Spellbp1;
+            bool has_bp2 = sZoneDifficulty->HardmodeAI[entry][key].Spellbp2;
+            
             for (Unit* trg : targetList)
             {
                 if (trg)
                 {
                     LOG_INFO("module", "Creature casting HardmodeAI spell: {} at target {}", sZoneDifficulty->HardmodeAI[entry][key].Spell, trg->GetName());
-                    unit->CastSpell(trg, sZoneDifficulty->HardmodeAI[entry][key].Spell, true);
+                    if (!has_bp0 && !has_bp1 && !has_bp2)
+                    {
+                        unit->CastCustomSpell(trg, sZoneDifficulty->HardmodeAI[entry][key].Spell, true);
+                        
+                    }
+                    else
+                    {
+                        unit->CastSpell(trg, sZoneDifficulty->HardmodeAI[entry][key].Spell,
+                            has_bp0 ? &sZoneDifficulty->HardmodeAI[entry][key].Spellbp0 : NULL,
+                            has_bp1 ? &sZoneDifficulty->HardmodeAI[entry][key].Spellbp1 : NULL,
+                            has_bp2 ? &sZoneDifficulty->HardmodeAI[entry][key].Spellbp2 : NULL,
+                            true);
+                    }
                 }
             }
             return;
@@ -872,7 +892,18 @@ void ZoneDifficulty::HardmodeEvent(Unit* unit, uint32 entry, uint32 key)
         if (target)
         {
             LOG_INFO("module", "Creature casting HardmodeAI spell: {} at target {}", sZoneDifficulty->HardmodeAI[entry][key].Spell, target->GetName());
-            unit->CastSpell(target, sZoneDifficulty->HardmodeAI[entry][key].Spell, true);
+            if (!has_bp0 && !has_bp1 && !has_bp2)
+            {
+                unit->CastCustomSpell(target, sZoneDifficulty->HardmodeAI[entry][key].Spell, true);
+            }
+            else
+            {
+                unit->CastSpell(target, sZoneDifficulty->HardmodeAI[entry][key].Spell,
+                    has_bp0 ? &sZoneDifficulty->HardmodeAI[entry][key].Spellbp0 : NULL,
+                    has_bp1 ? &sZoneDifficulty->HardmodeAI[entry][key].Spellbp1 : NULL,
+                    has_bp2 ? &sZoneDifficulty->HardmodeAI[entry][key].Spellbp2 : NULL,
+                    true);
+            }
         }
     }
 }
