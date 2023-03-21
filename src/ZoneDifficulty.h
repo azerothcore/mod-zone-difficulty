@@ -40,6 +40,9 @@ struct ZoneDifficultyHAI
 {
     uint8 Chance;
     uint32 Spell;
+    int32 Spellbp0;
+    int32 Spellbp1;
+    int32 Spellbp2;
     uint8 Target;
     uint8 TargetArg;
     std::chrono::milliseconds Delay;

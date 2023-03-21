@@ -222,7 +222,7 @@ void ZoneDifficulty::LoadMapDifficultySettings()
     {
         do
         {
-            bool enabled = (*result)[8].Get<bool>();
+            bool enabled = (*result)[11].Get<bool>();
 
             if (enabled)
             {
@@ -230,9 +230,9 @@ void ZoneDifficulty::LoadMapDifficultySettings()
                 ZoneDifficultyHAI data;
                 data.Chance = (*result)[1].Get<uint8>();
                 data.Spell = (*result)[2].Get<uint32>();
-                data.Spellbp0 = (*result)[3].Get<uint32>();
-                data.Spellbp1 = (*result)[4].Get<uint32>();
-                data.Spellbp2 = (*result)[5].Get<uint32>();
+                data.Spellbp0 = (*result)[3].Get<int32>();
+                data.Spellbp1 = (*result)[4].Get<int32>();
+                data.Spellbp2 = (*result)[5].Get<int32>();
                 data.Target = (*result)[6].Get<uint8>();
                 data.TargetArg = (*result)[7].Get<uint8>();
                 data.Delay = (*result)[8].Get<Milliseconds>();
@@ -506,10 +506,10 @@ void ZoneDifficulty::AddHardmodeScore(Map* map, uint32 type)
             sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()][type] = sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()][type] + 1;
         }
 
-        if (sZoneDifficulty->IsDebugInfoEnabled)
-        {
-            LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Player {} new score: {}", player->GetName(), sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()][type]);
-        }
+        //if (sZoneDifficulty->IsDebugInfoEnabled)
+        //{
+        //    LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Player {} new score: {}", player->GetName(), sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()][type]);
+        //}
 
         std::string typestring = sZoneDifficulty->GetContentTypeString(type);
         ChatHandler(player->GetSession()).PSendSysMessage("You have received hardmode score %s New score: %i", typestring, sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()][type]);
@@ -805,11 +805,11 @@ void ZoneDifficulty::HardmodeEvent(Unit* unit, uint32 entry, uint32 key)
             {
                 return;
             }
-            
+
             bool has_bp0 = sZoneDifficulty->HardmodeAI[entry][key].Spellbp0;
             bool has_bp1 = sZoneDifficulty->HardmodeAI[entry][key].Spellbp1;
             bool has_bp2 = sZoneDifficulty->HardmodeAI[entry][key].Spellbp2;
-            
+
             for (Unit* trg : targetList)
             {
                 if (trg)
@@ -817,12 +817,12 @@ void ZoneDifficulty::HardmodeEvent(Unit* unit, uint32 entry, uint32 key)
                     LOG_INFO("module", "Creature casting HardmodeAI spell: {} at target {}", sZoneDifficulty->HardmodeAI[entry][key].Spell, trg->GetName());
                     if (!has_bp0 && !has_bp1 && !has_bp2)
                     {
-                        unit->CastCustomSpell(trg, sZoneDifficulty->HardmodeAI[entry][key].Spell, true);
-                        
+                        unit->CastSpell(trg, sZoneDifficulty->HardmodeAI[entry][key].Spell, true);
+
                     }
                     else
                     {
-                        unit->CastSpell(trg, sZoneDifficulty->HardmodeAI[entry][key].Spell,
+                        unit->CastCustomSpell(trg, sZoneDifficulty->HardmodeAI[entry][key].Spell,
                             has_bp0 ? &sZoneDifficulty->HardmodeAI[entry][key].Spellbp0 : NULL,
                             has_bp1 ? &sZoneDifficulty->HardmodeAI[entry][key].Spellbp1 : NULL,
                             has_bp2 ? &sZoneDifficulty->HardmodeAI[entry][key].Spellbp2 : NULL,
@@ -891,14 +891,17 @@ void ZoneDifficulty::HardmodeEvent(Unit* unit, uint32 entry, uint32 key)
 
         if (target)
         {
+            bool has_bp0 = sZoneDifficulty->HardmodeAI[entry][key].Spellbp0;
+            bool has_bp1 = sZoneDifficulty->HardmodeAI[entry][key].Spellbp1;
+            bool has_bp2 = sZoneDifficulty->HardmodeAI[entry][key].Spellbp2;
             LOG_INFO("module", "Creature casting HardmodeAI spell: {} at target {}", sZoneDifficulty->HardmodeAI[entry][key].Spell, target->GetName());
             if (!has_bp0 && !has_bp1 && !has_bp2)
             {
-                unit->CastCustomSpell(target, sZoneDifficulty->HardmodeAI[entry][key].Spell, true);
+                unit->CastSpell(target, sZoneDifficulty->HardmodeAI[entry][key].Spell, true);
             }
             else
             {
-                unit->CastSpell(target, sZoneDifficulty->HardmodeAI[entry][key].Spell,
+                unit->CastCustomSpell(target, sZoneDifficulty->HardmodeAI[entry][key].Spell,
                     has_bp0 ? &sZoneDifficulty->HardmodeAI[entry][key].Spellbp0 : NULL,
                     has_bp1 ? &sZoneDifficulty->HardmodeAI[entry][key].Spellbp1 : NULL,
                     has_bp2 ? &sZoneDifficulty->HardmodeAI[entry][key].Spellbp2 : NULL,
@@ -947,7 +950,7 @@ public:
                                 continue;
                             }
 
-                            if (sZoneDifficulty->IsDebugInfoEnabled)
+                            if (sZoneDifficulty->IsDebugInfoEnabled && target)
                             {
                                 if (Player* player = target->ToPlayer()) // Pointless check? Perhaps.
                                 {
@@ -991,7 +994,7 @@ public:
 
                             eff->SetAmount(absorb);
 
-                            if (sZoneDifficulty->IsDebugInfoEnabled)
+                            if (sZoneDifficulty->IsDebugInfoEnabled && target)
                             {
                                 if (Player* player = target->ToPlayer()) // Pointless check? Perhaps.
                                 {
@@ -1108,7 +1111,7 @@ public:
             uint32 phaseMask = target->GetPhaseMask();
             int32 matchingPhase = sZoneDifficulty->GetLowestMatchingPhase(mapId, phaseMask);
 
-            if (sZoneDifficulty->IsDebugInfoEnabled)
+            if (sZoneDifficulty->IsDebugInfoEnabled && attacker)
             {
                 if (Player* player = attacker->ToPlayer())
                 {
@@ -1144,7 +1147,7 @@ public:
                 }
             }
 
-            if (sZoneDifficulty->IsDebugInfoEnabled)
+            if (sZoneDifficulty->IsDebugInfoEnabled && attacker)
             {
                 if (Player* player = attacker->ToPlayer())
                 {
@@ -1187,7 +1190,7 @@ public:
                     return;
                 }
 
-                if (sZoneDifficulty->IsDebugInfoEnabled)
+                if (sZoneDifficulty->IsDebugInfoEnabled && target)
                 {
                     if (Player* player = target->ToPlayer()) // Pointless check? Perhaps.
                     {
@@ -1225,7 +1228,7 @@ public:
                 }
             }
 
-            if (sZoneDifficulty->IsDebugInfoEnabled)
+            if (sZoneDifficulty->IsDebugInfoEnabled && target)
             {
                 if (Player* player = target->ToPlayer()) // Pointless check? Perhaps.
                 {
@@ -1837,7 +1840,7 @@ public:
                 }
             }
             // ... if there is an encounter in progress
-            else if (player->GetInstanceScript() && player->GetInstanceScript()->IsEncounterInProgress())
+            if (player->GetInstanceScript()->IsEncounterInProgress())
             {
                 //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: IsEncounterInProgress");
                 canTurnOn = false;
@@ -1993,10 +1996,10 @@ public:
                 {
                     return;
                 }
-                if (sZoneDifficulty->IsDebugInfoEnabled)
-                {
+                //if (sZoneDifficulty->IsDebugInfoEnabled)
+                //{
                     //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Modify creature hp for hard mode: {} to {}", baseHealth, newHp);
-                }
+                //}
                 bool hpIsFull = false;
                 if (creature->GetHealthPct() >= 100)
                 {
@@ -2017,10 +2020,10 @@ public:
             {
                 if (creature->GetMaxHealth() == newHp)
                 {
-                    if (sZoneDifficulty->IsDebugInfoEnabled)
-                    {
-                        //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Modify creature hp for normal mode: {} to {}", baseHealth, baseHealth);
-                    }
+                    //if (sZoneDifficulty->IsDebugInfoEnabled)
+                    //{
+                    //    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Modify creature hp for normal mode: {} to {}", baseHealth, baseHealth);
+                    //}
                     bool hpIsFull = false;
                     if (creature->GetHealthPct() >= 100)
                     {
