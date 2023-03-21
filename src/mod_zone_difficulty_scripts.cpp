@@ -717,7 +717,7 @@ std::list<Unit*> ZoneDifficulty::GetTargetList(Unit* unit, uint32 entry, uint32 
     std::list<Unit*> targetList;
     if (threatlist.empty())
     {
-        LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Threatlist is empty for unit {}", unit->GetName());
+        //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Threatlist is empty for unit {}", unit->GetName());
         return targetList;
     }
 
@@ -763,7 +763,7 @@ std::list<Unit*> ZoneDifficulty::GetTargetList(Unit* unit, uint32 entry, uint32 
 
 void ZoneDifficulty::HardmodeEvent(Unit* unit, uint32 entry, uint32 key)
 {
-    LOG_INFO("module", "MOD-ZONE-DIFFICULTY: HardmodeEvent for entry {} with key {}", entry, key);
+    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: HardmodeEvent for entry {} with key {}", entry, key);
     if (unit && unit->IsAlive())
     {
         if (!unit->IsInCombat())
@@ -771,11 +771,11 @@ void ZoneDifficulty::HardmodeEvent(Unit* unit, uint32 entry, uint32 key)
             unit->m_Events.CancelEventGroup(EVENT_GROUP);
             return;
         }
-        LOG_INFO("module", "MOD-ZONE-DIFFICULTY: HardmodeEvent IsInCombat for entry {} with key {}", entry, key);
+        //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: HardmodeEvent IsInCombat for entry {} with key {}", entry, key);
         // Try again in 1s if the unit is currently casting
         if (unit->HasUnitState(UNIT_STATE_CASTING))
         {
-            LOG_INFO("module", "MOD-ZONE-DIFFICULTY: HardmodeEvent Re-schedule AI event in 1s because unit is casting for entry {} with key {}", entry, key);
+            //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: HardmodeEvent Re-schedule AI event in 1s because unit is casting for entry {} with key {}", entry, key);
             unit->m_Events.AddEventAtOffset([unit, entry, key]()
                 {
                     sZoneDifficulty->HardmodeEvent(unit, entry, key);
@@ -1331,7 +1331,7 @@ public:
             return;
         }
 
-        LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnUnitEnterCombat checks passed for unit {}", unit->GetEntry());
+        //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnUnitEnterCombat checks passed for unit {}", unit->GetEntry());
         uint32 i = 0;
         for (ZoneDifficultyHAI& data : sZoneDifficulty->HardmodeAI[entry])
         {
