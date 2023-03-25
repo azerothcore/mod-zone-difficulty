@@ -167,7 +167,7 @@ void ZoneDifficulty::LoadMapDifficultySettings()
             ZoneDifficultyHardmodeMapData data;
             uint32 MapID = (*result)[0].Get<uint32>();
             data.EncounterEntry = (*result)[1].Get<uint32>();
-            data.OverrideGO = (*result)[2].Get<uint32>();
+            data.Override = (*result)[2].Get<uint32>();
             data.RewardType = (*result)[3].Get<uint8>();
 
             sZoneDifficulty->HardmodeLoot[MapID].push_back(data);
@@ -476,7 +476,7 @@ std::string ZoneDifficulty::GetContentTypeString(uint32 type)
  *  @param map The map where the player is currently.
  *  @param type The type of instance the score is awarded for.
  */
-void ZoneDifficulty::AddHardmodeScore(Map* map, uint32 type)
+void ZoneDifficulty::AddHardmodeScore(Map* map, uint32 type, uint32 score)
 {
     if (!map)
     {
@@ -495,15 +495,15 @@ void ZoneDifficulty::AddHardmodeScore(Map* map, uint32 type)
         Player* player = i->GetSource();
         if (sZoneDifficulty->HardmodeScore.find(player->GetGUID().GetCounter()) == sZoneDifficulty->HardmodeScore.end())
         {
-            sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()][type] = 1;
+            sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()][type] = score;
         }
         else if (sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()].find(type) == sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()].end())
         {
-            sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()][type] = 1;
+            sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()][type] = score;
         }
         else
         {
-            sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()][type] = sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()][type] + 1;
+            sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()][type] = sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()][type] + score;
         }
 
         //if (sZoneDifficulty->IsDebugInfoEnabled)
@@ -1485,6 +1485,7 @@ public:
             if (sZoneDifficulty->HardmodeInstanceData[map->GetInstanceId()])
             {
                 uint32 mapId = map->GetId();
+                uint32 score = 0;
                 if (!sZoneDifficulty->IsHardmodeMap(mapId))
                 {
                     //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: No additional loot stored in map with id {}.", map->GetInstanceId());
@@ -1492,12 +1493,16 @@ public:
                 }
 
                 bool SourceAwardsHardmodeLoot = false;
-                //iterate over all listed creature entries for that map id and see, if the encounter should yield hardmode loot and if a go is to be looted instead
+                //iterate over all listed creature entries for that map id and see, if the encounter should yield hardmode loot and if there is an override to the default behaviour
                 for (auto value : sZoneDifficulty->HardmodeLoot[mapId])
                 {
                     if (value.EncounterEntry == source->GetEntry())
                     {
                         SourceAwardsHardmodeLoot = true;
+                        if (!value.Override & 1)
+                        {
+                            score = 1;
+                        }
                         break;
                     }
                 }
@@ -1509,11 +1514,11 @@ public:
 
                 if (map->IsHeroic() && map->IsNonRaidDungeon())
                 {
-                    sZoneDifficulty->AddHardmodeScore(map, sZoneDifficulty->Expansion[mapId]);
+                    sZoneDifficulty->AddHardmodeScore(map, sZoneDifficulty->Expansion[mapId], score);
                 }
                 else if (map->IsRaid())
                 {
-                    sZoneDifficulty->AddHardmodeScore(map, sZoneDifficulty->Expansion[mapId]);
+                    sZoneDifficulty->AddHardmodeScore(map, sZoneDifficulty->Expansion[mapId], score);
                 }
                 /* debug
                  * else

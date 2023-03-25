@@ -19,14 +19,16 @@ DROP TABLE IF EXISTS `zone_difficulty_hardmode_instance_data`;
 CREATE TABLE `zone_difficulty_hardmode_instance_data` (
     `MapID` INT NOT NULL DEFAULT 0,
     `SourceEntry` INT NOT NULL,
-    -- 0 = no override. Only required if the loot for an encounter is obtained
-    -- from e.g. a chest instead of a corpse.
-    `OverrideGO` INT NOT NULL DEFAULT 0,
+
+    -- Bitmask `Override`:
+    -- 0 = nothing
+    -- 1 = no score, just log
+    `Override` INT NOT NULL DEFAULT 0,
     `InstanceType` TINYINT NOT NULL DEFAULT 0,
 	PRIMARY KEY (`MapID`, `SourceEntry`)
 );
 
-INSERT INTO `zone_difficulty_hardmode_instance_data` (`MapID`, `SourceEntry`, `OverrideGO`, `InstanceType`) VALUES
+INSERT INTO `zone_difficulty_hardmode_instance_data` (`MapID`, `SourceEntry`, `Override`, `InstanceType`) VALUES
 -- TBC Raids
 (544, 17257, 0, 9),    -- Magtheridon, Magtheridon's Lair
 (565, 18831, 0, 9),    -- High King Maulgar, Gruul's Lair
