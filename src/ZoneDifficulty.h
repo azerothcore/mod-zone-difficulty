@@ -23,7 +23,7 @@ struct ZoneDifficultyNerfData
 struct ZoneDifficultyHardmodeMapData
 {
     uint32 EncounterEntry;
-    uint32 OverrideGO;
+    uint32 Override;
     uint32 RewardType;
 };
 
@@ -45,8 +45,8 @@ struct ZoneDifficultyHAI
     int32 Spellbp2;
     uint8 Target;
     uint8 TargetArg;
-    std::chrono::milliseconds Delay;
-    std::chrono::milliseconds Cooldown;
+    Milliseconds Delay;
+    Milliseconds Cooldown;
     uint8 Repetitions;
 };
 
@@ -118,7 +118,7 @@ public:
     void SendWhisperToRaid(std::string message, Creature* creature, Player* player);
     std::string GetItemTypeString(uint32 type);
     std::string GetContentTypeString(uint32 type);
-    void AddHardmodeScore(Map* map, uint32 type);
+    void AddHardmodeScore(Map* map, uint32 type, uint32 score);
     void DeductHardmodeScore(Player* player, uint32 type, uint32 score);
     void SendItem(Player* player, uint32 category, uint32 itemType, uint32 id);
     std::list<Unit*> GetTargetList(Unit* unit, uint32 entry, uint32 key);
