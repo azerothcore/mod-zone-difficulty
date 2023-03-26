@@ -33,7 +33,7 @@ struct ZoneDifficultyRewardData
     uint32 Price;
     uint32 Enchant;
     uint8 EnchantSlot;
-    uint32 Achievement;
+    int32 Achievement;
 };
 
 struct ZoneDifficultyHAI
@@ -125,6 +125,7 @@ public:
     void HardmodeEvent(Unit* unit, uint32 entry, uint32 key);
     bool HasNormalMode(int8 mode) { return (mode & MODE_NORMAL) == MODE_NORMAL; }
     bool HasHardMode(int8 mode) { return (mode & MODE_HARD) == MODE_HARD; }
+    bool HasCompletedFullTier(uint32 category, uint32 playerGUID);
     [[nodiscard]] bool IsValidNerfTarget(Unit* target);
     [[nodiscard]] bool VectorContainsUint32(std::vector<uint32> vec, uint32 element);
     [[nodiscard]] bool IsHardmodeMap(uint32 mapid);
@@ -136,10 +137,12 @@ public:
     float HardmodeHpModifier{ 2.0 };
     std::vector<uint32> DailyHeroicQuests;
     std::map<uint32, uint32> HeroicTBCQuestMapList;
+    std::map<uint32, uint8> EncounterCounter;
     std::map<uint32, uint8> Expansion;
     std::map<uint32, float> CreatureOverrides;
     std::map<uint32, uint32> EncountersInProgress;
     std::map<uint32, std::string> ItemIcons;
+    std::map<uint8, ZoneDifficultyRewardData> TierRewards;
 
     typedef std::map<uint32, std::map<uint32, ZoneDifficultyNerfData> > ZoneDifficultyNerfDataMap;
     ZoneDifficultyNerfDataMap NerfInfo;
@@ -156,6 +159,8 @@ public:
     ZoneDifficultyRewardMap Rewards;
     typedef std::map<uint32, std::vector<ZoneDifficultyHAI> > ZoneDifficultyHAIMap;
     ZoneDifficultyHAIMap HardmodeAI;
+    typedef std::map<uint32, std::map<uint32, std::map<uint32, bool> > > ZoneDifficultyEncounterLogMap;
+    ZoneDifficultyEncounterLogMap Logs;
 };
 
 #define sZoneDifficulty ZoneDifficulty::instance()

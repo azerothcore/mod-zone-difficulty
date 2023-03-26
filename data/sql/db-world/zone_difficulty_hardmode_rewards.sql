@@ -32,13 +32,17 @@ CREATE TABLE `zone_difficulty_hardmode_rewards` (
     `Price` INT NOT NULL DEFAULT 0,
     `Enchant` INT NOT NULL DEFAULT 0,
     `EnchantSlot` TINYINT NOT NULL DEFAULT 0,
-    `Achievement` INT NOT NULL DEFAULT 0,
+    `Achievement` INT NOT NULL DEFAULT 0,        -- indicates a full-tier-clearance reward if negative
     `Enabled` TINYINT DEFAULT 0,
     `Comment` TEXT,
     PRIMARY KEY (`ContentType`, `Entry`, `Enchant`)
 );
 
 INSERT INTO `zone_difficulty_hardmode_rewards` (`ContentType`, `ItemType`, `Entry`, `Price`, `Enchant`, `EnchantSlot`, `Achievement`, `Enabled`, `Comment`) VALUES
+-- Full Tier Rewards:
+(8, 0, 13584, 20, 0, 0, -1, 1, 'Mini Diablo for clearing all TBC heroics on Hardmode'),
+(9, 0, 13583, 20, 0, 0, -1, 1, 'Panda Cub for clearing all T4 raids on Hardmode'),
+
 -- TYPE_HEROIC_TBC = 8;
 -- Back, Finger, Trinket, Neck = 1
 (8, 1, 29347, 10, 211, 11, 668, 1, 'Talisman of the Breaker +7 SP'),

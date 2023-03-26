@@ -57,7 +57,7 @@ void ZoneDifficulty::LoadMapDifficultySettings()
     HeroicTBCQuestMapList[558] = 11374; // Auchenai Crypts
     HeroicTBCQuestMapList[560] = 11378; // The Escape From Durnholde
     HeroicTBCQuestMapList[556] = 11372; // Sethekk Halls
-    HeroicTBCQuestMapList[585] = 11499; // Magisters' Terrace
+    //HeroicTBCQuestMapList[585] = 11499; // Magisters' Terrace
     HeroicTBCQuestMapList[555] = 11375; // Shadow Labyrinth
     HeroicTBCQuestMapList[540] = 11363; // Shattered Halls
     HeroicTBCQuestMapList[552] = 11388; // The Arcatraz
@@ -65,6 +65,29 @@ void ZoneDifficulty::LoadMapDifficultySettings()
     HeroicTBCQuestMapList[553] = 11384; // The Botanica
     HeroicTBCQuestMapList[554] = 11386; // The Mechanar
     HeroicTBCQuestMapList[545] = 11370; // The Steamvault
+
+    // Category 8
+    EncounterCounter[542] = 3; // Blood Furnace
+    EncounterCounter[543] = 3; // Hellfire Ramparts
+    EncounterCounter[547] = 3; // Slave Pens
+    EncounterCounter[546] = 4; // The Underbog
+    EncounterCounter[557] = 4; // Mana-Tombs
+    EncounterCounter[558] = 2; // Auchenai Crypts
+    EncounterCounter[560] = 3; // The Escape From Durnholde
+    EncounterCounter[556] = 3; // Sethekk Halls
+    //EncounterCounter[585] = 4; // Magisters' Terrace
+    EncounterCounter[555] = 4; // Shadow Labyrinth
+    EncounterCounter[540] = 4; // Shattered Halls
+    EncounterCounter[552] = 4; // The Arcatraz
+    EncounterCounter[269] = 3; // The Black Morass
+    EncounterCounter[553] = 5; // The Botanica
+    EncounterCounter[554] = 3; // The Mechanar
+    EncounterCounter[545] = 3; // The Steamvault
+
+    // Category 9
+    EncounterCounter[565] = 2; // Gruul's Lair
+    EncounterCounter[544] = 1; // Magtheridon's Lair
+    EncounterCounter[532] = 10; // Karazhan
 
     // Icons
     sZoneDifficulty->ItemIcons[ITEMTYPE_MISC] = "|TInterface\\icons\\inv_misc_cape_17:15|t |TInterface\\icons\\inv_misc_gem_topaz_02:15|t |TInterface\\icons\\inv_jewelry_ring_51naxxramas:15|t ";
@@ -277,13 +300,21 @@ void ZoneDifficulty::LoadMapDifficultySettings()
             data.Price = (*result)[3].Get<uint32>();
             data.Enchant = (*result)[4].Get<uint32>();
             data.EnchantSlot = (*result)[5].Get<uint8>();
-            data.Achievement = (*result)[6].Get<uint32>();
+            data.Achievement = (*result)[6].Get<int32>();
             bool enabled = (*result)[7].Get<bool>();
 
             if (enabled)
             {
-                sZoneDifficulty->Rewards[contentType][itemType].push_back(data);
-                //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Loading item with entry {} has enchant {} in slot {}. contentType: {} itemType: {}", data.Entry, data.Enchant, data.EnchantSlot, contentType, itemType);
+                if (data.Achievement >= 0)
+                {
+                    sZoneDifficulty->Rewards[contentType][itemType].push_back(data);
+                    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Loading item with entry {} has enchant {} in slot {}. contentType: {} itemType: {}", data.Entry, data.Enchant, data.EnchantSlot, contentType, itemType);
+                }
+                else
+                {
+                    sZoneDifficulty->TierRewards[contentType] = data;
+                    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Loading tier reward with entry {} has enchant {} in slot {}. contentType: {} itemType: {}", data.Entry, data.Enchant, data.EnchantSlot, contentType, itemType);
+                }
             }
             //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Total items in Rewards map: {}.", i);
         } while (result->NextRow());
@@ -336,12 +367,21 @@ void ZoneDifficulty::LoadHardmodeInstanceData()
 }
 
 /**
- *  @brief Loads the score data from the database.
+ *  @brief Loads the score data and encounter logs from the database.
  *  Fetch from zone_difficulty_hardmode_score.
  *
  *  `CharacterGuid` INT NOT NULL DEFAULT 0,
  *  `Type` TINYINT NOT NULL DEFAULT 0,
  *  `Score` INT NOT NULL DEFAULT 0,
+ *
+ *  Fetch from zone_difficulty_encounter_logs.
+ *  `InstanceId` INT NOT NULL DEFAULT 0,
+ *  `TimestampStart` INT NOT NULL DEFAULT 0,
+ *  `TimestampEnd` INT NOT NULL DEFAULT 0,
+ *  `Map` INT NOT NULL DEFAULT 0,
+ *  `BossId` INT NOT NULL DEFAULT 0,
+ *  `PlayerGuid` INT NOT NULL DEFAULT 0,
+ *  `Mode` INT NOT NULL DEFAULT 0,
  *
  */
 void ZoneDifficulty::LoadHardmodeScoreData()
@@ -357,6 +397,27 @@ void ZoneDifficulty::LoadHardmodeScoreData()
             //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Loading from DB for player with GUID {}: Type = {}, Score = {}", GUID, Type, Score);
             sZoneDifficulty->HardmodeScore[GUID][Type] = Score;
 
+        } while (result->NextRow());
+    }
+    if (QueryResult result = CharacterDatabase.Query("SELECT `Map`, `BossId`, `PlayerGuid` FROM zone_difficulty_encounter_logs WHERE `Mode` = 64"))
+    {
+        do
+        {
+            uint32 MapId = (*result)[0].Get<uint32>();
+            uint8 BossID = (*result)[1].Get<uint32>();
+            uint32 PlayerGuid = (*result)[2].Get<uint32>();
+
+            // Set all BossID which aren't true to false for that mapID
+            if (sZoneDifficulty->Logs[PlayerGuid].find(MapId) == sZoneDifficulty->Logs[PlayerGuid].end())
+            {
+                for (int i = 0; i < sZoneDifficulty->EncounterCounter[MapId]; ++i)
+                {
+                    LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Initializing player record for PlayerGuid {} in MapId {} for BossId {}: False", PlayerGuid, MapId, i);
+                    sZoneDifficulty->Logs[PlayerGuid][MapId][i] = false;
+                }
+            }
+            LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Setting player record for PlayerGuid {} in MapId {} for BossId {}: True", PlayerGuid, MapId, BossID);
+            sZoneDifficulty->Logs[PlayerGuid][MapId][BossID] = true;
         } while (result->NextRow());
     }
 }
@@ -544,7 +605,17 @@ void ZoneDifficulty::DeductHardmodeScore(Player* player, uint32 type, uint32 sco
  */
 void ZoneDifficulty::SendItem(Player* player, uint32 category, uint32 itemType, uint32 id)
 {
-    ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(sZoneDifficulty->Rewards[category][itemType][id].Entry);
+    //Check if a full tier cleareance reward is meant (itemType 99)
+    ItemTemplate const* itemTemplate;
+    if (itemType == 99)
+    {
+        itemTemplate = sObjectMgr->GetItemTemplate(sZoneDifficulty->TierRewards[category].Entry);
+    }
+    else
+    {
+        itemTemplate = sObjectMgr->GetItemTemplate(sZoneDifficulty->Rewards[category][itemType][id].Entry);
+    }
+
     if (!itemTemplate)
     {
         LOG_ERROR("module", "MOD-ZONE-DIFFICULTY: itemTemplate could not be constructed in sZoneDifficulty->SendItem for category {}, itemType {}, id {}.", category, itemType, id);
@@ -557,15 +628,31 @@ void ZoneDifficulty::SendItem(Player* player, uint32 category, uint32 itemType, 
     MailDraft draft(REWARD_MAIL_SUBJECT, REWARD_MAIL_BODY);
     MailSender sender(MAIL_NORMAL, senderGuid, MAIL_STATIONERY_GM);
     CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
-    if (Item* item = Item::CreateItem(sZoneDifficulty->Rewards[category][itemType][id].Entry, 1, player))
+    if (itemType == 99)
     {
-        if (sZoneDifficulty->Rewards[category][itemType][id].EnchantSlot != 0 && sZoneDifficulty->Rewards[category][itemType][id].Enchant != 0)
+        if (Item* item = Item::CreateItem(sZoneDifficulty->TierRewards[category].Entry, 1, player))
         {
-            item->SetEnchantment(EnchantmentSlot(sZoneDifficulty->Rewards[category][itemType][id].EnchantSlot), sZoneDifficulty->Rewards[category][itemType][id].Enchant, 0, 0, player->GetGUID());
-            player->ApplyEnchantment(item, EnchantmentSlot(sZoneDifficulty->Rewards[category][itemType][id].EnchantSlot), true, true, true);
+            if (sZoneDifficulty->TierRewards[category].EnchantSlot != 0 && sZoneDifficulty->TierRewards[category].Enchant != 0)
+            {
+                item->SetEnchantment(EnchantmentSlot(sZoneDifficulty->TierRewards[category].EnchantSlot), sZoneDifficulty->TierRewards[category].Enchant, 0, 0, player->GetGUID());
+                player->ApplyEnchantment(item, EnchantmentSlot(sZoneDifficulty->TierRewards[category].EnchantSlot), true, true, true);
+            }
+            item->SaveToDB(trans); // save for prevent lost at next mail load, if send fail then item will deleted
+            draft.AddItem(item);
         }
-        item->SaveToDB(trans); // save for prevent lost at next mail load, if send fail then item will deleted
-        draft.AddItem(item);
+    }
+    else
+    {
+        if (Item* item = Item::CreateItem(sZoneDifficulty->Rewards[category][itemType][id].Entry, 1, player))
+        {
+            if (sZoneDifficulty->Rewards[category][itemType][id].EnchantSlot != 0 && sZoneDifficulty->Rewards[category][itemType][id].Enchant != 0)
+            {
+                item->SetEnchantment(EnchantmentSlot(sZoneDifficulty->Rewards[category][itemType][id].EnchantSlot), sZoneDifficulty->Rewards[category][itemType][id].Enchant, 0, 0, player->GetGUID());
+                player->ApplyEnchantment(item, EnchantmentSlot(sZoneDifficulty->Rewards[category][itemType][id].EnchantSlot), true, true, true);
+            }
+            item->SaveToDB(trans); // save for prevent lost at next mail load, if send fail then item will deleted
+            draft.AddItem(item);
+        }
     }
     draft.SendMailTo(trans, MailReceiver(player, senderGuid), sender);
     CharacterDatabase.CommitTransaction(trans);
@@ -909,6 +996,45 @@ void ZoneDifficulty::HardmodeEvent(Unit* unit, uint32 entry, uint32 key)
             }
         }
     }
+}
+
+bool ZoneDifficulty::HasCompletedFullTier(uint32 category, uint32 playerGuid)
+{
+    LOG_INFO("module", "MOD-ZONE-DIFFCULTY: Executing HasCompletedFullTier for category {} playerGUID {}.", category, playerGuid);
+    std::vector<uint32> MapList;
+    switch (category)
+    {
+    case TYPE_HEROIC_TBC:
+        //585 is Magister's Terrace. Only add when released.
+        MapList = { 269, 540, 542, 543, 545, 547, 546, 552, 553, 554, 555, 556, 557, 558, 560/*, 585*/ };
+        break;
+    case TYPE_RAID_T4:
+        MapList = { 532, 544, 565};
+        break;
+    default:
+        LOG_ERROR("module", "MOD-ZONE-DIFFICULTY: Category without data requested in ZoneDifficulty::HasCompletedFullTier {}", category);
+        return false;
+        break;
+    }
+
+    for (uint32 mapId : MapList)
+    {
+        LOG_INFO("module", "MOD-ZONE-DIFFCULTY: Checking HasCompletedFullTier for mapId {}.", mapId);
+        if (sZoneDifficulty->EncounterCounter.find(mapId) == sZoneDifficulty->EncounterCounter.end())
+        {
+            LOG_ERROR("module", "MOD-ZONE-DIFFICULTY: Map without data requested in ZoneDifficulty::HasCompletedFullTier {}", mapId);
+            return false;
+        }
+        for (uint8 i = 0; i < sZoneDifficulty->EncounterCounter[mapId]; ++i)
+        {
+            LOG_INFO("module", "MOD-ZONE-DIFFCULTY: Checking HasCompletedFullTier for BossId {}: {}.", i, sZoneDifficulty->Logs[playerGuid][mapId][i]);
+            if (!sZoneDifficulty->Logs[playerGuid][mapId][i])
+            {
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
 class mod_zone_difficulty_unitscript : public UnitScript
@@ -1499,7 +1625,7 @@ public:
                     if (value.EncounterEntry == source->GetEntry())
                     {
                         SourceAwardsHardmodeLoot = true;
-                        if (!value.Override & 1)
+                        if (!(value.Override & 1))
                         {
                             score = 1;
                         }
@@ -1563,7 +1689,7 @@ public:
             for (int i = 1; i <= 16; ++i)
             {
                 std::string whisper;
-                whisper.append("You score is ");
+                whisper.append("Your score is ");
                 if (sZoneDifficulty->HardmodeScore.find(player->GetGUID().GetCounter()) == sZoneDifficulty->HardmodeScore.end())
                 {
                     whisper.append("0 ");
@@ -1580,10 +1706,100 @@ public:
                 creature->Whisper(whisper, LANG_UNIVERSAL, player);
             }
         }
+
+        // full tier clearance rewards: confirmation
+        if (action > 99001000)
+        {
+
+            uint32 category = action - 99001000;
+
+            // Check (again) if the player has enough score in the respective category.
+            uint32 availableScore = 0;
+            if (sZoneDifficulty->HardmodeScore.find(player->GetGUID().GetCounter()) != sZoneDifficulty->HardmodeScore.end())
+            {
+                if (sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()].find(category) != sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()].end())
+                {
+                    availableScore = sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()][category];
+                }
+            }
+            if (availableScore < sZoneDifficulty->TierRewards[category].Price)
+            {
+                CloseGossipMenuFor(player);
+                return true;
+            }
+
+            // Check (again) if the player has the neccesary achievement
+            if (!sZoneDifficulty->HasCompletedFullTier(category, player->GetGUID().GetCounter()))
+            {
+                CloseGossipMenuFor(player);
+                return true;
+            }
+
+            LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Sending full tier clearance reward for category {}", category);
+            sZoneDifficulty->DeductHardmodeScore(player, category, sZoneDifficulty->TierRewards[category].Price);
+            sZoneDifficulty->SendItem(player, category, 99, 0);
+
+            return true;
+        }
+
+        // full tier clearance rewards: selection
+        if (action > 99000000)
+        {
+            uint32 category = action - 99000000;
+            if (sZoneDifficulty->HasCompletedFullTier(category, player->GetGUID().GetCounter()))
+            {
+                // Check if the player has enough score in the respective category.
+                uint32 availableScore = 0;
+                if (sZoneDifficulty->HardmodeScore.find(player->GetGUID().GetCounter()) != sZoneDifficulty->HardmodeScore.end())
+                {
+                    if (sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()].find(category) != sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()].end())
+                    {
+                        availableScore = sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()][category];
+                    }
+                }
+
+                if (availableScore < sZoneDifficulty->TierRewards[category].Price)
+                {
+                    npcText = NPC_TEXT_DENIED;
+                    SendGossipMenuFor(player, npcText, creature);
+                    std::string whisper;
+                    whisper.append("I am sorry, time-traveler. This reward costs ");
+                    whisper.append(std::to_string(sZoneDifficulty->TierRewards[category].Price));
+                    whisper.append(" score but you only have ");
+                    whisper.append(std::to_string(sZoneDifficulty->HardmodeScore[category][player->GetGUID().GetCounter()]));
+                    whisper.append(" ");
+                    whisper.append(sZoneDifficulty->GetContentTypeString(category));
+                    creature->Whisper(whisper, LANG_UNIVERSAL, player);
+                    return true;
+                }
+                npcText = NPC_TEXT_CONFIRM;
+                ItemTemplate const* proto = sObjectMgr->GetItemTemplate(sZoneDifficulty->TierRewards[category].Entry);
+                std::string gossip;
+                std::string name = proto->Name1;
+                if (ItemLocale const* leftIl = sObjectMgr->GetItemLocale(sZoneDifficulty->TierRewards[category].Entry))
+                {
+                    ObjectMgr::GetLocaleString(leftIl->Name, player->GetSession()->GetSessionDbcLocale(), name);
+                }
+                gossip.append("Yes, ").append(name).append(" is the item i want.");
+                AddGossipItemFor(player, GOSSIP_ICON_CHAT, "No!", GOSSIP_SENDER_MAIN, 999998);
+                AddGossipItemFor(player, GOSSIP_ICON_VENDOR, gossip, GOSSIP_SENDER_MAIN, 99001000 + category);
+                //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: AddingGossipItem with action {}", 99001000 + category);
+                SendGossipMenuFor(player, npcText, creature);
+                return true;
+            }
+        }
+
         // player has selected a content type
         else if (action < 100)
         {
             npcText = NPC_TEXT_CATEGORY;
+            if (sZoneDifficulty->HasCompletedFullTier(action, player->GetGUID().GetCounter()))
+            {
+                std::string gossip = "I want to redeem the ultimate Hardmode reward ";
+                gossip.append(sZoneDifficulty->GetContentTypeString(action));
+                AddGossipItemFor(player, GOSSIP_ICON_MONEY_BAG, gossip, GOSSIP_SENDER_MAIN, 99000000 + action);
+            }
+
             uint32 i = 1;
             for (auto& itemType : sZoneDifficulty->Rewards[action])
             {
