@@ -2159,14 +2159,14 @@ public:
             return;
         }
 
-        uint32 mapId = creature->GetMapId();
-        if (sZoneDifficulty->NerfInfo.find(mapId) == sZoneDifficulty->NerfInfo.end())
+        if (!map->IsRaid() &&
+            (!(map->IsHeroic() && map->IsDungeon())))
         {
             return;
         }
 
-        if (!map->IsRaid() &&
-            (!(map->IsHeroic() && map->IsDungeon())))
+        uint32 mapId = creature->GetMapId();
+        if (sZoneDifficulty->NerfInfo.find(mapId) == sZoneDifficulty->NerfInfo.end())
         {
             return;
         }
