@@ -2116,29 +2116,37 @@ public:
     bool OnGossipHello(Player* player, Creature* creature) override
     {
         //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnGossipHelloChromie");
-        uint32 npcText = NPC_TEXT_OTHER;
-        if (Group* group = player->GetGroup())
+        Group* group = player->GetGroup();
+        if (player->GetGroup() && !player->GetGroup()->IsLfgRandomInstance())
         {
-            //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnGossipHello Has Group");
-            if (group->IsLeader(player->GetGUID()))
-            {
-                //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnGossipHello Is Leader");
-                AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Please Chromie, let us re-experience how all the things really happened back then. (Hard mode)", GOSSIP_SENDER_MAIN, 100);
-                AddGossipItemFor(player, GOSSIP_ICON_CHAT, "I think we will be fine with the cinematic version from here. (Normal mode)", GOSSIP_SENDER_MAIN, 101);
+            creature->Whisper("I am sorry, time-traveler. You can not accept challenges here. You need to choose a specific dungeon in order to play my history lessons.", LANG_UNIVERSAL, player);
+            return true;
+        }
+        if (!player->GetGroup())
+        {
+            creature->Whisper("I am sorry, time-traveler. You can not play my history lessons on your own. Bring some friends?", LANG_UNIVERSAL, player);
+            return true;
+        }
+        uint32 npcText = NPC_TEXT_OTHER;
+        //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnGossipHello Has Group");
+        if (group->IsLeader(player->GetGUID()))
+        {
+            //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnGossipHello Is Leader");
+            AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Please Chromie, let us re-experience how all the things really happened back then. (Hard mode)", GOSSIP_SENDER_MAIN, 100);
+            AddGossipItemFor(player, GOSSIP_ICON_CHAT, "I think we will be fine with the cinematic version from here. (Normal mode)", GOSSIP_SENDER_MAIN, 101);
 
-                if (sZoneDifficulty->HardmodeInstanceData[player->GetMap()->GetInstanceId()])
-                {
-                    npcText = NPC_TEXT_LEADER_HARD;
-                }
-                else
-                {
-                    npcText = NPC_TEXT_LEADER_NORMAL;
-                }
+            if (sZoneDifficulty->HardmodeInstanceData[player->GetMap()->GetInstanceId()])
+            {
+                npcText = NPC_TEXT_LEADER_HARD;
             }
             else
             {
-                creature->Whisper("I will let the leader of your group decide about this subject. You will receive a notification, when they make a new request to me.", LANG_UNIVERSAL, player);
+                npcText = NPC_TEXT_LEADER_NORMAL;
             }
+        }
+        else
+        {
+            creature->Whisper("I will let the leader of your group decide about this subject. You will receive a notification, when they make a new request to me.", LANG_UNIVERSAL, player);
         }
         SendGossipMenuFor(player, npcText, creature);
         return true;
