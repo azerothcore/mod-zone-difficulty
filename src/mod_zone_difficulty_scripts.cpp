@@ -57,7 +57,7 @@ void ZoneDifficulty::LoadMapDifficultySettings()
     HeroicTBCQuestMapList[558] = 11374; // Auchenai Crypts
     HeroicTBCQuestMapList[560] = 11378; // The Escape From Durnholde
     HeroicTBCQuestMapList[556] = 11372; // Sethekk Halls
-    //HeroicTBCQuestMapList[585] = 11499; // Magisters' Terrace
+    HeroicTBCQuestMapList[585] = 11499; // Magisters' Terrace
     HeroicTBCQuestMapList[555] = 11375; // Shadow Labyrinth
     HeroicTBCQuestMapList[540] = 11363; // Shattered Halls
     HeroicTBCQuestMapList[552] = 11388; // The Arcatraz
@@ -87,7 +87,7 @@ void ZoneDifficulty::LoadMapDifficultySettings()
     // Category 9
     EncounterCounter[565] = 2; // Gruul's Lair
     EncounterCounter[544] = 1; // Magtheridon's Lair
-    EncounterCounter[532] = 10; // Karazhan
+    EncounterCounter[532] = 12; // Karazhan
 
     // Icons
     sZoneDifficulty->ItemIcons[ITEMTYPE_MISC] = "|TInterface\\icons\\inv_misc_cape_17:15|t |TInterface\\icons\\inv_misc_gem_topaz_02:15|t |TInterface\\icons\\inv_jewelry_ring_51naxxramas:15|t ";
@@ -1445,7 +1445,7 @@ public:
      */
     void OnUnitEnterCombat(Unit* unit, Unit* /*victim*/) override
     {
-        //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnUnitEnterCombat for unit {}", unit->GetEntry());
+        LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnUnitEnterCombat for unit {}", unit->GetEntry());
         if (sZoneDifficulty->HardmodeInstanceData.find(unit->GetInstanceId()) == sZoneDifficulty->HardmodeInstanceData.end())
         {
             return;
@@ -1471,7 +1471,7 @@ public:
             return;
         }
 
-        //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnUnitEnterCombat checks passed for unit {}", unit->GetEntry());
+        LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnUnitEnterCombat checks passed for unit {}", unit->GetEntry());
         uint32 i = 0;
         for (ZoneDifficultyHAI& data : sZoneDifficulty->HardmodeAI[entry])
         {
@@ -1485,12 +1485,6 @@ public:
             ++i;
         }
     }
-
-    //void BeforeSendNonMeleeDamage(Unit* caster, SpellNonMeleeDamage* log)
-    //void BeforeSendHeal(Unit* caster, HealInfo* healInfo) override
-    //{
-    //    LOG_INFO("module", "GetHeal {}, GetAbsorb {}, Healer {}, Target {} ", healInfo->GetHeal(), healInfo->GetAbsorb(), healInfo->GetHealer()->GetName(), healInfo->GetTarget()->GetName());
-    //}
 };
 
 class mod_zone_difficulty_playerscript : public PlayerScript
@@ -2160,7 +2154,7 @@ public:
             creature->Whisper("I am sorry, time-traveler. You can not accept challenges here. You need to choose a specific dungeon in order to play my history lessons.", LANG_UNIVERSAL, player);
             return true;
         }
-        if (!group)
+        if (!group && !player->IsGameMaster())
         {
             creature->Whisper("I am sorry, time-traveler. You can not play my history lessons on your own. Bring some friends?", LANG_UNIVERSAL, player);
             return true;
