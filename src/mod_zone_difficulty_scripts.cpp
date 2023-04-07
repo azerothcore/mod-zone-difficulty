@@ -1731,6 +1731,7 @@ public:
                 whisper.append(sZoneDifficulty->GetContentTypeString(i));
                 creature->Whisper(whisper, LANG_UNIVERSAL, player);
             }
+            return true;
         }
 
         // full tier clearance rewards: confirmation
@@ -1813,6 +1814,7 @@ public:
                 SendGossipMenuFor(player, npcText, creature);
                 return true;
             }
+            return true;
         }
 
         // player has selected a content type
