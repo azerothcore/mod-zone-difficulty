@@ -54,6 +54,7 @@ ModZoneDifficulty.Hardmode.Enable = 0
 #
 #    ModZoneDifficulty.Hardmode.HpModifier
 #        Description: Modifier for creature HP except bosses in hardmode.
+#        Possible to override per creature by adding data to `zone_difficulty_hardmode_creatureoverrides`.
 #        Default:     2.0 - 200% HP
 #
 
