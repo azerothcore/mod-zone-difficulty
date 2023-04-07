@@ -13,5 +13,5 @@ INSERT INTO `zone_difficulty_spelloverrides` (`SpellID`, `NerfValue`, `Enabled`,
 (52752, 1, 1, 'Ancestral Awakening - Skip nerf.'),
 (47753, 1, 1, 'Divine Aegis - Skip nerf.'),
 (18562, 1, 1, 'Swiftmend - Skip nerf.'),
-(25516, 1, 1, 'AQ20 Andorov Healing - Skip nerf.')
+(25516, 1, 1, 'AQ20 Andorov Healing - Skip nerf.'),
 (36240, 1, 1, 'Gruul Cave In - Skip buff.');
