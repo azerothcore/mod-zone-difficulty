@@ -2118,6 +2118,12 @@ public:
         }
         else if (action == 101)
         {
+            if (player->GetInstanceScript()->IsEncounterInProgress())
+            {
+                //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: IsEncounterInProgress");
+                creature->Whisper("I am sorry, time-traveler. You can not change the version of the time-line currently. There is already a battle in progress.", LANG_UNIVERSAL, player);
+                CloseGossipMenuFor(player);
+            }
             if (player->GetInstanceScript()->GetBossState(0) != DONE)
             {
                 //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Turn off hardmode for id {}", instanceId);
