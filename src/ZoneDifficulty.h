@@ -135,6 +135,8 @@ public:
     bool IsEnabled{ false };
     bool IsDebugInfoEnabled{ false };
     float HardmodeHpModifier{ 2.0 };
+    bool HardmodeEnable{ false };
+    bool HardmodeInNormalDungeons{ false };
     std::vector<uint32> DailyHeroicQuests;
     std::map<uint32, uint32> HeroicTBCQuestMapList;
     std::map<uint32, uint8> EncounterCounter;

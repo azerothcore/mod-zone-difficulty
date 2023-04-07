@@ -114,7 +114,7 @@ void ZoneDifficulty::LoadMapDifficultySettings()
                 data.Enabled = data.Enabled | mode;
                 sZoneDifficulty->NerfInfo[mapId][phaseMask] = data;
             }
-            if (sZoneDifficulty->HasHardMode(mode))
+            if (sZoneDifficulty->HasHardMode(mode) && sZoneDifficulty->HardmodeEnable)
             {
                 data.HealingNerfPctHard = (*result)[2].Get<float>();
                 data.AbsorbNerfPctHard = (*result)[3].Get<float>();
@@ -666,6 +666,10 @@ void ZoneDifficulty::SendItem(Player* player, uint32 category, uint32 itemType, 
  */
 bool ZoneDifficulty::IsHardmodeMap(uint32 mapId)
 {
+    if (!sZoneDifficulty->HardmodeEnable)
+    {
+        return false;
+    }
     if (sZoneDifficulty->HardmodeLoot.find(mapId) == sZoneDifficulty->HardmodeLoot.end())
     {
         return false;
@@ -784,10 +788,10 @@ void ZoneDifficulty::SaveHardmodeInstanceData(uint32 instanceId)
 {
     if (sZoneDifficulty->HardmodeInstanceData.find(instanceId) == sZoneDifficulty->HardmodeInstanceData.end())
     {
-        LOG_INFO("module", "MOD-ZONE-DIFFICULTY: ZoneDifficulty::SaveHardmodeInstanceData: InstanceId {} not found in HardmodeInstanceData.", instanceId);
+        //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: ZoneDifficulty::SaveHardmodeInstanceData: InstanceId {} not found in HardmodeInstanceData.", instanceId);
         return;
     }
-    LOG_INFO("module", "MOD-ZONE-DIFFICULTY: ZoneDifficulty::SaveHardmodeInstanceData: Saving instanceId {} with HardmodeOn {}", instanceId, sZoneDifficulty->HardmodeInstanceData[instanceId]);
+    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: ZoneDifficulty::SaveHardmodeInstanceData: Saving instanceId {} with HardmodeOn {}", instanceId, sZoneDifficulty->HardmodeInstanceData[instanceId]);
     CharacterDatabase.Execute("REPLACE INTO zone_difficulty_instance_saves (InstanceID, HardmodeOn) VALUES ({}, {})", instanceId, sZoneDifficulty->HardmodeInstanceData[instanceId]);
 }
 
@@ -905,7 +909,7 @@ void ZoneDifficulty::HardmodeEvent(Unit* unit, uint32 entry, uint32 key)
                     if (!has_bp0 && !has_bp1 && !has_bp2)
                     {
                         unit->CastSpell(trg, sZoneDifficulty->HardmodeAI[entry][key].Spell, true);
-
+                        LOG_INFO("module", "Creature casting HardmodeAI spell: {} at target {}", sZoneDifficulty->HardmodeAI[entry][key].Spell, trg->GetName());
                     }
                     else
                     {
@@ -914,6 +918,7 @@ void ZoneDifficulty::HardmodeEvent(Unit* unit, uint32 entry, uint32 key)
                             has_bp1 ? &sZoneDifficulty->HardmodeAI[entry][key].Spellbp1 : NULL,
                             has_bp2 ? &sZoneDifficulty->HardmodeAI[entry][key].Spellbp2 : NULL,
                             true);
+                        LOG_INFO("module", "Creature casting HardmodeAI spell: {} at target {} with custom values.", sZoneDifficulty->HardmodeAI[entry][key].Spell, trg->GetName());
                     }
                 }
             }
@@ -1000,7 +1005,7 @@ void ZoneDifficulty::HardmodeEvent(Unit* unit, uint32 entry, uint32 key)
 
 bool ZoneDifficulty::HasCompletedFullTier(uint32 category, uint32 playerGuid)
 {
-    LOG_INFO("module", "MOD-ZONE-DIFFCULTY: Executing HasCompletedFullTier for category {} playerGUID {}.", category, playerGuid);
+    //LOG_INFO("module", "MOD-ZONE-DIFFCULTY: Executing HasCompletedFullTier for category {} playerGUID {}.", category, playerGuid);
     std::vector<uint32> MapList;
     switch (category)
     {
@@ -1019,7 +1024,7 @@ bool ZoneDifficulty::HasCompletedFullTier(uint32 category, uint32 playerGuid)
 
     for (uint32 mapId : MapList)
     {
-        LOG_INFO("module", "MOD-ZONE-DIFFCULTY: Checking HasCompletedFullTier for mapId {}.", mapId);
+        //LOG_INFO("module", "MOD-ZONE-DIFFCULTY: Checking HasCompletedFullTier for mapId {}.", mapId);
         if (sZoneDifficulty->EncounterCounter.find(mapId) == sZoneDifficulty->EncounterCounter.end())
         {
             LOG_ERROR("module", "MOD-ZONE-DIFFICULTY: Map without data requested in ZoneDifficulty::HasCompletedFullTier {}", mapId);
@@ -1027,7 +1032,7 @@ bool ZoneDifficulty::HasCompletedFullTier(uint32 category, uint32 playerGuid)
         }
         for (uint8 i = 0; i < sZoneDifficulty->EncounterCounter[mapId]; ++i)
         {
-            LOG_INFO("module", "MOD-ZONE-DIFFCULTY: Checking HasCompletedFullTier for BossId {}: {}.", i, sZoneDifficulty->Logs[playerGuid][mapId][i]);
+            //LOG_INFO("module", "MOD-ZONE-DIFFCULTY: Checking HasCompletedFullTier for BossId {}: {}.", i, sZoneDifficulty->Logs[playerGuid][mapId][i]);
             if (!sZoneDifficulty->Logs[playerGuid][mapId][i])
             {
                 return false;
@@ -1045,6 +1050,10 @@ public:
     void OnAuraApply(Unit* target, Aura* aura) override
     {
         if (!sZoneDifficulty->IsEnabled)
+        {
+            return;
+        }
+        if (!sZoneDifficulty->HardmodeInNormalDungeons && !target->GetMap()->IsRaidOrHeroicDungeon())
         {
             return;
         }
@@ -1143,6 +1152,10 @@ public:
         {
             return;
         }
+        if (!sZoneDifficulty->HardmodeInNormalDungeons && !target->GetMap()->IsRaidOrHeroicDungeon())
+        {
+            return;
+        }
 
         if (sZoneDifficulty->IsValidNerfTarget(target))
         {
@@ -1200,6 +1213,10 @@ public:
     void ModifyPeriodicDamageAurasTick(Unit* target, Unit* attacker, uint32& damage, SpellInfo const* spellInfo) override
     {
         if (!sZoneDifficulty->IsEnabled)
+        {
+            return;
+        }
+        if (!sZoneDifficulty->HardmodeInNormalDungeons && !target->GetMap()->IsRaidOrHeroicDungeon())
         {
             return;
         }
@@ -1292,6 +1309,10 @@ public:
         {
             return;
         }
+        if (!sZoneDifficulty->HardmodeInNormalDungeons && !target->GetMap()->IsRaidOrHeroicDungeon())
+        {
+            return;
+        }
 
         // Disclaimer: also affects disables boss adds buff.
         if (sConfigMgr->GetOption<bool>("ModZoneDifficulty.SpellBuff.OnlyBosses", false))
@@ -1373,6 +1394,10 @@ public:
         {
             return;
         }
+        if (!sZoneDifficulty->HardmodeInNormalDungeons && !target->GetMap()->IsRaidOrHeroicDungeon())
+        {
+            return;
+        }
 
         // Disclaimer: also affects disables boss adds buff.
         if (sConfigMgr->GetOption<bool>("ModZoneDifficulty.MeleeBuff.OnlyBosses", false))
@@ -1414,17 +1439,6 @@ public:
             }
         }
     }
-
-    //void OnUnitEnterEvadeMode(Unit* unit, uint8 /*why*/) override
-    //{
-    //    uint32 entry = unit->GetEntry();
-    //    LOG_INFO("module", "OnUnitEnterEvadeMode fired. Entry: {}", entry);
-    //    if (entry == 19389)
-    //    {
-    //        unit->m_Events.CancelEventGroup(EVENT_GROUP);
-    //        LOG_INFO("module", "Unit evading, events reset.");
-    //    }
-    //}
 
     /**
      *  @brief Check if the Hardmode is activated for the instance and if the creature has any hardmode AI assigned. Schedule the events, if so.
@@ -1528,6 +1542,8 @@ public:
         sZoneDifficulty->IsEnabled = sConfigMgr->GetOption<bool>("ModZoneDifficulty.Enable", false);
         sZoneDifficulty->IsDebugInfoEnabled = sConfigMgr->GetOption<bool>("ModZoneDifficulty.DebugInfo", false);
         sZoneDifficulty->HardmodeHpModifier = sConfigMgr->GetOption<float>("ModZoneDifficulty.Hardmode.HpModifier", 2);
+        sZoneDifficulty->HardmodeEnable = sConfigMgr->GetOption<bool>("ModZoneDifficulty.Hardmode.Enable", false);
+        sZoneDifficulty->HardmodeInNormalDungeons = sConfigMgr->GetOption<bool>("ModZoneDifficulty.Hardmode.InNormalDungeons", false);
         sZoneDifficulty->LoadMapDifficultySettings();
     }
 
@@ -1545,12 +1561,17 @@ public:
 
     void OnBeforeSetBossState(uint32 id, EncounterState newState, EncounterState oldState, Map* instance) override
     {
+        if (!sZoneDifficulty->HardmodeEnable)
+        {
+            return;
+        }
         if (sZoneDifficulty->IsDebugInfoEnabled)
         {
             LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnBeforeSetBossState: bossId = {}, newState = {}, oldState = {}, MapId = {}, InstanceId = {}", id, newState, oldState, instance->GetId(), instance->GetInstanceId());
         }
         uint32 instanceId = instance->GetInstanceId();
-        if (!sZoneDifficulty->IsHardmodeMap(instance->GetId()))
+        if (!sZoneDifficulty->IsHardmodeMap(instance->GetId()) ||
+            (!sZoneDifficulty->HardmodeInNormalDungeons && !instance->IsRaidOrHeroicDungeon()))
         {
             //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnBeforeSetBossState: Instance not handled because there is no hardmode loot data for map id: {}", instance->GetId());
             return;
@@ -1598,6 +1619,10 @@ public:
 
     void OnAfterUpdateEncounterState(Map* map, EncounterCreditType /*type*/, uint32 /*creditEntry*/, Unit* source, Difficulty /*difficulty_fixed*/, DungeonEncounterList const* /*encounters*/, uint32 /*dungeonCompleted*/, bool /*updated*/) override
     {
+        if (!sZoneDifficulty->HardmodeEnable)
+        {
+            return;
+        }
         if (!source)
         {
             //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: source is a nullptr in OnAfterUpdateEncounterState");
@@ -1612,7 +1637,8 @@ public:
             {
                 uint32 mapId = map->GetId();
                 uint32 score = 0;
-                if (!sZoneDifficulty->IsHardmodeMap(mapId))
+                if (!sZoneDifficulty->IsHardmodeMap(mapId) ||
+                    (!sZoneDifficulty->HardmodeInNormalDungeons && !map->IsRaidOrHeroicDungeon()))
                 {
                     //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: No additional loot stored in map with id {}.", map->GetInstanceId());
                     return;
@@ -1735,7 +1761,7 @@ public:
                 return true;
             }
 
-            LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Sending full tier clearance reward for category {}", category);
+            //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Sending full tier clearance reward for category {}", category);
             sZoneDifficulty->DeductHardmodeScore(player, category, sZoneDifficulty->TierRewards[category].Price);
             sZoneDifficulty->SendItem(player, category, 99, 0);
 
@@ -2160,6 +2186,10 @@ public:
 
     void OnAllCreatureUpdate(Creature* creature, uint32 /*diff*/) override
     {
+        if (!sZoneDifficulty->HardmodeEnable)
+        {
+            return;
+        }
         // Heavily inspired by https://github.com/azerothcore/mod-autobalance/blob/1d82080237e62376b9a030502264c90b5b8f272b/src/AutoBalance.cpp
         Map* map = creature->GetMap();
         if (!creature || !map)
