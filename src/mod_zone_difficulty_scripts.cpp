@@ -1718,11 +1718,11 @@ public:
                 whisper.append("Your score is ");
                 if (sZoneDifficulty->HardmodeScore.find(player->GetGUID().GetCounter()) == sZoneDifficulty->HardmodeScore.end())
                 {
-                    whisper.append("0 ");
+                    continue;
                 }
                 else if (sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()].find(i) == sZoneDifficulty->HardmodeScore[player->GetGUID().GetCounter()].end())
                 {
-                    whisper.append("0 ");
+                    continue;
                 }
                 else
                 {
@@ -2155,7 +2155,7 @@ public:
     {
         //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnGossipHelloChromie");
         Group* group = player->GetGroup();
-        if (group && !group->IsLfgRandomInstance() && !player->GetMap()->IsRaid())
+        if (group && group->IsLfgRandomInstance() && !player->GetMap()->IsRaid())
         {
             creature->Whisper("I am sorry, time-traveler. You can not accept challenges here. You need to choose a specific dungeon in order to play my history lessons.", LANG_UNIVERSAL, player);
             return true;
