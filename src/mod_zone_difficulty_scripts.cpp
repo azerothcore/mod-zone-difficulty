@@ -2023,6 +2023,10 @@ public:
             //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: mod_zone_difficulty_dungeonmasterAI: Reset happens.");
             if (me->GetMap() && me->GetMap()->IsHeroic() && !me->GetMap()->IsRaid())
             {
+                if (!sZoneDifficulty->HardmodeEnable)
+                {
+                    return;
+                }
                 //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: We're inside a heroic 5man now.");
                 //todo: add the list for the wotlk heroic dungeons quests
                 for (auto& quest : sZoneDifficulty->DailyHeroicQuests)
