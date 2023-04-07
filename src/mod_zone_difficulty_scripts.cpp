@@ -2117,12 +2117,12 @@ public:
     {
         //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnGossipHelloChromie");
         Group* group = player->GetGroup();
-        if (player->GetGroup() && !player->GetGroup()->IsLfgRandomInstance())
+        if (group && !group->IsLfgRandomInstance() && !player->GetMap()->IsRaid())
         {
             creature->Whisper("I am sorry, time-traveler. You can not accept challenges here. You need to choose a specific dungeon in order to play my history lessons.", LANG_UNIVERSAL, player);
             return true;
         }
-        if (!player->GetGroup())
+        if (!group)
         {
             creature->Whisper("I am sorry, time-traveler. You can not play my history lessons on your own. Bring some friends?", LANG_UNIVERSAL, player);
             return true;
