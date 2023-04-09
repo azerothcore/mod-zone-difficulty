@@ -431,15 +431,17 @@ void ZoneDifficulty::LoadHardmodeScoreData()
  */
 void ZoneDifficulty::SendWhisperToRaid(std::string message, Creature* creature, Player* player)
 {
-    Group::MemberSlotList const& members = player->GetGroup()->GetMemberSlots();
-    for (auto& member : members)
+    if (Map* map = creature->GetMap())
     {
-        Player* mplr = ObjectAccessor::FindConnectedPlayer(member.guid);
-        if (creature && mplr && mplr->GetMap()->GetInstanceId() == player->GetMap()->GetInstanceId())
-        {
-            //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Player {} should receive a whisper.", mplr->GetName());
-            creature->Whisper(message, LANG_UNIVERSAL, mplr);
-        }
+        map->DoForAllPlayers([&, player, creature](Player* mapPlayer) {
+            if (creature && player)
+            {
+                if (mapPlayer->IsInSameGroupWith(player))
+                {
+                    creature->Whisper(message, LANG_UNIVERSAL, mapPlayer);
+                }
+            }
+        });
     }
 }
 
