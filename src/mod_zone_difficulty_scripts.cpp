@@ -2161,7 +2161,7 @@ public:
         }
         uint32 npcText = NPC_TEXT_OTHER;
         //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnGossipHello Has Group");
-        if (group->IsLeader(player->GetGUID()))
+        if (player->IsGameMaster() || (group && group->IsLeader(player->GetGUID())))
         {
             //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnGossipHello Is Leader");
             AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Please Chromie, let us re-experience how all the things really happened back then. (Hard mode)", GOSSIP_SENDER_MAIN, 100);
