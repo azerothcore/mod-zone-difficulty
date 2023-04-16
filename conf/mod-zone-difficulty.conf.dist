@@ -42,3 +42,29 @@ ModZoneDifficulty.SpellBuff.OnlyBosses = 0
 #
 
 ModZoneDifficulty.MeleeBuff.OnlyBosses = 0
+
+#
+#    ModZoneDifficulty.Hardmode.Enable
+#        Description: Enable or disable the hardmode.
+#        Default:     0 - Disabled
+#                     1 - Enabled
+
+ModZoneDifficulty.Hardmode.Enable = 0
+
+#
+#    ModZoneDifficulty.Hardmode.HpModifier
+#        Description: Modifier for creature HP except bosses in hardmode.
+#        Possible to override per creature by adding data to `zone_difficulty_hardmode_creatureoverrides`.
+#        Default:     2.0 - 200% HP
+#
+
+ModZoneDifficulty.Hardmode.HpModifier = 2.0
+
+#
+#    ModZoneDifficulty.Hardmode.InNormalDungeons
+#        Description: Enable or disable hardmode in non-heroic 5man dungeons.
+#        Dungeonmaster NPCs still need to be spawned. They only appear in heroic 5mans and raids by default.
+#        Default:     0 - Disabled
+#                     1 - Enabled
+
+ModZoneDifficulty.Hardmode.InNormalDungeons = 0
