@@ -926,7 +926,7 @@ void ZoneDifficulty::HardmodeEvent(Unit* unit, uint32 entry, uint32 key)
             }
             return;
         }
-        else
+        else if (sZoneDifficulty->HardmodeAI[entry][key].Target != TARGET_SELF)
         {
             std::list<Unit*> targetList = sZoneDifficulty->GetTargetList(unit, entry, key);
             if (targetList.empty())
