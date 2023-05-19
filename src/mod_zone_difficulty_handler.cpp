@@ -947,38 +947,42 @@ void ZoneDifficulty::HardmodeEvent(Unit* unit, uint32 entry, uint32 key)
 
                 switch (sZoneDifficulty->HardmodeAI[entry][key].Target)
                 {
-                case TARGET_HOSTILE_AGGRO_FROM_TOP:
-                {
-                    std::list<Unit*>::const_iterator itr = targetList.begin();
-                    std::advance(itr, counter);
-                    target = *itr;
-                    break;
-                }
-                case TARGET_HOSTILE_AGGRO_FROM_BOTTOM:
-                {
-                    std::list<Unit*>::reverse_iterator ritr = targetList.rbegin();
-                    std::advance(ritr, counter);
-                    target = *ritr;
-                    break;
-                }
-                case TARGET_HOSTILE_RANDOM:
-                {
-                    std::list<Unit*>::const_iterator itr = targetList.begin();
-                    std::advance(itr, urand(0, targetList.size() - 1));
-                    target = *itr;
-                    break;
-                }
-                case TARGET_HOSTILE_RANDOM_NOT_TOP:
-                {
-                    std::list<Unit*>::const_iterator itr = targetList.begin();
-                    std::advance(itr, urand(1, targetList.size() - 1));
-                    target = *itr;
-                    break;
-                }
-                default:
-                {
-                    LOG_ERROR("module", "MOD-ZONE-DIFFICULTY: Unknown type for Target: {} in zone_difficulty_hardmode_ai", sZoneDifficulty->HardmodeAI[entry][key].Target);
-                }
+                    case TARGET_HOSTILE_AGGRO_FROM_TOP:
+                    {
+                        std::list<Unit*>::const_iterator itr = targetList.begin();
+                        std::advance(itr, counter);
+                        target = *itr;
+                        LOG_INFO("module", "Selecting target type TARGET_HOSTILE_AGGRO_FROM_TOP with counter {}.", counter);
+                        break;
+                    }
+                    case TARGET_HOSTILE_AGGRO_FROM_BOTTOM:
+                    {
+                        std::list<Unit*>::reverse_iterator ritr = targetList.rbegin();
+                        std::advance(ritr, counter);
+                        target = *ritr;
+                        LOG_INFO("module", "Selecting target type TARGET_HOSTILE_AGGRO_FROM_BOTTOM with counter {}.", counter);
+                        break;
+                    }
+                    case TARGET_HOSTILE_RANDOM:
+                    {
+                        std::list<Unit*>::const_iterator itr = targetList.begin();
+                        std::advance(itr, urand(0, targetList.size() - 1));
+                        target = *itr;
+                        LOG_INFO("module", "Selecting target type TARGET_HOSTILE_RANDOM with counter {}.", counter);
+                        break;
+                    }
+                    case TARGET_HOSTILE_RANDOM_NOT_TOP:
+                    {
+                        std::list<Unit*>::const_iterator itr = targetList.begin();
+                        std::advance(itr, urand(1, targetList.size() - 1));
+                        target = *itr;
+                        LOG_INFO("module", "Selecting target type TARGET_HOSTILE_RANDOM_NOT_TOP with counter {}.", counter);
+                        break;
+                    }
+                    default:
+                    {
+                        LOG_ERROR("module", "MOD-ZONE-DIFFICULTY: Unknown type for Target: {} in zone_difficulty_hardmode_ai", sZoneDifficulty->HardmodeAI[entry][key].Target);
+                    }
                 }
             }
         }
