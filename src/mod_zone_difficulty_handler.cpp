@@ -939,7 +939,7 @@ void ZoneDifficulty::HardmodeEvent(Unit* unit, uint32 entry, uint32 key)
             }
             else
             {
-                uint8 counter
+                uint8 counter;
                 if (sZoneDifficulty->HardmodeAI[entry][key].TargetArg < targetList.size() - 1)
                 {
                     counter = sZoneDifficulty->HardmodeAI[entry][key].TargetArg;
