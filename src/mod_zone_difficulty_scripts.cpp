@@ -139,7 +139,7 @@ public:
         {
             if (spellInfo)
             {
-                if (spellInfo->HasEffect(SPELL_EFFECT_HEALTH_LEECH));
+                if (spellInfo->HasEffect(SPELL_EFFECT_HEALTH_LEECH))
                 {
                     return;
                 }
