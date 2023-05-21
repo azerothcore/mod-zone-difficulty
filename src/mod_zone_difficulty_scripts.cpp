@@ -139,6 +139,17 @@ public:
         {
             if (spellInfo)
             {
+                if (spellInfo->HasEffect(SPELL_EFFECT_HEALTH_LEECH));
+                {
+                    return;
+                }
+                for (auto const& eff : spellInfo->GetEffects())
+                {
+                    if (eff.ApplyAuraName == SPELL_AURA_PERIODIC_LEECH)
+                    {
+                        return;
+                    }
+                }
                 // Skip spells not affected by vulnerability (potions) and bandages
                 if (spellInfo->HasAttribute(SPELL_ATTR0_NO_IMMUNITIES) || spellInfo->Mechanic == MECHANIC_BANDAGE)
                 {
