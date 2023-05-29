@@ -45,6 +45,7 @@ struct ZoneDifficultyHAI
     int32 Spellbp2;
     uint8 Target;
     uint8 TargetArg;
+    uint8 TargetArg2;
     Milliseconds Delay;
     Milliseconds Cooldown;
     uint8 Repetitions;
@@ -95,13 +96,14 @@ uint32 const ITEMTYPE_MAIL = 4;
 uint32 const ITEMTYPE_PLATE = 5;
 uint32 const ITEMTYPE_WEAPONS = 6;
 
-uint8 const TARGET_SELF = 1;
-uint8 const TARGET_VICTIM = 2;                      // current target
-uint8 const TARGET_HOSTILE_AGGRO_FROM_TOP = 3;      // count TargetArg highest aggro from top
-uint8 const TARGET_HOSTILE_AGGRO_FROM_BOTTOM = 4;   // count TargetArg lowest aggro from bottom
-uint8 const TARGET_HOSTILE_RANDOM = 5;              // any random player from the threat list
-uint8 const TARGET_HOSTILE_RANDOM_NOT_TOP = 6;      // any random player from the threat list except the current target
-uint8 const TARGET_PLAYER_DISTANCE = 18;            // all players within TargetArg range
+uint32 const TARGET_NONE = 0;
+uint32 const TARGET_SELF = 1;
+uint32 const TARGET_VICTIM = 2;                      // current target
+uint32 const TARGET_HOSTILE_AGGRO_FROM_TOP = 3;      // count TargetArg highest aggro from top within TargetArg2 distance
+uint32 const TARGET_HOSTILE_AGGRO_FROM_BOTTOM = 4;   // count TargetArg lowest aggro from bottom within TargetArg2 distance
+uint32 const TARGET_HOSTILE_RANDOM = 5;              // any random player from the threat list
+uint32 const TARGET_HOSTILE_RANDOM_NOT_TOP = 6;      // any random player from the threat list except the current target
+uint32 const TARGET_PLAYER_DISTANCE = 18;            // a random player within TargetArg range
 
 const std::string REWARD_MAIL_SUBJECT = "Chromie's Reward for you";
 const std::string REWARD_MAIL_BODY = "Enjoy your new item!";
