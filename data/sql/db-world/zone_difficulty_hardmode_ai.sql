@@ -29,7 +29,7 @@ CREATE TABLE `zone_difficulty_hardmode_ai` (
 );
 
 DELETE FROM `zone_difficulty_hardmode_ai`;
-INSERT INTO `zone_difficulty_hardmode_ai` (`CreatureEntry`, `Chance`, `Spell`, `Spellbp0`, `Spellbp1`, `Spellbp2`, `Target`, `TargetArg`, `Delay`, `Cooldown`, `Repetitions`, `Enabled`, `Comment`) VALUES
+INSERT INTO `zone_difficulty_hardmode_ai` (`CreatureEntry`, `Chance`, `Spell`, `Spellbp0`, `Spellbp1`, `Spellbp2`, `Target`, `TargetArg`, `TargetArg2`, `Delay`, `Cooldown`, `Repetitions`, `Enabled`, `Comment`) VALUES
 (18831, 100, 19784, 0, 0, 0, @TARGET_HOSTILE_RANDOM, 0, 0, 30000, 5000, 0, 1, 'Maulgar, Gruul\'s Lair. Dark Iron Bomb on a random player after 30s every 5s.'),
 (18832, 100, 6726, 0, 0, 0, @TARGET_PLAYER_DISTANCE, 0, 50, 28000, 30000, 0, 1, 'Krosh Firehand, Gruul\'s Lair. 5sec Silence on all players in 50m after 28s every 30s.'),
 (18834, 100, 69969, 0, 0, 0, @TARGET_PLAYER_DISTANCE, 0, 50, 58000, 60000, 0, 1, 'Olm the Summoner, Gruul\'s Lair. Curse of Doom (12s) on all players in 50m after 58s every 60s.'),
