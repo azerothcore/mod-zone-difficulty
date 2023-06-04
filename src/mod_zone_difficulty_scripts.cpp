@@ -434,13 +434,15 @@ public:
      */
     void OnUnitEnterCombat(Unit* unit, Unit* /*victim*/) override
     {
-        //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnUnitEnterCombat for unit {}", unit->GetEntry());
+        LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnUnitEnterCombat for unit {}", unit->GetEntry());
         if (sZoneDifficulty->HardmodeInstanceData.find(unit->GetInstanceId()) == sZoneDifficulty->HardmodeInstanceData.end())
         {
+            LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Instance is not in mythic mode.");
             return;
         }
         if (!sZoneDifficulty->HardmodeInstanceData[unit->GetInstanceId()])
         {
+            LOG_INFO("module", "MOD-ZONE-DIFFICULTY: InstanceId not found in mythic mode list.");
             return;
         }
 
@@ -448,19 +450,21 @@ public:
         {
             if (creature->IsTrigger())
             {
+                LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Creature is a trigger.");
                 return;
             }
         }
 
-        unit->m_Events.CancelEventGroup(EVENT_GROUP);
-
         uint32 entry = unit->GetEntry();
         if (sZoneDifficulty->HardmodeAI.find(entry) == sZoneDifficulty->HardmodeAI.end())
         {
+            LOG_INFO("module", "MOD-ZONE-DIFFICULTY: No HarmodeAI found for creature with entry {}", entry);
             return;
         }
 
-        //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnUnitEnterCombat checks passed for unit {}", unit->GetEntry());
+        unit->m_Events.CancelEventGroup(EVENT_GROUP);
+        LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnUnitEnterCombat checks passed for unit {}", unit->GetEntry());
+
         uint32 i = 0;
         for (ZoneDifficultyHAI& data : sZoneDifficulty->HardmodeAI[entry])
         {

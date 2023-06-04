@@ -19,7 +19,7 @@ CREATE TABLE `zone_difficulty_hardmode_ai` (
     `Spellbp1` INT NOT NULL DEFAULT 0,              -- custom spell value bp1
     `Spellbp2` INT NOT NULL DEFAULT 0,              -- custom spell value bp2
     `Target` TINYINT NOT NULL DEFAULT 1,            -- see above
-    `TargetArg` INT NOT NULL DEFAULT 0,             -- optional argument for the target. Max/min range
+    `TargetArg` INT NOT NULL DEFAULT 0,             -- optional argument for the target. Max(positive)/min(negative) range.
     `TargetArg2` INT NOT NULL DEFAULT 0,            -- optional argument for the target. Counter in the threat list for position
     `Delay` INT NOT NULL DEFAULT 1,                 -- time in ms before first cast
     `Cooldown` INT NOT NULL DEFAULT 1,              -- time in ms between casts

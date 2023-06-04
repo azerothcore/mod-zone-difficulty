@@ -245,7 +245,7 @@ void ZoneDifficulty::LoadMapDifficultySettings()
     {
         do
         {
-            bool enabled = (*result)[11].Get<bool>();
+            bool enabled = (*result)[12].Get<bool>();
 
             if (enabled)
             {
@@ -850,7 +850,7 @@ void ZoneDifficulty::HardmodeEvent(Unit* unit, uint32 entry, uint32 key)
                 if (!has_bp0 && !has_bp1 && !has_bp2)
                 {
                     unit->CastSpell(target, sZoneDifficulty->HardmodeAI[entry][key].Spell, true);
-                    LOG_INFO("module", "Creature casting HardmodeAI spell: {} at target {}", sZoneDifficulty->HardmodeAI[entry][key].Spell, targetName);
+                    LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Creature casting HardmodeAI spell: {} at target {}", sZoneDifficulty->HardmodeAI[entry][key].Spell, targetName);
                 }
                 else
                 {
@@ -859,7 +859,7 @@ void ZoneDifficulty::HardmodeEvent(Unit* unit, uint32 entry, uint32 key)
                         has_bp1 ? &sZoneDifficulty->HardmodeAI[entry][key].Spellbp1 : NULL,
                         has_bp2 ? &sZoneDifficulty->HardmodeAI[entry][key].Spellbp2 : NULL,
                         true);
-                    LOG_INFO("module", "Creature casting HardmodeAI spell: {} at target {} with custom values.", sZoneDifficulty->HardmodeAI[entry][key].Spell, targetName);
+                    LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Creature casting HardmodeAI spell: {} at target {} with custom values.", sZoneDifficulty->HardmodeAI[entry][key].Spell, targetName);
                 }
             }
             return;
@@ -890,10 +890,10 @@ void ZoneDifficulty::HardmodeEvent(Unit* unit, uint32 entry, uint32 key)
 
                     if (!target)
                     {
-                        LOG_INFO("module", "Fall-back to GetVictim()");
+                        LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Fall-back to GetVictim()");
                         target = unit->GetVictim();
                     }
-                    LOG_INFO("module", "Selecting target type TARGET_HOSTILE_AGGRO_FROM_TOP with range TargetArg {} and position on threat-list TargetArg2 {}.", sZoneDifficulty->HardmodeAI[entry][key].TargetArg, range);
+                    LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Selecting target type TARGET_HOSTILE_AGGRO_FROM_TOP with range TargetArg {} and position on threat-list TargetArg2 {}.", sZoneDifficulty->HardmodeAI[entry][key].TargetArg, range);
                     break;
                 }
                 case TARGET_HOSTILE_AGGRO_FROM_BOTTOM:
@@ -910,19 +910,19 @@ void ZoneDifficulty::HardmodeEvent(Unit* unit, uint32 entry, uint32 key)
                         LOG_INFO("module", "Fall-back to GetVictim()");
                         target = unit->GetVictim();
                     }
-                    LOG_INFO("module", "Selecting target type TARGET_HOSTILE_AGGRO_FROM_TOP with range TargetArg {} and position on threat-list TargetArg2 {}.", sZoneDifficulty->HardmodeAI[entry][key].TargetArg, range);
+                    LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Selecting target type TARGET_HOSTILE_AGGRO_FROM_TOP with range TargetArg {} and position on threat-list TargetArg2 {}.", sZoneDifficulty->HardmodeAI[entry][key].TargetArg, range);
                     break;
                 }
                 case TARGET_HOSTILE_RANDOM:
                 {
                     target = unit->GetAI()->SelectTarget(SelectTargetMethod::Random, 0, sZoneDifficulty->HardmodeAI[entry][key].TargetArg, true);
-                    LOG_INFO("module", "Selecting target type TARGET_HOSTILE_RANDOM with max range {}.", sZoneDifficulty->HardmodeAI[entry][key].TargetArg);
+                    LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Selecting target type TARGET_HOSTILE_RANDOM with max range {}.", sZoneDifficulty->HardmodeAI[entry][key].TargetArg);
                     break;
                     }
                 case TARGET_HOSTILE_RANDOM_NOT_TOP:
                 {
                     target = unit->GetAI()->SelectTarget(SelectTargetMethod::Random, 0, sZoneDifficulty->HardmodeAI[entry][key].TargetArg, true, false);
-                    LOG_INFO("module", "Selecting target type TARGET_HOSTILE_RANDOM_NOT_TOP with max range {}.", sZoneDifficulty->HardmodeAI[entry][key].TargetArg);
+                    LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Selecting target type TARGET_HOSTILE_RANDOM_NOT_TOP with max range {}.", sZoneDifficulty->HardmodeAI[entry][key].TargetArg);
                     break;
                 }
                 default:
@@ -944,7 +944,7 @@ void ZoneDifficulty::HardmodeEvent(Unit* unit, uint32 entry, uint32 key)
             if (!has_bp0 && !has_bp1 && !has_bp2)
             {
                 unit->CastSpell(target, sZoneDifficulty->HardmodeAI[entry][key].Spell, true);
-                LOG_INFO("module", "Creature casting HardmodeAI spell: {} at target {}", sZoneDifficulty->HardmodeAI[entry][key].Spell, targetName);
+                LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Creature casting HardmodeAI spell: {} at target {}", sZoneDifficulty->HardmodeAI[entry][key].Spell, targetName);
             }
             else
             {
@@ -953,12 +953,12 @@ void ZoneDifficulty::HardmodeEvent(Unit* unit, uint32 entry, uint32 key)
                     has_bp1 ? &sZoneDifficulty->HardmodeAI[entry][key].Spellbp1 : NULL,
                     has_bp2 ? &sZoneDifficulty->HardmodeAI[entry][key].Spellbp2 : NULL,
                     true);
-                LOG_INFO("module", "Creature casting HardmodeAI spell: {} at target {} with custom values.", sZoneDifficulty->HardmodeAI[entry][key].Spell, targetName);
+                LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Creature casting HardmodeAI spell: {} at target {} with custom values.", sZoneDifficulty->HardmodeAI[entry][key].Spell, targetName);
             }
         }
         else
         {
-            LOG_ERROR("module", "No target could be found for unit with entry {} and harmodeAI key {}.", entry, key);
+            LOG_ERROR("module", "MOD-ZONE-DIFFICULTY: No target could be found for unit with entry {} and harmodeAI key {}.", entry, key);
         }
     }
 }
