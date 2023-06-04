@@ -15,8 +15,8 @@
 -- TYPE_RAID_T9 = 15;
 -- TYPE_RAID_T10 = 16;
 
-DROP TABLE IF EXISTS `zone_difficulty_hardmode_instance_data`;
-CREATE TABLE `zone_difficulty_hardmode_instance_data` (
+DROP TABLE IF EXISTS `zone_difficulty_mythicmode_instance_data`;
+CREATE TABLE `zone_difficulty_mythicmode_instance_data` (
     `MapID` INT NOT NULL DEFAULT 0,
     `SourceEntry` INT NOT NULL,
 
@@ -28,7 +28,7 @@ CREATE TABLE `zone_difficulty_hardmode_instance_data` (
 	PRIMARY KEY (`MapID`, `SourceEntry`)
 );
 
-INSERT INTO `zone_difficulty_hardmode_instance_data` (`MapID`, `SourceEntry`, `Override`, `InstanceType`) VALUES
+INSERT INTO `zone_difficulty_mythicmode_instance_data` (`MapID`, `SourceEntry`, `Override`, `InstanceType`) VALUES
 -- TBC Raids
 (544, 17257, 0, 9),    -- Magtheridon, Magtheridon's Lair
 (565, 18831, 0, 9),    -- High King Maulgar, Gruul's Lair
