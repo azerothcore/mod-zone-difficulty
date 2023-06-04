@@ -934,7 +934,7 @@ void ZoneDifficulty::MythicmodeEvent(Unit* unit, uint32 entry, uint32 key)
 
         if (!target && sZoneDifficulty->MythicmodeAI[entry][key].Target != TARGET_NONE)
         {
-            Unit* victim;
+            Unit* victim = nullptr;
             if (sZoneDifficulty->MythicmodeAI[entry][key].TargetArg > 0)
             {
                 if (unit->IsInRange(victim, 0, sZoneDifficulty->MythicmodeAI[entry][key].TargetArg, true))
