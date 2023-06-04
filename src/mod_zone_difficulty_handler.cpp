@@ -932,9 +932,24 @@ void ZoneDifficulty::MythicmodeEvent(Unit* unit, uint32 entry, uint32 key)
             }
         }
 
-        if (sZoneDifficulty->MythicmodeAI[entry][key].Target != TARGET_NONE)
+        if (!target && sZoneDifficulty->MythicmodeAI[entry][key].Target != TARGET_NONE)
         {
-            target = unit->GetVictim();
+            Unit* victim;
+            if (sZoneDifficulty->MythicmodeAI[entry][key].TargetArg > 0)
+            {
+                if (unit->IsInRange(victim, 0, sZoneDifficulty->MythicmodeAI[entry][key].TargetArg, true))
+                {
+                    target = victim;
+                }
+            }
+            else if (sZoneDifficulty->MythicmodeAI[entry][key].TargetArg < 0)
+            {
+                if (unit->IsInRange(victim, sZoneDifficulty->MythicmodeAI[entry][key].TargetArg, 0, true))
+                {
+                    target = victim;
+                }
+            }
+
         }
 
         if (target or sZoneDifficulty->MythicmodeAI[entry][key].Target == TARGET_NONE)
