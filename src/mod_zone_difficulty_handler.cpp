@@ -866,7 +866,7 @@ void ZoneDifficulty::MythicmodeEvent(Unit* unit, uint32 entry, uint32 key)
         }
 
         // Select target
-        Unit* target;
+        Unit* target = nullptr;
         if (sZoneDifficulty->MythicmodeAI[entry][key].Target == TARGET_SELF)
         {
             target = unit;
