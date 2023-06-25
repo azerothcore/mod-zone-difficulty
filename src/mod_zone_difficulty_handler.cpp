@@ -257,7 +257,7 @@ void ZoneDifficulty::LoadMapDifficultySettings()
                 data.Spellbp1 = (*result)[4].Get<int32>();
                 data.Spellbp2 = (*result)[5].Get<int32>();
                 data.Target = (*result)[6].Get<uint8>();
-                data.TargetArg = (*result)[7].Get<uint8>();
+                data.TargetArg = (*result)[7].Get<int8>();
                 data.TargetArg2 = (*result)[8].Get<uint8>();
                 data.Delay = (*result)[9].Get<Milliseconds>();
                 data.Cooldown = (*result)[10].Get<Milliseconds>();
