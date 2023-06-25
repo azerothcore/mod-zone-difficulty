@@ -24,8 +24,8 @@
 -- Plate = 5
 -- Weapons, Holdables, Shields = 6
 
-DROP TABLE IF EXISTS `zone_difficulty_hardmode_rewards`;
-CREATE TABLE `zone_difficulty_hardmode_rewards` (
+DROP TABLE IF EXISTS `zone_difficulty_mythicmode_rewards`;
+CREATE TABLE `zone_difficulty_mythicmode_rewards` (
     `ContentType` INT NOT NULL DEFAULT 0,
     `ItemType` INT NOT NULL DEFAULT 0,
     `Entry` INT NOT NULL DEFAULT 0,
@@ -38,10 +38,10 @@ CREATE TABLE `zone_difficulty_hardmode_rewards` (
     PRIMARY KEY (`ContentType`, `Entry`, `Enchant`)
 );
 
-INSERT INTO `zone_difficulty_hardmode_rewards` (`ContentType`, `ItemType`, `Entry`, `Price`, `Enchant`, `EnchantSlot`, `Achievement`, `Enabled`, `Comment`) VALUES
+INSERT INTO `zone_difficulty_mythicmode_rewards` (`ContentType`, `ItemType`, `Entry`, `Price`, `Enchant`, `EnchantSlot`, `Achievement`, `Enabled`, `Comment`) VALUES
 -- Full Tier Rewards:
-(8, 0, 13584, 20, 0, 0, -1, 1, 'Mini Diablo for clearing all TBC heroics on Hardmode'),
-(9, 0, 13583, 20, 0, 0, -1, 1, 'Panda Cub for clearing all T4 raids on Hardmode'),
+(8, 0, 13584, 20, 0, 0, -1, 1, 'Mini Diablo for clearing all TBC heroics on Mythicmode'),
+(9, 0, 13583, 20, 0, 0, -1, 1, 'Panda Cub for clearing all T4 raids on Mythicmode'),
 
 -- TYPE_HEROIC_TBC = 8;
 -- Back, Finger, Trinket, Neck = 1

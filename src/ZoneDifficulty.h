@@ -20,7 +20,7 @@ struct ZoneDifficultyNerfData
     float MeleeDamageBuffPctHard;
 };
 
-struct ZoneDifficultyHardmodeMapData
+struct ZoneDifficultyMythicmodeMapData
 {
     uint32 EncounterEntry;
     uint32 Override;
@@ -45,6 +45,7 @@ struct ZoneDifficultyHAI
     int32 Spellbp2;
     uint8 Target;
     uint8 TargetArg;
+    uint8 TargetArg2;
     Milliseconds Delay;
     Milliseconds Cooldown;
     uint8 Repetitions;
@@ -95,13 +96,14 @@ uint32 const ITEMTYPE_MAIL = 4;
 uint32 const ITEMTYPE_PLATE = 5;
 uint32 const ITEMTYPE_WEAPONS = 6;
 
-uint8 const TARGET_SELF = 1;
-uint8 const TARGET_VICTIM = 2;                      // current target
-uint8 const TARGET_HOSTILE_AGGRO_FROM_TOP = 3;      // count TargetArg highest aggro from top
-uint8 const TARGET_HOSTILE_AGGRO_FROM_BOTTOM = 4;   // count TargetArg lowest aggro from bottom
-uint8 const TARGET_HOSTILE_RANDOM = 5;              // any random player from the threat list
-uint8 const TARGET_HOSTILE_RANDOM_NOT_TOP = 6;      // any random player from the threat list except the current target
-uint8 const TARGET_PLAYER_DISTANCE = 18;            // all players within TargetArg range
+uint32 const TARGET_NONE = 0;
+uint32 const TARGET_SELF = 1;
+uint32 const TARGET_VICTIM = 2;                      // current target
+uint32 const TARGET_HOSTILE_AGGRO_FROM_TOP = 3;      // count TargetArg highest aggro from top within TargetArg2 distance
+uint32 const TARGET_HOSTILE_AGGRO_FROM_BOTTOM = 4;   // count TargetArg lowest aggro from bottom within TargetArg2 distance
+uint32 const TARGET_HOSTILE_RANDOM = 5;              // any random player from the threat list
+uint32 const TARGET_HOSTILE_RANDOM_NOT_TOP = 6;      // any random player from the threat list except the current target
+uint32 const TARGET_PLAYER_DISTANCE = 18;            // a random player within TargetArg range
 
 const std::string REWARD_MAIL_SUBJECT = "Chromie's Reward for you";
 const std::string REWARD_MAIL_BODY = "Enjoy your new item!";
@@ -112,31 +114,31 @@ public:
     static ZoneDifficulty* instance();
 
     void LoadMapDifficultySettings();
-    void SaveHardmodeInstanceData(uint32 instanceId);
-    void LoadHardmodeInstanceData();
-    void LoadHardmodeScoreData();
+    void SaveMythicmodeInstanceData(uint32 instanceId);
+    void LoadMythicmodeInstanceData();
+    void LoadMythicmodeScoreData();
     void SendWhisperToRaid(std::string message, Creature* creature, Player* player);
     std::string GetItemTypeString(uint32 type);
     std::string GetContentTypeString(uint32 type);
-    void AddHardmodeScore(Map* map, uint32 type, uint32 score);
-    void DeductHardmodeScore(Player* player, uint32 type, uint32 score);
+    void AddMythicmodeScore(Map* map, uint32 type, uint32 score);
+    void DeductMythicmodeScore(Player* player, uint32 type, uint32 score);
     void SendItem(Player* player, uint32 category, uint32 itemType, uint32 id);
     std::list<Unit*> GetTargetList(Unit* unit, uint32 entry, uint32 key);
-    void HardmodeEvent(Unit* unit, uint32 entry, uint32 key);
+    void MythicmodeEvent(Unit* unit, uint32 entry, uint32 key);
     bool HasNormalMode(int8 mode) { return (mode & MODE_NORMAL) == MODE_NORMAL; }
-    bool HasHardMode(int8 mode) { return (mode & MODE_HARD) == MODE_HARD; }
+    bool HasMythicmode(int8 mode) { return (mode & MODE_HARD) == MODE_HARD; }
     bool HasCompletedFullTier(uint32 category, uint32 playerGUID);
     [[nodiscard]] bool IsValidNerfTarget(Unit* target);
     [[nodiscard]] bool VectorContainsUint32(std::vector<uint32> vec, uint32 element);
-    [[nodiscard]] bool IsHardmodeMap(uint32 mapid);
+    [[nodiscard]] bool IsMythicmodeMap(uint32 mapid);
     [[nodiscard]] bool ShouldNerfInDuels(Unit* target);
     [[nodiscard]] int32 GetLowestMatchingPhase(uint32 mapId, uint32 phaseMask);
 
     bool IsEnabled{ false };
     bool IsDebugInfoEnabled{ false };
-    float HardmodeHpModifier{ 2.0 };
-    bool HardmodeEnable{ false };
-    bool HardmodeInNormalDungeons{ false };
+    float MythicmodeHpModifier{ 2.0 };
+    bool MythicmodeEnable{ false };
+    bool MythicmodeInNormalDungeons{ false };
     std::vector<uint32> DailyHeroicQuests;
     std::map<uint32, uint32> HeroicTBCQuestMapList;
     std::map<uint32, uint8> EncounterCounter;
@@ -151,16 +153,16 @@ public:
     std::map<uint32, float> SpellNerfOverrides;
     typedef std::map<uint32, std::vector<uint32> > ZoneDifficultyDisablesMap;
     ZoneDifficultyDisablesMap DisallowedBuffs;
-    typedef std::map<uint32, bool> ZoneDifficultyHardmodeInstDataMap;
-    ZoneDifficultyHardmodeInstDataMap HardmodeInstanceData;
-    typedef std::map<uint32, std::vector<ZoneDifficultyHardmodeMapData> > ZoneDifficultyHardmodeLootMap;
-    ZoneDifficultyHardmodeLootMap HardmodeLoot;
+    typedef std::map<uint32, bool> ZoneDifficultyMythicmodeInstDataMap;
+    ZoneDifficultyMythicmodeInstDataMap MythicmodeInstanceData;
+    typedef std::map<uint32, std::vector<ZoneDifficultyMythicmodeMapData> > ZoneDifficultyMythicmodeLootMap;
+    ZoneDifficultyMythicmodeLootMap MythicmodeLoot;
     typedef std::map<uint32, std::map<uint32, uint32> > ZoneDifficultyDualUintMap;
-    ZoneDifficultyDualUintMap HardmodeScore;
+    ZoneDifficultyDualUintMap MythicmodeScore;
     typedef std::map<uint32, std::map<uint32, std::vector<ZoneDifficultyRewardData> > > ZoneDifficultyRewardMap;
     ZoneDifficultyRewardMap Rewards;
     typedef std::map<uint32, std::vector<ZoneDifficultyHAI> > ZoneDifficultyHAIMap;
-    ZoneDifficultyHAIMap HardmodeAI;
+    ZoneDifficultyHAIMap MythicmodeAI;
     typedef std::map<uint32, std::map<uint32, std::map<uint32, bool> > > ZoneDifficultyEncounterLogMap;
     ZoneDifficultyEncounterLogMap Logs;
 };
