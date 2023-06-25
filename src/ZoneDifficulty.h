@@ -44,7 +44,7 @@ struct ZoneDifficultyHAI
     int32 Spellbp1;
     int32 Spellbp2;
     uint8 Target;
-    uint8 TargetArg;
+    int8 TargetArg;
     uint8 TargetArg2;
     Milliseconds Delay;
     Milliseconds Cooldown;
