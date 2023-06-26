@@ -25,6 +25,7 @@ CREATE TABLE `zone_difficulty_mythicmode_ai` (
     `Cooldown` INT NOT NULL DEFAULT 1,              -- time in ms between casts
     `Repetitions` TINYINT NOT NULL DEFAULT 0,       -- 0 = forever, 1 = just once. Room for future counters.
     `Enabled` TINYINT DEFAULT 1,                    -- 0 = disabled, 1 = enabled
+	`TriggeredCast` TINYINT DEFAULT 1,              -- 0 = Not triggered, 1 = Triggered spell cast (no cast time, etc.)
 	`Comment` TEXT
 );
 
