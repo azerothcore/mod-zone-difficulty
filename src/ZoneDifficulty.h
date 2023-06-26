@@ -49,6 +49,7 @@ struct ZoneDifficultyHAI
     Milliseconds Delay;
     Milliseconds Cooldown;
     uint8 Repetitions;
+    bool TriggeredCast;
 };
 
 int32 const DUEL_INDEX = 0x7FFFFFFF;
