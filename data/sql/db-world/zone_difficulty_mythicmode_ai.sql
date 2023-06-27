@@ -52,7 +52,7 @@ INSERT INTO `zone_difficulty_mythicmode_ai` (`CreatureEntry`, `Chance`, `Spell`,
 (18094, 20, 28412, 0, 0, 0, @TARGET_HOSTILE_AGGRO_FROM_TOP, 0, 2, 5000, 15000, 0, 1, 1, 'Tarren Mill Lookout, Old Hillsbrad. Deathcoil the 2nd player in threat list after 5s every 15s. 20% Chance'),
 (18170, 20, 36606, 0, 3000, 0, @TARGET_HOSTILE_RANDOM_NOT_TOP, -10, 0, 15000, 15000, 0, 1, 1, 'Infinite Slayer, Old Hillsbrad. Charge and Knockback a random player except the current tank after 15s every 15s. 20% Chance. Min range 10m.'),
 -- Old Hillsbrad Boss
-(17862, 100, 25840, 0, 0, 0, @TARGET_SELF, 0, 0, 30000, 0, 1, 1, 0 'Captain Skarloc, Old Hillsbrad. Self Heal to Full after 30s once.'),
+(17862, 100, 25840, 0, 0, 0, @TARGET_SELF, 0, 0, 30000, 0, 1, 1, 0, 'Captain Skarloc, Old Hillsbrad. Self Heal to Full after 30s once.'),
 (17862, 100, 36340, 0, 0, 0, @TARGET_HOSTILE_RANDOM, 0, 0, 30000, 3000, 0, 1, 1, 'Captain Skarloc, Old Hillsbrad. Holy Shock for 1k on a random target every 3s after 30s'),
 (18096, 100, 55847, 0, 0, 0, @TARGET_HOSTILE_RANDOM, 30, 0, 15000, 4000, 0, 1, 1, 'Epoch Hunter, Old Hillsbrad. Shadow Pool on a random player in 30m range after 15s every 4s.'),
     
