@@ -852,7 +852,7 @@ void ZoneDifficulty::MythicmodeEvent(Unit* unit, uint32 entry, uint32 key)
                 if (!has_bp0 && !has_bp1 && !has_bp2)
                 {
                     unit->CastSpell(target, mythicAI.Spell, mythicAI.TriggeredCast);
-                    LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Creature casting MythicmodeAI spell: {} at target {}", mythicAI.Spell, targetName);
+                    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Creature casting MythicmodeAI spell: {} at target {}", mythicAI.Spell, targetName);
                 }
                 else
                 {
@@ -861,7 +861,7 @@ void ZoneDifficulty::MythicmodeEvent(Unit* unit, uint32 entry, uint32 key)
                         has_bp1 ? &mythicAI.Spellbp1 : NULL,
                         has_bp2 ? &mythicAI.Spellbp2 : NULL,
                         mythicAI.TriggeredCast);
-                    LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Creature casting MythicmodeAI spell: {} at target {} with custom values.", mythicAI.Spell, targetName);
+                    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Creature casting MythicmodeAI spell: {} at target {} with custom values.", mythicAI.Spell, targetName);
                 }
             }
             return;
@@ -892,10 +892,10 @@ void ZoneDifficulty::MythicmodeEvent(Unit* unit, uint32 entry, uint32 key)
 
                     if (!target)
                     {
-                        LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Fall-back to GetVictim()");
+                        //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Fall-back to GetVictim()");
                         target = unit->GetVictim();
                     }
-                    LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Selecting target type TARGET_HOSTILE_AGGRO_FROM_TOP with range TargetArg {} and position on threat-list TargetArg2 {}.", mythicAI.TargetArg, range);
+                    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Selecting target type TARGET_HOSTILE_AGGRO_FROM_TOP with range TargetArg {} and position on threat-list TargetArg2 {}.", mythicAI.TargetArg, range);
                     break;
                 }
                 case TARGET_HOSTILE_AGGRO_FROM_BOTTOM:
@@ -909,22 +909,22 @@ void ZoneDifficulty::MythicmodeEvent(Unit* unit, uint32 entry, uint32 key)
 
                     if (!target)
                     {
-                        LOG_INFO("module", "Fall-back to GetVictim()");
+                        //LOG_INFO("module", "Fall-back to GetVictim()");
                         target = unit->GetVictim();
                     }
-                    LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Selecting target type TARGET_HOSTILE_AGGRO_FROM_TOP with range TargetArg {} and position on threat-list TargetArg2 {}.", mythicAI.TargetArg, range);
+                    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Selecting target type TARGET_HOSTILE_AGGRO_FROM_TOP with range TargetArg {} and position on threat-list TargetArg2 {}.", mythicAI.TargetArg, range);
                     break;
                 }
                 case TARGET_HOSTILE_RANDOM:
                 {
                     target = unit->GetAI()->SelectTarget(SelectTargetMethod::Random, 0, mythicAI.TargetArg, true);
-                    LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Selecting target type TARGET_HOSTILE_RANDOM with max range {}.", mythicAI.TargetArg);
+                    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Selecting target type TARGET_HOSTILE_RANDOM with max range {}.", mythicAI.TargetArg);
                     break;
                     }
                 case TARGET_HOSTILE_RANDOM_NOT_TOP:
                 {
                     target = unit->GetAI()->SelectTarget(SelectTargetMethod::Random, 0, mythicAI.TargetArg, true, false);
-                    LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Selecting target type TARGET_HOSTILE_RANDOM_NOT_TOP with max range {}.", mythicAI.TargetArg);
+                    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Selecting target type TARGET_HOSTILE_RANDOM_NOT_TOP with max range {}.", mythicAI.TargetArg);
                     break;
                 }
                 default:
@@ -961,7 +961,7 @@ void ZoneDifficulty::MythicmodeEvent(Unit* unit, uint32 entry, uint32 key)
             if (!has_bp0 && !has_bp1 && !has_bp2)
             {
                 unit->CastSpell(target, mythicAI.Spell, mythicAI.TriggeredCast);
-                LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Creature casting MythicmodeAI spell: {} at target {}", mythicAI.Spell, targetName);
+                //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Creature casting MythicmodeAI spell: {} at target {}", mythicAI.Spell, targetName);
             }
             else
             {
@@ -970,7 +970,7 @@ void ZoneDifficulty::MythicmodeEvent(Unit* unit, uint32 entry, uint32 key)
                     has_bp1 ? &mythicAI.Spellbp1 : NULL,
                     has_bp2 ? &mythicAI.Spellbp2 : NULL,
                     mythicAI.TriggeredCast);
-                LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Creature casting MythicmodeAI spell: {} at target {} with custom values.", mythicAI.Spell, targetName);
+                //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Creature casting MythicmodeAI spell: {} at target {} with custom values.", mythicAI.Spell, targetName);
             }
         }
         else
