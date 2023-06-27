@@ -61,6 +61,6 @@ INSERT INTO `zone_difficulty_mythicmode_ai` (`CreatureEntry`, `Chance`, `Spell`,
 (17892, 20, 43242, 0, 0, 0, @TARGET_SELF, 0, 0, 2000, 0, 1, 1, 1, 'Infinite Chronomancer, Black Morrass. Haste (Movement and cast) on self after 2 seconds once. 20% chance.'),
 -- Black Morrass Bosses
 (17879, 100, 55948, 0, 0, 0, @TARGET_SELF, 0, 0, 15000, 10000, 0, 1, 1, 'Chrono Lord Deja, Black Morrass. Grow on self after 15s every 10s.'),
-(17881, 100, 38980, 0, 0, 0, @TARGET_SELF, 0, 0, 15000, 8000, 0, 1, 1, 'Aeonus, Black Morrass. Summon an imp after 15s every 8s.');
+(17881, 100, 38980, 0, 0, 0, @TARGET_SELF, 0, 0, 15000, 8000, 0, 1, 1, 'Aeonus, Black Morrass. Summon an imp after 15s every 8s.'),
 (22362, 20, 9906, 0, 0, 0, @TARGET_SELF, 0, 2, 3000, 10000, 0, 1, 1, 'Imp, summoned by Aeonus Black, Morrass (Line above). Reflect for 5s every 10s after 3s. 20% Chance.'),
 (22362, 20, 63240, 0, 0, 0, @TARGET_SELF, 0, 2, 1000, 20000, 0, 1, 1, 'Imp, summoned by Aeonus Black, Morrass (Line above). Thorns for 10s every 20s after 1s. 20% Chance.');
