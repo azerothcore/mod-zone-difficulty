@@ -434,15 +434,15 @@ public:
      */
     void OnUnitEnterCombat(Unit* unit, Unit* /*victim*/) override
     {
-        LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnUnitEnterCombat for unit {}", unit->GetEntry());
+        //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnUnitEnterCombat for unit {}", unit->GetEntry());
         if (sZoneDifficulty->MythicmodeInstanceData.find(unit->GetInstanceId()) == sZoneDifficulty->MythicmodeInstanceData.end())
         {
-            LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Instance is not in mythic mode.");
+            //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Instance is not in mythic mode.");
             return;
         }
         if (!sZoneDifficulty->MythicmodeInstanceData[unit->GetInstanceId()])
         {
-            LOG_INFO("module", "MOD-ZONE-DIFFICULTY: InstanceId not found in mythic mode list.");
+            //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: InstanceId not found in mythic mode list.");
             return;
         }
 
@@ -450,7 +450,7 @@ public:
         {
             if (creature->IsTrigger())
             {
-                LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Creature is a trigger.");
+                //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Creature is a trigger.");
                 return;
             }
         }
@@ -458,12 +458,12 @@ public:
         uint32 entry = unit->GetEntry();
         if (sZoneDifficulty->MythicmodeAI.find(entry) == sZoneDifficulty->MythicmodeAI.end())
         {
-            LOG_INFO("module", "MOD-ZONE-DIFFICULTY: No HarmodeAI found for creature with entry {}", entry);
+            //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: No HarmodeAI found for creature with entry {}", entry);
             return;
         }
 
         unit->m_Events.CancelEventGroup(EVENT_GROUP);
-        LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnUnitEnterCombat checks passed for unit {}", unit->GetEntry());
+        //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnUnitEnterCombat checks passed for unit {}", unit->GetEntry());
 
         uint32 i = 0;
         for (ZoneDifficultyHAI& data : sZoneDifficulty->MythicmodeAI[entry])
@@ -554,7 +554,7 @@ public:
         }
         if (sZoneDifficulty->IsDebugInfoEnabled)
         {
-            LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnBeforeSetBossState: bossId = {}, newState = {}, oldState = {}, MapId = {}, InstanceId = {}", id, newState, oldState, instance->GetId(), instance->GetInstanceId());
+            //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnBeforeSetBossState: bossId = {}, newState = {}, oldState = {}, MapId = {}, InstanceId = {}", id, newState, oldState, instance->GetId(), instance->GetInstanceId());
         }
         uint32 instanceId = instance->GetInstanceId();
         if (!sZoneDifficulty->IsMythicmodeMap(instance->GetId()) ||
@@ -679,7 +679,7 @@ public:
     {
         if (sZoneDifficulty->IsDebugInfoEnabled)
         {
-            LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnGossipSelectRewardNpc action: {}", action);
+            //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnGossipSelectRewardNpc action: {}", action);
         }
         ClearGossipMenuFor(player);
         uint32 npcText = 0;
