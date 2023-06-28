@@ -48,19 +48,23 @@ INSERT INTO `zone_difficulty_mythicmode_ai` (`CreatureEntry`, `Chance`, `Spell`,
 (17257, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,0, 0, 1, 1, 'Magtheridon, Magtheridon\'s Lair. - Nothing yet'),
 
 -- Old Hillsbrad Trash
-(18934, 20, 15534, 0, 0, 0, @TARGET_HOSTILE_AGGRO_FROM_TOP, 0, 2, 5000, 15000, 0, 1, 0, 'Durnholde Mage, Old Hillsbrad. Sheep the 2nd player in threat list after 5s every 15s. 20% Chance'),
-(18094, 20, 28412, 0, 0, 0, @TARGET_HOSTILE_AGGRO_FROM_TOP, 0, 2, 5000, 15000, 0, 1, 1, 'Tarren Mill Lookout, Old Hillsbrad. Deathcoil the 2nd player in threat list after 5s every 15s. 20% Chance'),
-(18170, 20, 36606, 0, 3000, 0, @TARGET_HOSTILE_RANDOM_NOT_TOP, -10, 0, 15000, 15000, 0, 1, 1, 'Infinite Slayer, Old Hillsbrad. Charge and Knockback a random player except the current tank after 15s every 15s. 20% Chance. Min range 10m.'),
+(20525, 30, 15534, 0, 0, 0, @TARGET_HOSTILE_AGGRO_FROM_TOP, 0, 2, 5000, 15000, 0, 1, 0, 'Durnholde Mage, Old Hillsbrad. Sheep the 2nd player in threat list after 5s every 15s. 30% Chance'),
+(23177, 20, 28412, 0, 0, 0, @TARGET_HOSTILE_AGGRO_FROM_TOP, 0, 2, 5000, 15000, 0, 1, 1, 'Tarren Mill Lookout, Old Hillsbrad. Deathcoil the 2nd player in threat list after 5s every 15s. 20% Chance'),
+(23178, 50, 28412, 0, 0, 0, @TARGET_HOSTILE_AGGRO_FROM_TOP, 0, 2, 5000, 15000, 0, 1, 1, 'Tarren Mill Lookout, Old Hillsbrad. Deathcoil the 2nd player in threat list after 5s every 15s. 50% Chance'),
+(20534, 30, 36606, 0, 3000, 0, @TARGET_HOSTILE_RANDOM_NOT_TOP, -10, 0, 15000, 15000, 0, 1, 1, 'Infinite Slayer, Old Hillsbrad. Charge and Knockback a random player except the current tank after 15s every 15s. 20% Chance. Min range 10m.'),
 -- Old Hillsbrad Boss
 (17862, 100, 25840, 0, 0, 0, @TARGET_SELF, 0, 0, 30000, 0, 1, 1, 0, 'Captain Skarloc, Old Hillsbrad. Self Heal to Full after 30s once.'),
 (17862, 100, 36340, 0, 0, 0, @TARGET_HOSTILE_RANDOM, 0, 0, 30000, 3000, 0, 1, 1, 'Captain Skarloc, Old Hillsbrad. Holy Shock for 1k on a random target every 3s after 30s'),
 (18096, 100, 55847, 0, 0, 0, @TARGET_HOSTILE_RANDOM, 30, 0, 15000, 4000, 0, 1, 1, 'Epoch Hunter, Old Hillsbrad. Shadow Pool on a random player in 30m range after 15s every 4s.'),
     
 -- Black Morrass Trash
-(18995, 20, 43242, 0, 0, 0, @TARGET_SELF, 0, 0, 2000, 0, 1, 1, 1, 'Infinite Vanquisher, Black Morrass. Haste (Movement and cast) on self after 2 seconds once. 20% chance.'),
-(17892, 20, 43242, 0, 0, 0, @TARGET_SELF, 0, 0, 2000, 0, 1, 1, 1, 'Infinite Chronomancer, Black Morrass. Haste (Movement and cast) on self after 2 seconds once. 20% chance.'),
+(21136, 30, 43242, 0, 0, 0, @TARGET_SELF, 0, 0, 2000, 0, 1, 1, 1, 'Infinite Chronomancer, Black Morrass. Haste (Movement and cast) on self after 2 seconds once. 30% chance.'),
+(21137, 30, 43242, 0, 0, 0, @TARGET_SELF, 0, 0, 2000, 0, 1, 1, 1, 'Infinite Assassin, Black Morrass. Haste (Movement and cast) on self after 2 seconds once. 30% chance.'),
+(21138, 30, 43242, 0, 0, 0, @TARGET_SELF, 0, 0, 2000, 0, 1, 1, 1, 'Infinite Executioner Black Morrass. Haste (Movement and cast) on self after 2 seconds once. 30% chance.'),
+(21139, 30, 43242, 0, 0, 0, @TARGET_SELF, 0, 0, 2000, 0, 1, 1, 1, 'Infinite Vanquisher, Black Morrass. Haste (Movement and cast) on self after 2 seconds once. 30% chance.'),
 -- Black Morrass Bosses
 (17879, 100, 55948, 0, 0, 0, @TARGET_SELF, 0, 0, 15000, 10000, 0, 1, 1, 'Chrono Lord Deja, Black Morrass. Grow on self after 15s every 10s.'),
-(17881, 100, 38980, 0, 0, 0, @TARGET_SELF, 0, 0, 15000, 8000, 0, 1, 1, 'Aeonus, Black Morrass. Summon an imp after 15s every 8s.'),
-(22362, 20, 9906, 0, 0, 0, @TARGET_SELF, 0, 2, 3000, 10000, 0, 1, 1, 'Imp, summoned by Aeonus Black, Morrass (Line above). Reflect for 5s every 10s after 3s. 20% Chance.'),
-(22362, 20, 63240, 0, 0, 0, @TARGET_SELF, 0, 2, 1000, 20000, 0, 1, 1, 'Imp, summoned by Aeonus Black, Morrass (Line above). Thorns for 10s every 20s after 1s. 20% Chance.');
+(17881, 100, 32663, 0, 0, 0, @TARGET_SELF, 0, 0, 15000, 8000, 0, 1, 1, 'Aeonus, Black Morrass. Summon Dark Vortex after 15s every 8s.'),
+(18701, 100, 7, 0, 0, 0, @TARGET_SELF, 0, 2, 60000, 0, 1, 1, 1, 'Dark Vortext, summoned by Aeonus Black, Morrass (Line above). Kill self after 60s.'),
+(18701, 30, 9906, 0, 0, 0, @TARGET_SELF, 0, 2, 3000, 10000, 0, 1, 1, 'Dark Vortext, summoned by Aeonus Black, Morrass (Line above). Reflect for 5s every 10s after 3s. 30% Chance.'),
+(18701, 30, 63240, 0, 0, 0, @TARGET_SELF, 0, 2, 1000, 20000, 0, 1, 1, 'Dark Vortex, summoned by Aeonus Black, Morrass (Line above). Thorns for 10s every 20s after 1s. 30% Chance.');
