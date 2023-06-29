@@ -102,7 +102,14 @@ public:
                             //This check must be last and override duel and map adjustments
                             if (sZoneDifficulty->SpellNerfOverrides.find(spellInfo->Id) != sZoneDifficulty->SpellNerfOverrides.end())
                             {
-                                absorb = eff->GetAmount() * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id];
+                                if (sZoneDifficulty->SpellNerfOverrides[spellInfo->Id].find(mapId) != sZoneDifficulty->SpellNerFOverrides[spellInfo->Id].end())
+                                {
+                                    absorb = eff->GetAmount() * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id][mapId];
+                                }
+                                else if (sZoneDifficulty->SpellNerfOverrides[spellInfo->Id].find(0) != sZoneDifficulty->SpellNerFOverrides[spellInfo->Id].end())
+                                {
+                                    absorb = eff->GetAmount() * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id][0];
+                                }
                             }
 
                             eff->SetAmount(absorb);
@@ -165,9 +172,16 @@ public:
                 //This check must be first and skip the rest to override everything else.
                 if (spellInfo)
                 {
-                    if (sZoneDifficulty->SpellNerfOverrides.find(mapId) != sZoneDifficulty->SpellNerfOverrides.end())
+                    if (sZoneDifficulty->SpellNerfOverrides.find(spellInfo->Id) != sZoneDifficulty->SpellNerfOverrides.end())
                     {
-                        heal = heal * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id];
+                        if (sZoneDifficulty->SpellNerfOverrides[spellInfo->Id].find(mapId) != sZoneDifficulty->SpellNerfOverrides[spellInfo->Id].end())
+                        {
+                            heal = heal * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id][mapId];
+                        }
+                        if (sZoneDifficulty->SpellNerfOverrides[spellInfo->Id].find(0) != sZoneDifficulty->SpellNerfOverrides[spellInfo->Id].end())
+                        {
+                            heal = heal * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id][0];
+                        }
                         return;
                     }
                 }
@@ -322,7 +336,14 @@ public:
                 //This check must be first and skip the rest to override everything else.
                 if (sZoneDifficulty->SpellNerfOverrides.find(spellInfo->Id) != sZoneDifficulty->SpellNerfOverrides.end())
                 {
-                    damage = damage * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id];
+                    if (sZoneDifficulty->SpellNerfOverrides[spellInfo->Id].find(mapId) != sZoneDifficulty->SpellNerfOverrides[spellInfo->Id].end())
+                    {
+                        damage = damage * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id][mapId];
+                    }
+                    else if (sZoneDifficulty->SpellNerfOverrides[spellInfo->Id].find(0) != sZoneDifficulty->SpellNerfOverrides[spellInfo->Id].end())
+                    {
+                        damage = damage * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id][0];
+                    }
                     return;
                 }
 
