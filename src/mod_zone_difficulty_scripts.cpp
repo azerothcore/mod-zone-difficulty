@@ -186,6 +186,7 @@ public:
                             if (OverrideModeMatches([target->GetMap()->GetInstanceId(), spellInfo->Id, mapId))
                             {
                                 heal = heal * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id][mapId];
+                                return;
                             }
                         }
                         if (sZoneDifficulty->SpellNerfOverrides[spellInfo->Id].find(0) != sZoneDifficulty->SpellNerfOverrides[spellInfo->Id].end())
@@ -193,9 +194,9 @@ public:
                             if (OverrideModeMatches([target->GetMap()->GetInstanceId(), spellInfo->Id, mapId))
                             {
                                 heal = heal * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id][0];
+                                return;
                             }
                         }
-                        return;
                     }
                 }
 
@@ -354,6 +355,7 @@ public:
                         if (OverrideModeMatches([target->GetMap()->GetInstanceId(), spellInfo->Id, mapId))
                         {            {
                             damage = damage * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id][mapId];
+                            return;
                         }
                     }
                     else if (sZoneDifficulty->SpellNerfOverrides[spellInfo->Id].find(0) != sZoneDifficulty->SpellNerfOverrides[spellInfo->Id].end())
@@ -361,9 +363,9 @@ public:
                         if (OverrideModeMatches([target->GetMap()->GetInstanceId(), spellInfo->Id, mapId))
                         {
                             damage = damage * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id][0];
+                            return;
                         }
                     }
-                    return;
                 }
 
                 if (sZoneDifficulty->IsDebugInfoEnabled && target)
