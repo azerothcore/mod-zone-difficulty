@@ -114,7 +114,7 @@ public:
                                 {
                                     if (sZoneDifficulty->OverrideModeMatches(target->GetMap()->GetInstanceId(), spellInfo->Id, mapId))
                                     {
-                                        absorb = eff->GetAmount() * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id][0];
+                                        absorb = eff->GetAmount() * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id][0].NerfPct;
                                     }
                                 }
                             }
@@ -185,7 +185,7 @@ public:
                         {
                             if (sZoneDifficulty->OverrideModeMatches(target->GetMap()->GetInstanceId(), spellInfo->Id, mapId))
                             {
-                                heal = heal * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id][mapId];
+                                heal = heal * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id][mapId].NerfPct;
                                 return;
                             }
                         }
@@ -193,7 +193,7 @@ public:
                         {
                             if (sZoneDifficulty->OverrideModeMatches(target->GetMap()->GetInstanceId(), spellInfo->Id, mapId))
                             {
-                                heal = heal * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id][0];
+                                heal = heal * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id][0].NerfPct;
                                 return;
                             }
                         }
@@ -354,7 +354,7 @@ public:
                     {
                         if (sZoneDifficulty->OverrideModeMatches(target->GetMap()->GetInstanceId(), spellInfo->Id, mapId))
                         {
-                            damage = damage * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id][mapId];
+                            damage = damage * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id][mapId].NerfPct;
                             return;
                         }
                     }
@@ -362,7 +362,7 @@ public:
                     {
                         if (sZoneDifficulty->OverrideModeMatches(target->GetMap()->GetInstanceId(), spellInfo->Id, mapId))
                         {
-                            damage = damage * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id][0];
+                            damage = damage * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id][0].NerfPct;
                             return;
                         }
                     }
