@@ -20,6 +20,12 @@ struct ZoneDifficultyNerfData
     float MeleeDamageBuffPctHard;
 };
 
+struct ZoneDIfficulySpellOverrideData
+{
+    float NerfPct;
+    uint32 Mode;    // 1=normal, 64=mythic (bitmask)
+}
+
 struct ZoneDifficultyMythicmodeMapData
 {
     uint32 EncounterEntry;
@@ -151,7 +157,7 @@ public:
 
     typedef std::map<uint32, std::map<uint32, ZoneDifficultyNerfData> > ZoneDifficultyNerfDataMap;
     ZoneDifficultyNerfDataMap NerfInfo;
-    typedef std::map<uint32, std:map<uint32, float> > ZoneDIfficultySpellNerfMap;
+    typedef std::map<uint32, std:map<uint32, ZoneDIfficulySpellOverrideData> > ZoneDIfficultySpellNerfMap;
     ZoneDifficultySpellNerfMap SpellNerfOverrides;
     typedef std::map<uint32, std::vector<uint32> > ZoneDifficultyDisablesMap;
     ZoneDifficultyDisablesMap DisallowedBuffs;
