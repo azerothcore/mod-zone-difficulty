@@ -706,6 +706,27 @@ bool ZoneDifficulty::VectorContainsUint32(std::vector<uint32> vec, uint32 elemen
 }
 
 /**
+ * @brief Checks if the instance and spelloverride have matching modes
+ *
+ * @param instanceId
+ * @param spellId
+ * @param mapId
+ * @return The result as bool
+ */
+ bool ZoneDifficulty:OverrideModeMatches(uint32 instanceId, uint32 spellId, uint32 mapId)
+{
+    if (sZoneDifficulty->HasMythicmode(sZoneDifficulty->SpellNerfOverrides[spellId][mapId].Mode)) && sZoneDifficulty->MythicmodeInstanceData[instanceId] ||
+        sZoneDifficulty->HasNormalmode(sZoneDifficulty->SpellNerfOverrides[spellId][mapId].Mode)) && !sZoneDifficulty->MythicmodeInstanceData[instanceId])
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+/**
  *  @brief Checks if the target is in a duel while residing in the DUEL_AREA and their opponent is a valid object.
  *  Used to determine when the duel-specific nerfs should be applied.
  *
