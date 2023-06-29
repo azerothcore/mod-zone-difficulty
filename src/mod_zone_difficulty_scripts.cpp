@@ -102,7 +102,7 @@ public:
                             //This check must be last and override duel and map adjustments
                             if (sZoneDifficulty->SpellNerfOverrides.find(spellInfo->Id) != sZoneDifficulty->SpellNerfOverrides.end())
                             {
-                                if (sZoneDifficulty->SpellNerfOverrides[spellInfo->Id].find(mapId) != sZoneDifficulty->SpellNerFOverrides[spellInfo->Id].end())
+                                if (sZoneDifficulty->SpellNerfOverrides[spellInfo->Id].find(mapId) != sZoneDifficulty->SpellNerfOverrides[spellInfo->Id].end())
                                 {
                                     // Check if the mode of instance and SpellNerfOverride match 
                                     if (OverrideModeMatches([target->GetMap()->GetInstanceId(), spellInfo->Id, mapId))
@@ -110,7 +110,7 @@ public:
                                         absorb = eff->GetAmount() * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id][mapId].NerfPct;
                                     }
                                 }
-                                else if (sZoneDifficulty->SpellNerfOverrides[spellInfo->Id].find(0) != sZoneDifficulty->SpellNerFOverrides[spellInfo->Id].end())
+                                else if (sZoneDifficulty->SpellNerfOverrides[spellInfo->Id].find(0) != sZoneDifficulty->SpellNerfOverrides[spellInfo->Id].end())
                                 {
                                     if (OverrideModeMatches([target->GetMap()->GetInstanceId(), spellInfo->Id, mapId))
                                     {
