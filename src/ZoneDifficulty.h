@@ -23,7 +23,7 @@ struct ZoneDifficultyNerfData
 struct ZoneDifficulySpellOverrideData
 {
     float NerfPct;
-    uint32 Mode;    // 1=normal, 64=mythic (bitmask)
+    uint32 ModeMask;    // 1=normal, 64=mythic (bitmask)
 };
 
 struct ZoneDifficultyMythicmodeMapData
