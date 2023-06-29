@@ -151,7 +151,8 @@ public:
 
     typedef std::map<uint32, std::map<uint32, ZoneDifficultyNerfData> > ZoneDifficultyNerfDataMap;
     ZoneDifficultyNerfDataMap NerfInfo;
-    std::map<uint32, float> SpellNerfOverrides;
+    typedef std::map<uint32, std:map<uint32, float> > ZoneDIfficultySpellNerfMap;
+    ZoneDifficultySpellNerfMap SpellNerfOverrides;
     typedef std::map<uint32, std::vector<uint32> > ZoneDifficultyDisablesMap;
     ZoneDifficultyDisablesMap DisallowedBuffs;
     typedef std::map<uint32, bool> ZoneDifficultyMythicmodeInstDataMap;
