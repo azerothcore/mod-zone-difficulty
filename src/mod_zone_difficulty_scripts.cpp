@@ -353,7 +353,7 @@ public:
                     if (sZoneDifficulty->SpellNerfOverrides[spellInfo->Id].find(mapId) != sZoneDifficulty->SpellNerfOverrides[spellInfo->Id].end())
                     {
                         if (OverrideModeMatches([target->GetMap()->GetInstanceId(), spellInfo->Id, mapId))
-                        {            {
+                        {
                             damage = damage * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id][mapId];
                             return;
                         }
