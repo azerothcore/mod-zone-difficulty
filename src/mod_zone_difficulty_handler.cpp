@@ -143,8 +143,8 @@ void ZoneDifficulty::LoadMapDifficultySettings()
         {
             if ((*result)[3].Get<uint8>() > 0)
             {
-                sZoneDifficulty->SpellNerfOverrides[(*result)[0].Get<uint32>()][(*result)[1].Get<unint32>()].NerfPct = (*result)[2].Get<float>();
-                sZoneDifficulty->SpellNerfOverrides[(*result)[0].Get<uint32>()][(*result)[1].Get<unint32>()].ModeMask = (*result)[3].Get<uint32>();
+                sZoneDifficulty->SpellNerfOverrides[(*result)[0].Get<uint32>()][(*result)[1].Get<uint32>()].NerfPct = (*result)[2].Get<float>();
+                sZoneDifficulty->SpellNerfOverrides[(*result)[0].Get<uint32>()][(*result)[1].Get<uint32>()].ModeMask = (*result)[3].Get<uint32>();
             }
 
         } while (result->NextRow());
