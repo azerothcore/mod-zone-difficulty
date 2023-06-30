@@ -715,8 +715,8 @@ bool ZoneDifficulty::VectorContainsUint32(std::vector<uint32> vec, uint32 elemen
  */
  bool ZoneDifficulty::OverrideModeMatches(uint32 instanceId, uint32 spellId, uint32 mapId)
 {
-    if (sZoneDifficulty->HasMythicmode(sZoneDifficulty->SpellNerfOverrides[spellId][mapId].ModeMask) && sZoneDifficulty->MythicmodeInstanceData[instanceId] ||
-        sZoneDifficulty->HasNormalMode(sZoneDifficulty->SpellNerfOverrides[spellId][mapId].ModeMask) && !sZoneDifficulty->MythicmodeInstanceData[instanceId])
+    if ((sZoneDifficulty->HasMythicmode(sZoneDifficulty->SpellNerfOverrides[spellId][mapId].ModeMask) && sZoneDifficulty->MythicmodeInstanceData[instanceId]) ||
+        (sZoneDifficulty->HasNormalMode(sZoneDifficulty->SpellNerfOverrides[spellId][mapId].ModeMask) && !sZoneDifficulty->MythicmodeInstanceData[instanceId]))
     {
         return true;
     }
