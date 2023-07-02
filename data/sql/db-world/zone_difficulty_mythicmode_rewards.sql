@@ -55,7 +55,7 @@ INSERT INTO `zone_difficulty_mythicmode_rewards` (`ContentType`, `ItemType`, `En
 (8, 1, 31923, 10, 211, 11, 671, 1, 'Band of the Crystalline Void +7 SP'),
 (8, 1, 31924, 10, 2730, 11, 671, 1, 'Yor\'s Revenge +8 Dodge'),
 (8, 1, 32081, 10, 1588, 11, 670, 1, 'Eye of the Stalker +14 AP'),
-(8, 1, 29354, 10, 1588, 11, 672, 1, 'Light-Touched Stole of Altruism +14 AP'),
+(8, 1, 29354, 10, 211, 11, 672, 1, 'Light-Touched Stole of Altruism +7 SP'),
 -- Cloth = 2
 (8, 2, 29240, 10, 211, 11, 671, 1, 'Bands of Negation +7 SP'),
 (8, 2, 29241, 10, 211, 11, 681, 1, 'Belt of Depravity +7 SP'),
