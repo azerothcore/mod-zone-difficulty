@@ -20,6 +20,12 @@ struct ZoneDifficultyNerfData
     float MeleeDamageBuffPctHard;
 };
 
+struct ZoneDifficulySpellOverrideData
+{
+    float NerfPct;
+    uint32 ModeMask;    // 1=normal, 64=mythic (bitmask)
+};
+
 struct ZoneDifficultyMythicmodeMapData
 {
     uint32 EncounterEntry;
@@ -129,6 +135,7 @@ public:
     bool HasNormalMode(int8 mode) { return (mode & MODE_NORMAL) == MODE_NORMAL; }
     bool HasMythicmode(int8 mode) { return (mode & MODE_HARD) == MODE_HARD; }
     bool HasCompletedFullTier(uint32 category, uint32 playerGUID);
+    bool OverrideModeMatches(uint32 instanceId, uint32 spellId, uint32 mapId);
     [[nodiscard]] bool IsValidNerfTarget(Unit* target);
     [[nodiscard]] bool VectorContainsUint32(std::vector<uint32> vec, uint32 element);
     [[nodiscard]] bool IsMythicmodeMap(uint32 mapid);
@@ -151,7 +158,8 @@ public:
 
     typedef std::map<uint32, std::map<uint32, ZoneDifficultyNerfData> > ZoneDifficultyNerfDataMap;
     ZoneDifficultyNerfDataMap NerfInfo;
-    std::map<uint32, float> SpellNerfOverrides;
+    typedef std::map<uint32, std::map<uint32, ZoneDifficulySpellOverrideData> > ZoneDifficultySpellNerfMap;
+    ZoneDifficultySpellNerfMap SpellNerfOverrides;
     typedef std::map<uint32, std::vector<uint32> > ZoneDifficultyDisablesMap;
     ZoneDifficultyDisablesMap DisallowedBuffs;
     typedef std::map<uint32, bool> ZoneDifficultyMythicmodeInstDataMap;

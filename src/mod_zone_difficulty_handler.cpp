@@ -141,9 +141,10 @@ void ZoneDifficulty::LoadMapDifficultySettings()
     {
         do
         {
-            if ((*result)[2].Get<bool>())
+            if ((*result)[3].Get<uint8>() > 0)
             {
-                sZoneDifficulty->SpellNerfOverrides[(*result)[0].Get<uint32>()] = (*result)[1].Get<float>();
+                sZoneDifficulty->SpellNerfOverrides[(*result)[0].Get<uint32>()][(*result)[1].Get<uint32>()].NerfPct = (*result)[2].Get<float>();
+                sZoneDifficulty->SpellNerfOverrides[(*result)[0].Get<uint32>()][(*result)[1].Get<uint32>()].ModeMask = (*result)[3].Get<uint32>();
             }
 
         } while (result->NextRow());
@@ -705,6 +706,27 @@ bool ZoneDifficulty::VectorContainsUint32(std::vector<uint32> vec, uint32 elemen
 }
 
 /**
+ * @brief Checks if the instance and spelloverride have matching modes
+ *
+ * @param instanceId
+ * @param spellId
+ * @param mapId
+ * @return The result as bool
+ */
+ bool ZoneDifficulty::OverrideModeMatches(uint32 instanceId, uint32 spellId, uint32 mapId)
+{
+    if ((sZoneDifficulty->HasMythicmode(sZoneDifficulty->SpellNerfOverrides[spellId][mapId].ModeMask) && sZoneDifficulty->MythicmodeInstanceData[instanceId]) ||
+        (sZoneDifficulty->HasNormalMode(sZoneDifficulty->SpellNerfOverrides[spellId][mapId].ModeMask) && !sZoneDifficulty->MythicmodeInstanceData[instanceId]))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+/**
  *  @brief Checks if the target is in a duel while residing in the DUEL_AREA and their opponent is a valid object.
  *  Used to determine when the duel-specific nerfs should be applied.
  *
@@ -852,7 +874,7 @@ void ZoneDifficulty::MythicmodeEvent(Unit* unit, uint32 entry, uint32 key)
                 if (!has_bp0 && !has_bp1 && !has_bp2)
                 {
                     unit->CastSpell(target, mythicAI.Spell, mythicAI.TriggeredCast);
-                    LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Creature casting MythicmodeAI spell: {} at target {}", mythicAI.Spell, targetName);
+                    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Creature casting MythicmodeAI spell: {} at target {}", mythicAI.Spell, targetName);
                 }
                 else
                 {
@@ -861,7 +883,7 @@ void ZoneDifficulty::MythicmodeEvent(Unit* unit, uint32 entry, uint32 key)
                         has_bp1 ? &mythicAI.Spellbp1 : NULL,
                         has_bp2 ? &mythicAI.Spellbp2 : NULL,
                         mythicAI.TriggeredCast);
-                    LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Creature casting MythicmodeAI spell: {} at target {} with custom values.", mythicAI.Spell, targetName);
+                    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Creature casting MythicmodeAI spell: {} at target {} with custom values.", mythicAI.Spell, targetName);
                 }
             }
             return;
@@ -892,10 +914,10 @@ void ZoneDifficulty::MythicmodeEvent(Unit* unit, uint32 entry, uint32 key)
 
                     if (!target)
                     {
-                        LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Fall-back to GetVictim()");
+                        //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Fall-back to GetVictim()");
                         target = unit->GetVictim();
                     }
-                    LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Selecting target type TARGET_HOSTILE_AGGRO_FROM_TOP with range TargetArg {} and position on threat-list TargetArg2 {}.", mythicAI.TargetArg, range);
+                    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Selecting target type TARGET_HOSTILE_AGGRO_FROM_TOP with range TargetArg {} and position on threat-list TargetArg2 {}.", mythicAI.TargetArg, range);
                     break;
                 }
                 case TARGET_HOSTILE_AGGRO_FROM_BOTTOM:
@@ -909,22 +931,22 @@ void ZoneDifficulty::MythicmodeEvent(Unit* unit, uint32 entry, uint32 key)
 
                     if (!target)
                     {
-                        LOG_INFO("module", "Fall-back to GetVictim()");
+                        //LOG_INFO("module", "Fall-back to GetVictim()");
                         target = unit->GetVictim();
                     }
-                    LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Selecting target type TARGET_HOSTILE_AGGRO_FROM_TOP with range TargetArg {} and position on threat-list TargetArg2 {}.", mythicAI.TargetArg, range);
+                    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Selecting target type TARGET_HOSTILE_AGGRO_FROM_TOP with range TargetArg {} and position on threat-list TargetArg2 {}.", mythicAI.TargetArg, range);
                     break;
                 }
                 case TARGET_HOSTILE_RANDOM:
                 {
                     target = unit->GetAI()->SelectTarget(SelectTargetMethod::Random, 0, mythicAI.TargetArg, true);
-                    LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Selecting target type TARGET_HOSTILE_RANDOM with max range {}.", mythicAI.TargetArg);
+                    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Selecting target type TARGET_HOSTILE_RANDOM with max range {}.", mythicAI.TargetArg);
                     break;
                     }
                 case TARGET_HOSTILE_RANDOM_NOT_TOP:
                 {
                     target = unit->GetAI()->SelectTarget(SelectTargetMethod::Random, 0, mythicAI.TargetArg, true, false);
-                    LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Selecting target type TARGET_HOSTILE_RANDOM_NOT_TOP with max range {}.", mythicAI.TargetArg);
+                    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Selecting target type TARGET_HOSTILE_RANDOM_NOT_TOP with max range {}.", mythicAI.TargetArg);
                     break;
                 }
                 default:
@@ -961,7 +983,7 @@ void ZoneDifficulty::MythicmodeEvent(Unit* unit, uint32 entry, uint32 key)
             if (!has_bp0 && !has_bp1 && !has_bp2)
             {
                 unit->CastSpell(target, mythicAI.Spell, mythicAI.TriggeredCast);
-                LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Creature casting MythicmodeAI spell: {} at target {}", mythicAI.Spell, targetName);
+                //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Creature casting MythicmodeAI spell: {} at target {}", mythicAI.Spell, targetName);
             }
             else
             {
@@ -970,7 +992,7 @@ void ZoneDifficulty::MythicmodeEvent(Unit* unit, uint32 entry, uint32 key)
                     has_bp1 ? &mythicAI.Spellbp1 : NULL,
                     has_bp2 ? &mythicAI.Spellbp2 : NULL,
                     mythicAI.TriggeredCast);
-                LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Creature casting MythicmodeAI spell: {} at target {} with custom values.", mythicAI.Spell, targetName);
+                //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Creature casting MythicmodeAI spell: {} at target {} with custom values.", mythicAI.Spell, targetName);
             }
         }
         else

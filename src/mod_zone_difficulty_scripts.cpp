@@ -102,7 +102,21 @@ public:
                             //This check must be last and override duel and map adjustments
                             if (sZoneDifficulty->SpellNerfOverrides.find(spellInfo->Id) != sZoneDifficulty->SpellNerfOverrides.end())
                             {
-                                absorb = eff->GetAmount() * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id];
+                                if (sZoneDifficulty->SpellNerfOverrides[spellInfo->Id].find(mapId) != sZoneDifficulty->SpellNerfOverrides[spellInfo->Id].end())
+                                {
+                                    // Check if the mode of instance and SpellNerfOverride match 
+                                    if (sZoneDifficulty->OverrideModeMatches(target->GetMap()->GetInstanceId(), spellInfo->Id, mapId))
+                                    {
+                                        absorb = eff->GetAmount() * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id][mapId].NerfPct;
+                                    }
+                                }
+                                else if (sZoneDifficulty->SpellNerfOverrides[spellInfo->Id].find(0) != sZoneDifficulty->SpellNerfOverrides[spellInfo->Id].end())
+                                {
+                                    if (sZoneDifficulty->OverrideModeMatches(target->GetMap()->GetInstanceId(), spellInfo->Id, mapId))
+                                    {
+                                        absorb = eff->GetAmount() * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id][0].NerfPct;
+                                    }
+                                }
                             }
 
                             eff->SetAmount(absorb);
@@ -165,10 +179,24 @@ public:
                 //This check must be first and skip the rest to override everything else.
                 if (spellInfo)
                 {
-                    if (sZoneDifficulty->SpellNerfOverrides.find(mapId) != sZoneDifficulty->SpellNerfOverrides.end())
+                    if (sZoneDifficulty->SpellNerfOverrides.find(spellInfo->Id) != sZoneDifficulty->SpellNerfOverrides.end())
                     {
-                        heal = heal * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id];
-                        return;
+                        if (sZoneDifficulty->SpellNerfOverrides[spellInfo->Id].find(mapId) != sZoneDifficulty->SpellNerfOverrides[spellInfo->Id].end())
+                        {
+                            if (sZoneDifficulty->OverrideModeMatches(target->GetMap()->GetInstanceId(), spellInfo->Id, mapId))
+                            {
+                                heal = heal * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id][mapId].NerfPct;
+                                return;
+                            }
+                        }
+                        if (sZoneDifficulty->SpellNerfOverrides[spellInfo->Id].find(0) != sZoneDifficulty->SpellNerfOverrides[spellInfo->Id].end())
+                        {
+                            if (sZoneDifficulty->OverrideModeMatches(target->GetMap()->GetInstanceId(), spellInfo->Id, mapId))
+                            {
+                                heal = heal * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id][0].NerfPct;
+                                return;
+                            }
+                        }
                     }
                 }
 
@@ -322,8 +350,22 @@ public:
                 //This check must be first and skip the rest to override everything else.
                 if (sZoneDifficulty->SpellNerfOverrides.find(spellInfo->Id) != sZoneDifficulty->SpellNerfOverrides.end())
                 {
-                    damage = damage * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id];
-                    return;
+                    if (sZoneDifficulty->SpellNerfOverrides[spellInfo->Id].find(mapId) != sZoneDifficulty->SpellNerfOverrides[spellInfo->Id].end())
+                    {
+                        if (sZoneDifficulty->OverrideModeMatches(target->GetMap()->GetInstanceId(), spellInfo->Id, mapId))
+                        {
+                            damage = damage * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id][mapId].NerfPct;
+                            return;
+                        }
+                    }
+                    else if (sZoneDifficulty->SpellNerfOverrides[spellInfo->Id].find(0) != sZoneDifficulty->SpellNerfOverrides[spellInfo->Id].end())
+                    {
+                        if (sZoneDifficulty->OverrideModeMatches(target->GetMap()->GetInstanceId(), spellInfo->Id, mapId))
+                        {
+                            damage = damage * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id][0].NerfPct;
+                            return;
+                        }
+                    }
                 }
 
                 if (sZoneDifficulty->IsDebugInfoEnabled && target)
@@ -434,15 +476,15 @@ public:
      */
     void OnUnitEnterCombat(Unit* unit, Unit* /*victim*/) override
     {
-        LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnUnitEnterCombat for unit {}", unit->GetEntry());
+        //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnUnitEnterCombat for unit {}", unit->GetEntry());
         if (sZoneDifficulty->MythicmodeInstanceData.find(unit->GetInstanceId()) == sZoneDifficulty->MythicmodeInstanceData.end())
         {
-            LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Instance is not in mythic mode.");
+            //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Instance is not in mythic mode.");
             return;
         }
         if (!sZoneDifficulty->MythicmodeInstanceData[unit->GetInstanceId()])
         {
-            LOG_INFO("module", "MOD-ZONE-DIFFICULTY: InstanceId not found in mythic mode list.");
+            //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: InstanceId not found in mythic mode list.");
             return;
         }
 
@@ -450,7 +492,7 @@ public:
         {
             if (creature->IsTrigger())
             {
-                LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Creature is a trigger.");
+                //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Creature is a trigger.");
                 return;
             }
         }
@@ -458,12 +500,12 @@ public:
         uint32 entry = unit->GetEntry();
         if (sZoneDifficulty->MythicmodeAI.find(entry) == sZoneDifficulty->MythicmodeAI.end())
         {
-            LOG_INFO("module", "MOD-ZONE-DIFFICULTY: No HarmodeAI found for creature with entry {}", entry);
+            //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: No HarmodeAI found for creature with entry {}", entry);
             return;
         }
 
         unit->m_Events.CancelEventGroup(EVENT_GROUP);
-        LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnUnitEnterCombat checks passed for unit {}", unit->GetEntry());
+        //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnUnitEnterCombat checks passed for unit {}", unit->GetEntry());
 
         uint32 i = 0;
         for (ZoneDifficultyHAI& data : sZoneDifficulty->MythicmodeAI[entry])
@@ -554,7 +596,7 @@ public:
         }
         if (sZoneDifficulty->IsDebugInfoEnabled)
         {
-            LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnBeforeSetBossState: bossId = {}, newState = {}, oldState = {}, MapId = {}, InstanceId = {}", id, newState, oldState, instance->GetId(), instance->GetInstanceId());
+            //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnBeforeSetBossState: bossId = {}, newState = {}, oldState = {}, MapId = {}, InstanceId = {}", id, newState, oldState, instance->GetId(), instance->GetInstanceId());
         }
         uint32 instanceId = instance->GetInstanceId();
         if (!sZoneDifficulty->IsMythicmodeMap(instance->GetId()) ||
@@ -679,7 +721,7 @@ public:
     {
         if (sZoneDifficulty->IsDebugInfoEnabled)
         {
-            LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnGossipSelectRewardNpc action: {}", action);
+            //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnGossipSelectRewardNpc action: {}", action);
         }
         ClearGossipMenuFor(player);
         uint32 npcText = 0;

@@ -34,44 +34,44 @@ You can also prevent certain spells from being affected at all. See `zone_diffic
 You can edit the `zone_difficulty_info_content.sql` file to apply changes. They will be applied by the autoupdater the next time you restart your server.
 Alternatively, you may edit the `zone_difficulty_info` table in your `world` database and use the `reload config` command to reload the values.
 
-# Hardmode
+# Mythicmode
 
 ## How does it work?
 
-For the hardmode, there is an NPC (id 1128001) spawned at the beginning of raids and the daily heroic dungeon,
+For the Mythicmode, there is an NPC (id 1128001) spawned at the beginning of raids and the daily heroic dungeon,
 determined by the quest given from Wind Trader Zhareem in Shattrath. (Addition of WotlK heroics outstanding).
-The leader of the party can chose to activate the hardmode by talking to the NPC inside the heroic
-dungeon / raid. Single players can not use the hardmode. In Heroic dungeons, the NPC will despawn
-after 60 seconds. The party needs to decide, if they want to play the hardmode before this happens.
+The leader of the party can chose to activate the Mythicmode by talking to the NPC inside the heroic
+dungeon / raid. Single players can not use the Mythicmode. In Heroic dungeons, the NPC will despawn
+after 60 seconds. The party needs to decide, if they want to play the Mythicmode before this happens.
 The last boss of the heroic dungeon will award one score to every player in the heroic dungeon.
 
-In Raids, it will stay indefinitely. As soon as one raidboss is defeated, the leader can still turn the
-hardmode off, but no longer on once it is deactivated. Every defeated raidboss grants one score in the
+In Raids, the NPC will stay indefinitely. As soon as one raidboss is defeated, the leader can still turn the
+Mythicmode off, but no longer on once it is deactivated. Every defeated raidboss grants one score in the
 respective category.
 
 ## Config
 
-`ModZoneDifficulty.Hardmode.HpModifier = 2.0` determines the default creature hp modifier for hardmode.
+`ModZoneDifficulty.Hardmode.HpModifier = 2.0` determines the default creature hp modifier for Mythicmode.
 
 ## Tables
-`zone_difficulty_instance_saves` creates the tables to store the hardmode status and the scores.
+`zone_difficulty_instance_saves` creates the tables to store the Mythicmode status and the scores.
 No action required.
 
 `zone_difficulty_creatureoverrides` contains overrides for creature hp values. This is used to vary
 certain creatures health from the default value in the conf file.
 
-`zone_difficulty_hardmode_creatures` contains gossips and creature positions for the NPCs inside dungeons.
+`zone_difficulty_mythicmode_creatures` contains gossips and creature positions for the NPCs inside dungeons.
 Requires spawning additional NPCs, if more heroic dungeons / raids should be added.
 
 In heroic dungeons, the default spawn mask should be 1024. The script will change the NPCs phasemask to
 1, if the heroic dungeon is the current daily. In raids, the default spawn mask should be 1.
 
-`zone_difficulty_hardmode_loot_objects` contains the encounter IDs which should give scores
-for the hardmode. The encounter IDs are taken from the `creature_template` table.
+`zone_difficulty_instance_data` contains the encounter IDs which should give scores
+for the Mythicmode. The encounter IDs are taken from the `creature_template` table.
 `OverrideGO` is reserved for future use. `InstanceType` refers to the content level, see the top
 of the file for a list.
 
-`zone_difficulty_hardmode_rewards` holds the items which can be chosen as a reward for the hardmode.
+`zone_difficulty_mythicmode_rewards` holds the items which can be chosen as a reward for the Mythicmode.
 Tho gossips for the reward npc (id 1128002) will automatically expand, depending on the kind and
 amount of rows in the table. `ContentType` refers to the content level, `ItemType` refers to the item
 category. See the top of the file for a list for both. By adding an enchant id and a slot to the item,
