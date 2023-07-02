@@ -1,3 +1,15 @@
+-- ************************************************************************
+-- Possible values for `Target`:
+SET @TARGET_NONE = 0;                       -- For spells without target.
+SET @TARGET_SELF = 1;                       -- Self cast.
+SET @TARGET_VICTIM = 2;                     -- Our current target. (ie: highest aggro)
+SET @TARGET_HOSTILE_AGGRO_FROM_TOP= 3;      -- Position (TargetArg2) in the threat list counted from top. TargetArg = max/min range. Fallback to GetVictim().
+SET @TARGET_HOSTILE_AGGRO_FROM_BOTTOM = 4;  -- Position (TargetArg2) in the threat list counted from bottom. TargetArg = max/min range. Fallback to GetVictim().
+SET @TARGET_HOSTILE_RANDOM = 5;             -- Just any random player on our threat list. TargetArg = max/min range.
+SET @TARGET_HOSTILE_RANDOM_NOT_TOP = 6;     -- Just any random player on our threat list except the current target. TargetArg = max/min range.
+SET @TARGET_PLAYER_DISTANCE = 18;           -- All players in range. TargetArg = max/min range.
+-- ************************************************************************
+
 DELETE FROM `zone_difficulty_mythicmode_ai` WHERE CreatureEntry IN (21136, 21137, 21138, 21139, 17879, 17881, 18701);
 INSERT INTO `zone_difficulty_mythicmode_ai` (`CreatureEntry`, `Chance`, `Spell`, `Spellbp0`, `Spellbp1`, `Spellbp2`, `Target`, `TargetArg`, `TargetArg2`, `Delay`, `Cooldown`, `Repetitions`, `Enabled`, `TriggeredCast`, `Comment`) VALUES
 -- Black Morrass Trash
