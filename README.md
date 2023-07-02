@@ -1,8 +1,5 @@
 # Zone Difficulty Module
 
-[English](README.md) | [Español](README_ES.md)
-
-
 ## What is the purpose of this module?
 This module provides a way to nerf or debuff players in order to increase the difficulty of certain dungeons or balance battlegrounds/duels.
 
