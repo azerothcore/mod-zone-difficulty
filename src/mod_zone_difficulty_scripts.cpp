@@ -822,7 +822,7 @@ public:
                     whisper.append("I am sorry, time-traveler. This reward costs ");
                     whisper.append(std::to_string(sZoneDifficulty->TierRewards[category].Price));
                     whisper.append(" score but you only have ");
-                    whisper.append(std::to_string(sZoneDifficulty->MythicmodeScore[category][player->GetGUID().GetCounter()]));
+                    whisper.append(std::to_string(availableScore));
                     whisper.append(" ");
                     whisper.append(sZoneDifficulty->GetContentTypeString(category));
                     creature->Whisper(whisper, LANG_UNIVERSAL, player);
