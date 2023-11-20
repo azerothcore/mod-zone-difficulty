@@ -7,7 +7,7 @@ CREATE TABLE `zone_difficulty_spelloverrides` (
 	`Comment` TEXT
 );
 
-DELETE FROM `zone_difficulty_spelloverrides` WHERE `SpellID` IN (53652, 53654, 52752, 47753, 18562, 25516, 36240);
+DELETE FROM `zone_difficulty_spelloverrides` WHERE `SpellID` IN (53652, 53654, 52752, 47753, 18562, 25516, 36240, 31850, 31851, 31852, 66235);
 INSERT INTO `zone_difficulty_spelloverrides` (`SpellID`, `MapId`, `NerfValue`, `Enabled`, `Comment`) VALUES
 (53652, 0, 1, 1, 'Beacon of Light - Skip nerf.'),
 (53654, 0, 1, 1, 'Beacon of Light 2 (Flash of Light, Holy Shock) - Skip nerf.'),
@@ -16,4 +16,8 @@ INSERT INTO `zone_difficulty_spelloverrides` (`SpellID`, `MapId`, `NerfValue`, `
 (18562, 0, 1, 1, 'Swiftmend - Skip nerf.'),
 (25516, 0, 1, 1, 'AQ20 Andorov Healing - Skip nerf.'),
 (36240, 0, 1, 1, 'Gruul Cave In - Skip buff.'),
-(34435, 0, 1, 1, 'Magtheridon - Warder - Rain of Fire Skip buff.');
+(34435, 0, 1, 1, 'Magtheridon - Warder - Rain of Fire Skip buff.'),
+(31850, 0, 1, 1, 'Ardent Defender - Absorb - Skip nerf'),
+(31851, 0, 1, 1, 'Ardent Defender - Absorb - Skip nerf'),
+(31852, 0, 1, 1, 'Ardent Defender - Absorb - Skip nerf'),
+(66235, 0, 1, 1, 'Ardent Defender - Heal - Skip nerf');
