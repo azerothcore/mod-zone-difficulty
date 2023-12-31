@@ -10,7 +10,7 @@ SET @TARGET_HOSTILE_RANDOM_NOT_TOP = 6;     -- Just any random player on our thr
 SET @TARGET_PLAYER_DISTANCE = 18;           -- All players in range. TargetArg = max/min range.
 -- ************************************************************************
 
-DELETE FROM `zone_difficulty_mythicmode_ai` WHERE CreatureEntry IN (21136, 21137, 21138, 21139, 17879, 17881, 18701);
+DELETE FROM `zone_difficulty_mythicmode_ai` WHERE CreatureEntry IN (21136, 21137, 21138, 21139, 17879, 17881, 18701, 21818);
 INSERT INTO `zone_difficulty_mythicmode_ai` (`CreatureEntry`, `Chance`, `Spell`, `Spellbp0`, `Spellbp1`, `Spellbp2`, `Target`, `TargetArg`, `TargetArg2`, `Delay`, `Cooldown`, `Repetitions`, `Enabled`, `TriggeredCast`, `Comment`) VALUES
 -- Black Morrass Trash
 (21136, 30, 43242, 0, 0, 0, @TARGET_SELF, 0, 0, 2000, 0, 1, 1, 1, 'Infinite Chronomancer, Black Morrass. Haste (Movement and cast) on self after 2 seconds once. 30% Chance.'),
