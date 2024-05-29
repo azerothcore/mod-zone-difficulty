@@ -96,6 +96,7 @@ void ZoneDifficulty::LoadMapDifficultySettings()
     sZoneDifficulty->ItemIcons[ITEMTYPE_MAIL] = "|TInterface\\icons\\inv_chest_chain_13:15|t ";
     sZoneDifficulty->ItemIcons[ITEMTYPE_PLATE] = "|TInterface\\icons\\inv_chest_plate12:15|t ";
     sZoneDifficulty->ItemIcons[ITEMTYPE_WEAPONS] = "|TInterface\\icons\\inv_mace_25:15|t |TInterface\\icons\\inv_shield_27:15|t |TInterface\\icons\\inv_weapon_crossbow_04:15|t ";
+    sZoneDifficulty->ItemIcons[ITEMTYPE_OTHER] = "|TInterface\\icons\\inv_jewelcrafting_shadowspirit_01:15|t ";
 
     if (QueryResult result = WorldDatabase.Query("SELECT * FROM zone_difficulty_info"))
     {
