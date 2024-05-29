@@ -66,6 +66,10 @@ void ZoneDifficulty::LoadMapDifficultySettings()
     HeroicTBCQuestMapList[554] = 11386; // The Mechanar
     HeroicTBCQuestMapList[545] = 11370; // The Steamvault
 
+    // Category 1
+    EncounterCounter[47] = 5; // Razorfen Kraul
+    EncounterCounter[90] = 5; // Gnomeregan
+
     // Category 8
     EncounterCounter[542] = 3; // Blood Furnace
     EncounterCounter[543] = 3; // Hellfire Ramparts
@@ -471,6 +475,9 @@ std::string ZoneDifficulty::GetItemTypeString(uint32 type)
         break;
     case ITEMTYPE_WEAPONS:
         typestring = "Weapons and Shields";
+        break;
+    case ITEMTYPE_OTHER:
+        typestring = "Emblem, Vanity, Consumables, and other items";
         break;
     default:
         LOG_ERROR("module", "MOD-ZONE-DIFFICULTY: Unknown type {} in ZoneDifficulty::GetItemTypeString.", type);
@@ -1009,6 +1016,9 @@ bool ZoneDifficulty::HasCompletedFullTier(uint32 category, uint32 playerGuid)
     std::vector<uint32> MapList;
     switch (category)
     {
+    case TYPE_VANILLA:
+        MapList = { 47, 90 };
+        break;
     case TYPE_HEROIC_TBC:
         //585 is Magister's Terrace. Only add when released.
         MapList = { 269, 540, 542, 543, 545, 547, 546, 552, 553, 554, 555, 556, 557, 558, 560/*, 585*/ };

@@ -102,6 +102,7 @@ uint32 const ITEMTYPE_LEATHER = 3;
 uint32 const ITEMTYPE_MAIL = 4;
 uint32 const ITEMTYPE_PLATE = 5;
 uint32 const ITEMTYPE_WEAPONS = 6;
+uint32 const ITEMTYPE_OTHER = 7;
 
 uint32 const TARGET_NONE = 0;
 uint32 const TARGET_SELF = 1;

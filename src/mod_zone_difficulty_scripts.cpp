@@ -600,7 +600,7 @@ public:
         }
         uint32 instanceId = instance->GetInstanceId();
         if (!sZoneDifficulty->IsMythicmodeMap(instance->GetId()) ||
-            (!sZoneDifficulty->MythicmodeInNormalDungeons && !instance->IsRaidOrHeroicDungeon()))
+            (sZoneDifficulty->MythicmodeInNormalDungeons && !instance->IsRaidOrHeroicDungeon()))
         {
             //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnBeforeSetBossState: Instance not handled because there is no Mythicmode loot data for map id: {}", instance->GetId());
             return;
@@ -697,7 +697,7 @@ public:
                 {
                     sZoneDifficulty->AddMythicmodeScore(map, sZoneDifficulty->Expansion[mapId], score);
                 }
-                else if (map->IsRaid())
+                else if (map->IsRaid() || sZoneDifficulty->MythicmodeInNormalDungeons)
                 {
                     sZoneDifficulty->AddMythicmodeScore(map, sZoneDifficulty->Expansion[mapId], score);
                 }
