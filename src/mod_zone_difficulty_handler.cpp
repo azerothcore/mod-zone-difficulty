@@ -49,6 +49,7 @@ void ZoneDifficulty::LoadMapDifficultySettings()
     NerfInfo[DUEL_INDEX][0].SpellDamageBuffPct = 1;
 
     // Heroic Quest -> MapId Translation
+    HeroicTBCQuestMapList[47] = 90135; // Razorfen Kraul
     HeroicTBCQuestMapList[542] = 11362; // Blood Furnace
     HeroicTBCQuestMapList[543] = 11354; // Hellfire Ramparts
     HeroicTBCQuestMapList[547] = 11368; // Slave Pens
@@ -273,13 +274,13 @@ void ZoneDifficulty::LoadMapDifficultySettings()
                 if (data.Chance != 0 && data.Spell != 0 && ((data.Target >= 1 && data.Target <= 6) || data.Target == 18))
                 {
                     sZoneDifficulty->MythicmodeAI[creatureEntry].push_back(data);
-                    LOG_INFO("module", "MOD-ZONE-DIFFICULTY: New AI for entry {} with spell {}", creatureEntry, data.Spell);
+                    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: New AI for entry {} with spell {}", creatureEntry, data.Spell);
                 }
                 else
                 {
                     LOG_ERROR("module", "MOD-ZONE-DIFFICULTY: Unknown type for `Target`: {} in zone_difficulty_mythicmode_ai", data.Target);
                 }
-                //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: New creature with entry: {} has exception for hp: {}", creatureEntry, hpModifier);
+                ////LOG_INFO("module", "MOD-ZONE-DIFFICULTY: New creature with entry: {} has exception for hp: {}", creatureEntry, hpModifier);
             }
         } while (result->NextRow());
     }
@@ -324,7 +325,7 @@ void ZoneDifficulty::LoadMapDifficultySettings()
                     //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Loading tier reward with entry {} has enchant {} in slot {}. contentType: {} itemType: {}", data.Entry, data.Enchant, data.EnchantSlot, contentType, itemType);
                 }
             }
-            //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Total items in Rewards map: {}.", i);
+            ////LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Total items in Rewards map: {}.", i);
         } while (result->NextRow());
     }
     else
@@ -348,7 +349,7 @@ void ZoneDifficulty::LoadMythicmodeInstanceData()
     /* debugging
     * for (int i = 0; i < int(instanceIDs.size()); i++)
     * {
-    *   LOG_INFO("module", "MOD-ZONE-DIFFICULTY: ZoneDifficulty::LoadMythicmodeInstanceData: id {} exists: {}:", i, instanceIDs[i]);
+    *   //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: ZoneDifficulty::LoadMythicmodeInstanceData: id {} exists: {}:", i, instanceIDs[i]);
     * }
     * end debugging
     */
@@ -361,7 +362,7 @@ void ZoneDifficulty::LoadMythicmodeInstanceData()
 
             if (instanceIDs[InstanceId])
             {
-                LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Loading from DB for instanceId {}: MythicmodeOn = {}", InstanceId, MythicmodeOn);
+                //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Loading from DB for instanceId {}: MythicmodeOn = {}", InstanceId, MythicmodeOn);
                 sZoneDifficulty->MythicmodeInstanceData[InstanceId] = MythicmodeOn;
             }
             else
@@ -420,11 +421,11 @@ void ZoneDifficulty::LoadMythicmodeScoreData()
             {
                 for (int i = 0; i < sZoneDifficulty->EncounterCounter[MapId]; ++i)
                 {
-                    LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Initializing player record for PlayerGuid {} in MapId {} for BossId {}: False", PlayerGuid, MapId, i);
+                    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Initializing player record for PlayerGuid {} in MapId {} for BossId {}: False", PlayerGuid, MapId, i);
                     sZoneDifficulty->Logs[PlayerGuid][MapId][i] = false;
                 }
             }
-            LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Setting player record for PlayerGuid {} in MapId {} for BossId {}: True", PlayerGuid, MapId, BossID);
+            //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Setting player record for PlayerGuid {} in MapId {} for BossId {}: True", PlayerGuid, MapId, BossID);
             sZoneDifficulty->Logs[PlayerGuid][MapId][BossID] = true;
         } while (result->NextRow());
     }
@@ -582,7 +583,7 @@ void ZoneDifficulty::AddMythicmodeScore(Map* map, uint32 type, uint32 score)
 
         //if (sZoneDifficulty->IsDebugInfoEnabled)
         //{
-        //    LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Player {} new score: {}", player->GetName(), sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()][type]);
+        //    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Player {} new score: {}", player->GetName(), sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()][type]);
         //}
 
         std::string typestring = sZoneDifficulty->GetContentTypeString(type);
@@ -602,7 +603,7 @@ void ZoneDifficulty::DeductMythicmodeScore(Player* player, uint32 type, uint32 s
     // NULL check happens in the calling function
     if (sZoneDifficulty->IsDebugInfoEnabled)
     {
-        LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Reducing score with type {} from player with guid {} by {}.", type, player->GetGUID().GetCounter(), score);
+        //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Reducing score with type {} from player with guid {} by {}.", type, player->GetGUID().GetCounter(), score);
     }
     sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()][type] = sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()][type] - score;
     CharacterDatabase.Execute("REPLACE INTO zone_difficulty_mythicmode_score VALUES({}, {}, {})", player->GetGUID().GetCounter(), type, sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()][type]);
@@ -681,12 +682,15 @@ bool ZoneDifficulty::IsMythicmodeMap(uint32 mapId)
 {
     if (!sZoneDifficulty->MythicmodeEnable)
     {
+        //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Mythicmode is disabled.");
         return false;
     }
     if (sZoneDifficulty->MythicmodeLoot.find(mapId) == sZoneDifficulty->MythicmodeLoot.end())
     {
+        //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: No Mythicmode data found for mapId {}.", mapId);
         return false;
     }
+    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Mythicmode data found for mapId {}.", mapId);
     return true;
 }
 

@@ -592,42 +592,77 @@ public:
     {
         if (!sZoneDifficulty->MythicmodeEnable)
         {
+            //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Mythicmode is disabled.");
             return;
         }
+
         if (sZoneDifficulty->IsDebugInfoEnabled)
         {
-            //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnBeforeSetBossState: bossId = {}, newState = {}, oldState = {}, MapId = {}, InstanceId = {}", id, newState, oldState, instance->GetId(), instance->GetInstanceId());
+            //LOG_INFO("module", 
+                     "MOD-ZONE-DIFFICULTY: OnBeforeSetBossState: bossId = {}, newState = {}, oldState = {}, MapId = {}, InstanceId = {}",
+                     id, newState, oldState, instance->GetId(), instance->GetInstanceId());
         }
+
         uint32 instanceId = instance->GetInstanceId();
+
+        // Check if the map is eligible for Mythicmode
         if (!sZoneDifficulty->IsMythicmodeMap(instance->GetId()) ||
             (sZoneDifficulty->MythicmodeInNormalDungeons && !instance->IsRaidOrHeroicDungeon()))
         {
-            //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnBeforeSetBossState: Instance not handled because there is no Mythicmode loot data for map id: {}", instance->GetId());
+            //LOG_INFO("module", 
+                     "MOD-ZONE-DIFFICULTY: OnBeforeSetBossState: Instance not handled because there is no Mythicmode loot data for map id: {}",
+                     instance->GetId());
             return;
         }
+
+        // Handle transition to IN_PROGRESS state
         if (oldState != IN_PROGRESS && newState == IN_PROGRESS)
         {
+            //LOG_INFO("module", 
+                     "MOD-ZONE-DIFFICULTY: Encounter started. Map relevant. Checking for Mythicmode: {}", 
+                     sZoneDifficulty->MythicmodeInstanceData[instanceId]);
             if (sZoneDifficulty->MythicmodeInstanceData[instanceId])
             {
+                //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Mythicmode is on.");
                 sZoneDifficulty->EncountersInProgress[instanceId] = GameTime::GetGameTime().count();
             }
         }
+        // Handle transition from IN_PROGRESS to DONE state
         else if (oldState == IN_PROGRESS && newState == DONE)
         {
             if (sZoneDifficulty->MythicmodeInstanceData[instanceId])
             {
-                //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Mythicmode is on.");
-                if (sZoneDifficulty->EncountersInProgress.find(instanceId) != sZoneDifficulty->EncountersInProgress.end() && sZoneDifficulty->EncountersInProgress[instanceId] != 0)
+                //LOG_INFO("module", "\033[33mMOD-ZONE-DIFFICULTY: Mythicmode is on.\033[0m");
+
+                if (sZoneDifficulty->EncountersInProgress.find(instanceId) != sZoneDifficulty->EncountersInProgress.end() &&
+                    sZoneDifficulty->EncountersInProgress[instanceId] != 0)
                 {
                     Map::PlayerList const& PlayerList = instance->GetPlayers();
+
                     for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                     {
                         Player* player = i->GetSource();
+
                         if (!player->IsGameMaster() && !player->IsDeveloper())
                         {
+                            //LOG_INFO("module", 
+                                     "MOD-ZONE-DIFFICULTY: Encounter completed. Map relevant. Checking for source: {}", 
+                                     player->GetGUID().GetCounter());
+                            // Log the encounter for non-GM and non-developer players
                             CharacterDatabase.Execute(
                                 "REPLACE INTO `zone_difficulty_encounter_logs` VALUES({}, {}, {}, {}, {}, {}, {})",
-                                instanceId, sZoneDifficulty->EncountersInProgress[instanceId], GameTime::GetGameTime().count(), instance->GetId(), id, player->GetGUID().GetCounter(), 64);
+                                instanceId, sZoneDifficulty->EncountersInProgress[instanceId],
+                                GameTime::GetGameTime().count(), instance->GetId(), id,
+                                player->GetGUID().GetCounter(), 64);
+                        }
+                        else
+                        {
+                            // Log the encounter for GM and developer players with an additional flag
+                            CharacterDatabase.Execute(
+                                "REPLACE INTO `zone_difficulty_encounter_logs` VALUES({}, {}, {}, {}, {}, {}, {}, 1)",
+                                instanceId, sZoneDifficulty->EncountersInProgress[instanceId],
+                                GameTime::GetGameTime().count(), instance->GetId(), id,
+                                player->GetGUID().GetCounter(), 64);
                         }
                     }
                 }
@@ -701,12 +736,11 @@ public:
                 {
                     sZoneDifficulty->AddMythicmodeScore(map, sZoneDifficulty->Expansion[mapId], score);
                 }
-                /* debug
-                 * else
-                 * {
-                 *   LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Map with id {} is not a raid or a dungeon. Mythicmode loot not granted.", map->GetInstanceId());
-                 * }
-                 */
+                // debug
+                else
+                {
+                    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Map with id {} is not a raid or a dungeon. Mythicmode loot not granted.", map->GetInstanceId());
+                }
             }
         }
     }
@@ -995,7 +1029,7 @@ public:
                     gossip.append(" to receive this item. Before i can give it to you, you need to complete the whole dungeon where it can be obtained.");
                     creature->Whisper(gossip, LANG_UNIVERSAL, player);
                     /* debug
-                     * LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Player missing achiement with ID {} to obtain item with category {}, itemType {}, counter {}",
+                     * //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Player missing achiement with ID {} to obtain item with category {}, itemType {}, counter {}",
                      *    sZoneDifficulty->Rewards[category][itemType][counter].Achievement, category, itemType, counter);
                      * end debug
                      */
@@ -1184,11 +1218,11 @@ public:
     {
         //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnGossipHelloChromie");
         Group* group = player->GetGroup();
-        if (group && group->IsLfgRandomInstance() && !player->GetMap()->IsRaid())
-        {
-            creature->Whisper("I am sorry, time-traveler. You can not accept challenges here. You need to choose a specific dungeon in order to play my history lessons.", LANG_UNIVERSAL, player);
-            return true;
-        }
+        //if (group && group->IsLfgRandomInstance() && !player->GetMap()->IsRaid()) // Qeme
+        // if (group && !player->GetMap()->IsRaid())        {
+        //     creature->Whisper("I am sorry, time-traveler. You can not accept challenges here. You need to choose a specific dungeon in order to play my history lessons.", LANG_UNIVERSAL, player);
+        //     return true;
+        // }
         if (!group && !player->IsGameMaster())
         {
             creature->Whisper("I am sorry, time-traveler. You can not play my history lessons on your own. Bring some friends?", LANG_UNIVERSAL, player);
@@ -1239,7 +1273,7 @@ public:
         }
 
         if (!map->IsRaid() &&
-            (!(map->IsHeroic() && map->IsDungeon())))
+            (!(map->IsHeroic() && !map->IsDungeon())))
         {
             return;
         }
@@ -1296,10 +1330,10 @@ public:
                 {
                     return;
                 }
-                //if (sZoneDifficulty->IsDebugInfoEnabled)
-                //{
+                if (sZoneDifficulty->IsDebugInfoEnabled)
+                {
                     //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Modify creature hp for Mythic Mode: {} to {}", baseHealth, newHp);
-                //}
+                }
                 bool hpIsFull = false;
                 if (creature->GetHealthPct() >= 100)
                 {
@@ -1321,10 +1355,10 @@ public:
             {
                 if (creature->GetMaxHealth() == newHp)
                 {
-                    //if (sZoneDifficulty->IsDebugInfoEnabled)
-                    //{
-                    //    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Modify creature hp for normal mode: {} to {}", baseHealth, baseHealth);
-                    //}
+                    if (sZoneDifficulty->IsDebugInfoEnabled)
+                    {
+                       //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Modify creature hp for normal mode: {} to {}", baseHealth, baseHealth);
+                    }
                     bool hpIsFull = false;
                     if (creature->GetHealthPct() >= 100)
                     {
