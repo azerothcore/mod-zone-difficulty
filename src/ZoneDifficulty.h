@@ -148,6 +148,7 @@ public:
     float MythicmodeHpModifier{ 2.0 };
     bool MythicmodeEnable{ false };
     bool MythicmodeInNormalDungeons{ false };
+    bool LfgAllowed{ false }; // Config value for mythicmode on/off in LFG dungeons
     std::vector<uint32> DailyHeroicQuests;
     std::map<uint32, uint32> HeroicTBCQuestMapList;
     std::map<uint32, uint8> EncounterCounter;

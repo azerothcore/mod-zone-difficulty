@@ -68,3 +68,11 @@ ModZoneDifficulty.Mythicmode.HpModifier = 2.0
 #                     1 - Enabled
 
 ModZoneDifficulty.Mythicmode.InNormalDungeons = 0
+
+#
+#    ModZoneDifficulty.LfgAllowed
+#        Description: Enable or disable mythic mode for LFG dungeons.
+#        Default:     0 - Disabled
+#                     1 - Enabled
+
+ModZoneDifficulty.LfgAllowed = 0

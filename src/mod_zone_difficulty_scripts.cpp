@@ -573,6 +573,7 @@ public:
         sZoneDifficulty->MythicmodeHpModifier = sConfigMgr->GetOption<float>("ModZoneDifficulty.Mythicmode.HpModifier", 2);
         sZoneDifficulty->MythicmodeEnable = sConfigMgr->GetOption<bool>("ModZoneDifficulty.Mythicmode.Enable", false);
         sZoneDifficulty->MythicmodeInNormalDungeons = sConfigMgr->GetOption<bool>("ModZoneDifficulty.Mythicmode.InNormalDungeons", false);
+        sZoneDifficulty->LfgAllowed = sConfigMgr->GetOption<bool>("ModZoneDifficulty.LfgAllowed", false); // Config value for mythicmode on/off in LFG dungeons
         sZoneDifficulty->LoadMapDifficultySettings();
     }
 
@@ -599,8 +600,8 @@ public:
         if (sZoneDifficulty->IsDebugInfoEnabled)
         {
             //LOG_INFO("module", 
-                     "MOD-ZONE-DIFFICULTY: OnBeforeSetBossState: bossId = {}, newState = {}, oldState = {}, MapId = {}, InstanceId = {}",
-                     id, newState, oldState, instance->GetId(), instance->GetInstanceId());
+                    //  "MOD-ZONE-DIFFICULTY: OnBeforeSetBossState: bossId = {}, newState = {}, oldState = {}, MapId = {}, InstanceId = {}",
+                    //  id, newState, oldState, instance->GetId(), instance->GetInstanceId());
         }
 
         uint32 instanceId = instance->GetInstanceId();
@@ -610,8 +611,8 @@ public:
             (sZoneDifficulty->MythicmodeInNormalDungeons && !instance->IsRaidOrHeroicDungeon()))
         {
             //LOG_INFO("module", 
-                     "MOD-ZONE-DIFFICULTY: OnBeforeSetBossState: Instance not handled because there is no Mythicmode loot data for map id: {}",
-                     instance->GetId());
+                    //  "MOD-ZONE-DIFFICULTY: OnBeforeSetBossState: Instance not handled because there is no Mythicmode loot data for map id: {}",
+                    //  instance->GetId());
             return;
         }
 
@@ -619,8 +620,8 @@ public:
         if (oldState != IN_PROGRESS && newState == IN_PROGRESS)
         {
             //LOG_INFO("module", 
-                     "MOD-ZONE-DIFFICULTY: Encounter started. Map relevant. Checking for Mythicmode: {}", 
-                     sZoneDifficulty->MythicmodeInstanceData[instanceId]);
+                    //  "MOD-ZONE-DIFFICULTY: Encounter started. Map relevant. Checking for Mythicmode: {}", 
+                    //  sZoneDifficulty->MythicmodeInstanceData[instanceId]);
             if (sZoneDifficulty->MythicmodeInstanceData[instanceId])
             {
                 //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Mythicmode is on.");
@@ -632,7 +633,7 @@ public:
         {
             if (sZoneDifficulty->MythicmodeInstanceData[instanceId])
             {
-                //LOG_INFO("module", "\033[33mMOD-ZONE-DIFFICULTY: Mythicmode is on.\033[0m");
+                //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Mythicmode is on.");
 
                 if (sZoneDifficulty->EncountersInProgress.find(instanceId) != sZoneDifficulty->EncountersInProgress.end() &&
                     sZoneDifficulty->EncountersInProgress[instanceId] != 0)
@@ -646,8 +647,8 @@ public:
                         if (!player->IsGameMaster() && !player->IsDeveloper())
                         {
                             //LOG_INFO("module", 
-                                     "MOD-ZONE-DIFFICULTY: Encounter completed. Map relevant. Checking for source: {}", 
-                                     player->GetGUID().GetCounter());
+                                    //  "MOD-ZONE-DIFFICULTY: Encounter completed. Map relevant. Checking for source: {}", 
+                                    //  player->GetGUID().GetCounter());
                             // Log the encounter for non-GM and non-developer players
                             CharacterDatabase.Execute(
                                 "REPLACE INTO `zone_difficulty_encounter_logs` VALUES({}, {}, {}, {}, {}, {}, {})",
@@ -659,7 +660,7 @@ public:
                         {
                             // Log the encounter for GM and developer players with an additional flag
                             CharacterDatabase.Execute(
-                                "REPLACE INTO `zone_difficulty_encounter_logs` VALUES({}, {}, {}, {}, {}, {}, {}, 1)",
+                                "REPLACE INTO `zone_difficulty_encounter_logs` VALUES({}, {}, {}, {}, {}, {}, {}, -1)",
                                 instanceId, sZoneDifficulty->EncountersInProgress[instanceId],
                                 GameTime::GetGameTime().count(), instance->GetId(), id,
                                 player->GetGUID().GetCounter(), 64);
@@ -1218,11 +1219,11 @@ public:
     {
         //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnGossipHelloChromie");
         Group* group = player->GetGroup();
-        //if (group && group->IsLfgRandomInstance() && !player->GetMap()->IsRaid()) // Qeme
-        // if (group && !player->GetMap()->IsRaid())        {
-        //     creature->Whisper("I am sorry, time-traveler. You can not accept challenges here. You need to choose a specific dungeon in order to play my history lessons.", LANG_UNIVERSAL, player);
-        //     return true;
-        // }
+        if (group && group->IsLfgRandomInstance() && !player->GetMap()->IsRaid() && !sZoneDifficulty->LfgAllowed)
+        {
+            creature->Whisper("I am sorry, time-traveler. You can not accept challenges here. You need to choose a specific dungeon in order to play my history lessons.", LANG_UNIVERSAL, player);
+            return true;
+        }
         if (!group && !player->IsGameMaster())
         {
             creature->Whisper("I am sorry, time-traveler. You can not play my history lessons on your own. Bring some friends?", LANG_UNIVERSAL, player);

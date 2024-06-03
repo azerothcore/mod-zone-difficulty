@@ -49,7 +49,6 @@ void ZoneDifficulty::LoadMapDifficultySettings()
     NerfInfo[DUEL_INDEX][0].SpellDamageBuffPct = 1;
 
     // Heroic Quest -> MapId Translation
-    HeroicTBCQuestMapList[47] = 90135; // Razorfen Kraul
     HeroicTBCQuestMapList[542] = 11362; // Blood Furnace
     HeroicTBCQuestMapList[543] = 11354; // Hellfire Ramparts
     HeroicTBCQuestMapList[547] = 11368; // Slave Pens
