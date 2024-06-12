@@ -1358,7 +1358,7 @@ public:
                 {
                     if (sZoneDifficulty->IsDebugInfoEnabled)
                     {
-                       //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Modify creature hp for normal mode: {} to {}", baseHealth, baseHealth);
+                       LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Modify creature hp for normal mode: {} to {}", baseHealth, baseHealth);
                     }
                     bool hpIsFull = false;
                     if (creature->GetHealthPct() >= 100)
