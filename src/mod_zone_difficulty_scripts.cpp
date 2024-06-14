@@ -690,7 +690,7 @@ public:
         }
         if (!source)
         {
-            //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: source is a nullptr in OnAfterUpdateEncounterState");
+            LOG_INFO("module", "MOD-ZONE-DIFFICULTY: source is a nullptr in OnAfterUpdateEncounterState");
             return;
         }
 
@@ -705,24 +705,30 @@ public:
                 if (!sZoneDifficulty->IsMythicmodeMap(mapId) ||
                     (!sZoneDifficulty->MythicmodeInNormalDungeons && !map->IsRaidOrHeroicDungeon()))
                 {
-                    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: No additional loot stored in map with id {}.", map->GetInstanceId());
+                    LOG_INFO("module", "MOD-ZONE-DIFFICULTY: No additional loot stored in map with id {}.", map->GetInstanceId());
                     return;
                 }
 
                 bool SourceAwardsMythicmodeLoot = false;
                 //iterate over all listed creature entries for that map id and see, if the encounter should yield Mythicmode loot and if there is an override to the default behaviour
+                // Qeme
                 for (auto value : sZoneDifficulty->MythicmodeLoot[mapId])
                 {
                     if (value.EncounterEntry == source->GetEntry())
                     {
                         SourceAwardsMythicmodeLoot = true;
-                        if (!(value.Override & 1))
+                        if (value.Override & 1)
                         {
-                            score = 1;
+                            score = value.Override; // Set score to Override value if it exists (zone_difficulty_mythicmode_instance_data.override)
+                        }
+                        else
+                        {
+                            score = 1; // Default score
                         }
                         break;
                     }
                 }
+                // Qeme
 
                 if (!SourceAwardsMythicmodeLoot)
                 {
