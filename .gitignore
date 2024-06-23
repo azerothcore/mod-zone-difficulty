@@ -4,6 +4,7 @@
 #Generic
 #
 
+*.conf
 .directory
 .mailmap
 *.orig
