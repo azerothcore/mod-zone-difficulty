@@ -28,13 +28,10 @@ public:
     void OnAuraApply(Unit* target, Aura* aura) override
     {
         if (!sZoneDifficulty->IsEnabled)
-        {
             return;
-        }
+
         if (!sZoneDifficulty->MythicmodeInNormalDungeons && !target->GetMap()->IsRaidOrHeroicDungeon())
-        {
             return;
-        }
 
         if (sZoneDifficulty->IsValidNerfTarget(target))
         {
@@ -48,9 +45,7 @@ public:
                 {
                     // Skip spells not affected by vulnerability (potions)
                     if (spellInfo->HasAttribute(SPELL_ATTR0_NO_IMMUNITIES))
-                    {
                         return;
-                    }
 
                     if (spellInfo->HasAura(SPELL_AURA_SCHOOL_ABSORB))
                     {
@@ -59,19 +54,13 @@ public:
                         for (AuraEffect* eff : AuraEffectList)
                         {
                             if ((eff->GetAuraType() != SPELL_AURA_SCHOOL_ABSORB) || (eff->GetSpellInfo()->Id != spellInfo->Id))
-                            {
                                 continue;
-                            }
 
                             if (sZoneDifficulty->IsDebugInfoEnabled && target)
                             {
                                 if (Player* player = target->ToPlayer()) // Pointless check? Perhaps.
-                                {
                                     if (player->GetSession())
-                                    {
-                                        ChatHandler(player->GetSession()).PSendSysMessage("Spell: %s (%u) Base Value: %i", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, eff->GetAmount());
-                                    }
-                                }
+                                        ChatHandler(player->GetSession()).PSendSysMessage("Spell: {} ({}) Base Value: {}", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, eff->GetAmount());
                             }
 
                             int32 absorb = eff->GetAmount();
@@ -124,12 +113,8 @@ public:
                             if (sZoneDifficulty->IsDebugInfoEnabled && target)
                             {
                                 if (Player* player = target->ToPlayer()) // Pointless check? Perhaps.
-                                {
                                     if (player->GetSession())
-                                    {
-                                        ChatHandler(player->GetSession()).PSendSysMessage("Spell: %s (%u) Post Nerf Value: %i", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, eff->GetAmount());
-                                    }
-                                }
+                                        ChatHandler(player->GetSession()).PSendSysMessage("Spell: {} ({}) Post Nerf Value: {}", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, eff->GetAmount());
                             }
                         }
                     }
@@ -141,34 +126,27 @@ public:
     void ModifyHealReceived(Unit* target, Unit* /*healer*/, uint32& heal, SpellInfo const* spellInfo) override
     {
         if (!sZoneDifficulty->IsEnabled)
-        {
             return;
-        }
+
         if (!sZoneDifficulty->MythicmodeInNormalDungeons && !target->GetMap()->IsRaidOrHeroicDungeon())
-        {
             return;
-        }
 
         if (sZoneDifficulty->IsValidNerfTarget(target))
         {
             if (spellInfo)
             {
                 if (spellInfo->HasEffect(SPELL_EFFECT_HEALTH_LEECH))
-                {
                     return;
-                }
+
                 for (auto const& eff : spellInfo->GetEffects())
                 {
                     if (eff.ApplyAuraName == SPELL_AURA_PERIODIC_LEECH)
-                    {
                         return;
-                    }
                 }
+
                 // Skip spells not affected by vulnerability (potions) and bandages
                 if (spellInfo->HasAttribute(SPELL_ATTR0_NO_IMMUNITIES) || spellInfo->Mechanic == MECHANIC_BANDAGE)
-                {
                     return;
-                }
             }
 
             uint32 mapId = target->GetMapId();
@@ -230,9 +208,8 @@ public:
     void ModifyPeriodicDamageAurasTick(Unit* target, Unit* attacker, uint32& damage, SpellInfo const* spellInfo) override
     {
         if (!sZoneDifficulty->IsEnabled)
-        {
             return;
-        }
+
         if (!sZoneDifficulty->MythicmodeInNormalDungeons && !target->GetMap()->IsRaidOrHeroicDungeon())
         {
             return;
@@ -252,17 +229,13 @@ public:
         }
 
         if (!isDot)
-        {
             return;
-        }
 
         // Disclaimer: also affects disables boss adds buff.
         if (sConfigMgr->GetOption<bool>("ModZoneDifficulty.SpellBuff.OnlyBosses", false))
         {
             if (attacker->ToCreature() && !attacker->ToCreature()->IsDungeonBoss())
-            {
                 return;
-            }
         }
 
         if (sZoneDifficulty->IsValidNerfTarget(target))
@@ -374,8 +347,8 @@ public:
                     {
                         if (player->GetSession())
                         {
-                            ChatHandler(player->GetSession()).PSendSysMessage("Spell: %s (%u) Before Nerf Value: %i (%f Normal Mode)", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, damage, sZoneDifficulty->NerfInfo[mapId][matchingPhase].SpellDamageBuffPct);
-                            ChatHandler(player->GetSession()).PSendSysMessage("Spell: %s (%u) Before Nerf Value: %i (%f Mythic Mode)", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, damage, sZoneDifficulty->NerfInfo[mapId][matchingPhase].SpellDamageBuffPctHard);
+                            ChatHandler(player->GetSession()).PSendSysMessage("Spell: {} ({}) Before Nerf Value: {} ({} Normal Mode)", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, damage, sZoneDifficulty->NerfInfo[mapId][matchingPhase].SpellDamageBuffPct);
+                            ChatHandler(player->GetSession()).PSendSysMessage("Spell: {} ({}) Before Nerf Value: {} ({} Mythic Mode)", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, damage, sZoneDifficulty->NerfInfo[mapId][matchingPhase].SpellDamageBuffPctHard);
                         }
                     }
                 }
@@ -412,7 +385,7 @@ public:
                 {
                     if (player->GetSession())
                     {
-                        ChatHandler(player->GetSession()).PSendSysMessage("Spell: %s (%u) Post Nerf Value: %i", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, damage);
+                        ChatHandler(player->GetSession()).PSendSysMessage("Spell: {} ({}) Post Nerf Value: {}", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, damage);
                     }
                 }
             }

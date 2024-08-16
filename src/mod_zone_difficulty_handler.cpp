@@ -578,7 +578,7 @@ void ZoneDifficulty::AddMythicmodeScore(Map* map, uint32 type, uint32 score)
         //}
 
         std::string typestring = sZoneDifficulty->GetContentTypeString(type);
-        ChatHandler(player->GetSession()).PSendSysMessage("You have received Mythicmode score %s New score: %i", typestring, sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()][type]);
+        ChatHandler(player->GetSession()).PSendSysMessage("You have received Mythicmode score {} New score: {}", typestring, sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()][type]);
         CharacterDatabase.Execute("REPLACE INTO zone_difficulty_mythicmode_score VALUES({}, {}, {})", player->GetGUID().GetCounter(), type, sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()][type]);
     }
 }
@@ -672,13 +672,11 @@ void ZoneDifficulty::SendItem(Player* player, uint32 category, uint32 itemType, 
 bool ZoneDifficulty::IsMythicmodeMap(uint32 mapId)
 {
     if (!sZoneDifficulty->MythicmodeEnable)
-    {
         return false;
-    }
+
     if (sZoneDifficulty->MythicmodeLoot.find(mapId) == sZoneDifficulty->MythicmodeLoot.end())
-    {
         return false;
-    }
+
     return true;
 }
 
