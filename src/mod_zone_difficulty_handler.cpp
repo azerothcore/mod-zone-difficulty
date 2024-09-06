@@ -554,33 +554,20 @@ void ZoneDifficulty::AddMythicmodeScore(Map* map, uint32 type, uint32 score)
         LOG_ERROR("module", "MOD-ZONE-DIFFICULTY: Wrong value for type: {} in AddMythicmodeScore for map with id {}.", type, map->GetInstanceId());
         return;
     }
-    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Called AddMythicmodeScore for map id: {} and type: {}", map->GetId(), type);
-    Map::PlayerList const& PlayerList = map->GetPlayers();
-    for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-    {
-        Player* player = i->GetSource();
-        if (sZoneDifficulty->MythicmodeScore.find(player->GetGUID().GetCounter()) == sZoneDifficulty->MythicmodeScore.end())
-        {
-            sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()][type] = score;
-        }
-        else if (sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()].find(type) == sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()].end())
-        {
-            sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()][type] = score;
-        }
-        else
-        {
-            sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()][type] = sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()][type] + score;
-        }
 
-        //if (sZoneDifficulty->IsDebugInfoEnabled)
-        //{
-        //    LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Player {} new score: {}", player->GetName(), sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()][type]);
-        //}
+    map->DoForAllPlayers([&](Player* player)
+    {
+        if (sZoneDifficulty->MythicmodeScore.find(player->GetGUID().GetCounter()) == sZoneDifficulty->MythicmodeScore.end())
+            sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()][type] = score;
+        else if (sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()].find(type) == sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()].end())
+            sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()][type] = score;
+        else
+            sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()][type] = sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()][type] + score;
 
         std::string typestring = sZoneDifficulty->GetContentTypeString(type);
         ChatHandler(player->GetSession()).PSendSysMessage("You have received Mythicmode score {} New score: {}", typestring, sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()][type]);
         CharacterDatabase.Execute("REPLACE INTO zone_difficulty_mythicmode_score VALUES({}, {}, {})", player->GetGUID().GetCounter(), type, sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()][type]);
-    }
+    });
 }
 
 /**
@@ -780,7 +767,7 @@ bool ZoneDifficulty::ShouldNerfInDuels(Unit* target)
 int32 ZoneDifficulty::GetLowestMatchingPhase(uint32 mapId, uint32 phaseMask)
 {
     // Check if there is an entry for the mapId at all
-    if (sZoneDifficulty->NerfInfo.find(mapId) != sZoneDifficulty->NerfInfo.end())
+    if (sZoneDifficulty->ShouldNerfMap(mapId))
     {
 
         // Check if 0 is assigned as a phase to cover all phases
