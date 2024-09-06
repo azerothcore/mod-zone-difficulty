@@ -140,6 +140,7 @@ public:
     [[nodiscard]] bool VectorContainsUint32(std::vector<uint32> vec, uint32 element);
     [[nodiscard]] bool IsMythicmodeMap(uint32 mapid);
     [[nodiscard]] bool ShouldNerfInDuels(Unit* target);
+    [[nodiscard]] bool ShouldNerfMap(uint32 mapId) { return NerfInfo.find(mapId) != NerfInfo.end(); };
     [[nodiscard]] int32 GetLowestMatchingPhase(uint32 mapId, uint32 phaseMask);
 
     bool IsEnabled{ false };

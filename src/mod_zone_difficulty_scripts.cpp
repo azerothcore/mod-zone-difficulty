@@ -39,7 +39,7 @@ public:
             bool nerfInDuel = sZoneDifficulty->ShouldNerfInDuels(target);
 
             //Check if the map of the target is subject of a nerf at all OR if the target is subject of a nerf in a duel
-            if (sZoneDifficulty->NerfInfo.find(mapId) != sZoneDifficulty->NerfInfo.end() || nerfInDuel)
+            if (sZoneDifficulty->ShouldNerfMap(mapId) || nerfInDuel)
             {
                 if (SpellInfo const* spellInfo = aura->GetSpellInfo())
                 {
@@ -152,7 +152,7 @@ public:
             uint32 mapId = target->GetMapId();
             bool nerfInDuel = sZoneDifficulty->ShouldNerfInDuels(target);
             //Check if the map of the target is subject of a nerf at all OR if the target is subject of a nerf in a duel
-            if (sZoneDifficulty->NerfInfo.find(mapId) != sZoneDifficulty->NerfInfo.end() || sZoneDifficulty->ShouldNerfInDuels(target))
+            if (sZoneDifficulty->ShouldNerfMap(mapId) || sZoneDifficulty->ShouldNerfInDuels(target))
             {
                 //This check must be first and skip the rest to override everything else.
                 if (spellInfo)
@@ -255,7 +255,7 @@ public:
                 }
             }
 
-            if (sZoneDifficulty->NerfInfo.find(mapId) != sZoneDifficulty->NerfInfo.end() && matchingPhase != -1)
+            if (sZoneDifficulty->ShouldNerfMap(mapId) && matchingPhase != -1)
             {
                 int8 mode = sZoneDifficulty->NerfInfo[mapId][matchingPhase].Enabled;
                 Map* map = target->GetMap();
@@ -354,7 +354,7 @@ public:
                 }
             }
 
-            if (sZoneDifficulty->NerfInfo.find(mapId) != sZoneDifficulty->NerfInfo.end() && matchingPhase != -1)
+            if (sZoneDifficulty->ShouldNerfMap(mapId) && matchingPhase != -1)
             {
                 int8 mode = sZoneDifficulty->NerfInfo[mapId][matchingPhase].Enabled;
                 Map* map = target->GetMap();
@@ -417,7 +417,7 @@ public:
             uint32 mapId = target->GetMapId();
             uint32 phaseMask = target->GetPhaseMask();
             int matchingPhase = sZoneDifficulty->GetLowestMatchingPhase(mapId, phaseMask);
-            if (sZoneDifficulty->NerfInfo.find(mapId) != sZoneDifficulty->NerfInfo.end() && matchingPhase != -1)
+            if (sZoneDifficulty->ShouldNerfMap(mapId) && matchingPhase != -1)
             {
                 int8 mode = sZoneDifficulty->NerfInfo[mapId][matchingPhase].Enabled;
                 Map* map = target->GetMap();
