@@ -553,14 +553,15 @@ public:
     void OnBeforeSetBossState(uint32 id, EncounterState newState, EncounterState oldState, Map* instance) override
     {
         if (!sZoneDifficulty->MythicmodeEnable)
-        {
             return;
-        }
+
         if (sZoneDifficulty->IsDebugInfoEnabled)
         {
             //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnBeforeSetBossState: bossId = {}, newState = {}, oldState = {}, MapId = {}, InstanceId = {}", id, newState, oldState, instance->GetId(), instance->GetInstanceId());
         }
+
         uint32 instanceId = instance->GetInstanceId();
+
         if (!sZoneDifficulty->IsMythicmodeMap(instance->GetId()) ||
             (!sZoneDifficulty->MythicmodeInNormalDungeons && !instance->IsRaidOrHeroicDungeon()))
         {
@@ -570,9 +571,7 @@ public:
         if (oldState != IN_PROGRESS && newState == IN_PROGRESS)
         {
             if (sZoneDifficulty->MythicmodeInstanceData[instanceId])
-            {
                 sZoneDifficulty->EncountersInProgress[instanceId] = GameTime::GetGameTime().count();
-            }
         }
         else if (oldState == IN_PROGRESS && newState == DONE)
         {
@@ -581,17 +580,12 @@ public:
                 //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Mythicmode is on.");
                 if (sZoneDifficulty->EncountersInProgress.find(instanceId) != sZoneDifficulty->EncountersInProgress.end() && sZoneDifficulty->EncountersInProgress[instanceId] != 0)
                 {
-                    Map::PlayerList const& PlayerList = instance->GetPlayers();
-                    for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                    instance->DoForAllPlayers([&](Player* player)
                     {
-                        Player* player = i->GetSource();
                         if (!player->IsGameMaster() && !player->IsDeveloper())
-                        {
-                            CharacterDatabase.Execute(
-                                "REPLACE INTO `zone_difficulty_encounter_logs` VALUES({}, {}, {}, {}, {}, {}, {})",
+                            CharacterDatabase.Execute("REPLACE INTO `zone_difficulty_encounter_logs` VALUES({}, {}, {}, {}, {}, {}, {})",
                                 instanceId, sZoneDifficulty->EncountersInProgress[instanceId], GameTime::GetGameTime().count(), instance->GetId(), id, player->GetGUID().GetCounter(), 64);
-                        }
-                    }
+                    });
                 }
             }
         }
@@ -643,17 +637,14 @@ public:
                     {
                         SourceAwardsMythicmodeLoot = true;
                         if (!(value.Override & 1))
-                        {
                             score = 1;
-                        }
+
                         break;
                     }
                 }
 
                 if (!SourceAwardsMythicmodeLoot)
-                {
                     return;
-                }
 
                 if (map->IsHeroic() && map->IsNonRaidDungeon())
                 {
@@ -769,12 +760,8 @@ public:
                 // Check if the player has enough score in the respective category.
                 uint32 availableScore = 0;
                 if (sZoneDifficulty->MythicmodeScore.find(player->GetGUID().GetCounter()) != sZoneDifficulty->MythicmodeScore.end())
-                {
                     if (sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()].find(category) != sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()].end())
-                    {
                         availableScore = sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()][category];
-                    }
-                }
 
                 if (availableScore < sZoneDifficulty->TierRewards[category].Price)
                 {
@@ -794,10 +781,10 @@ public:
                 ItemTemplate const* proto = sObjectMgr->GetItemTemplate(sZoneDifficulty->TierRewards[category].Entry);
                 std::string gossip;
                 std::string name = proto->Name1;
+
                 if (ItemLocale const* leftIl = sObjectMgr->GetItemLocale(sZoneDifficulty->TierRewards[category].Entry))
-                {
                     ObjectMgr::GetLocaleString(leftIl->Name, player->GetSession()->GetSessionDbcLocale(), name);
-                }
+
                 gossip.append("Yes, ").append(name).append(" is the item i want.");
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, "No!", GOSSIP_SENDER_MAIN, 999998);
                 AddGossipItemFor(player, GOSSIP_ICON_VENDOR, gossip, GOSSIP_SENDER_MAIN, 99001000 + category);
@@ -852,12 +839,9 @@ public:
                 ItemTemplate const* proto = sObjectMgr->GetItemTemplate(sZoneDifficulty->Rewards[category][counter][i].Entry);
                 std::string name = proto->Name1;
                 if (ItemLocale const* leftIl = sObjectMgr->GetItemLocale(sZoneDifficulty->Rewards[category][counter][i].Entry))
-                {
                     ObjectMgr::GetLocaleString(leftIl->Name, player->GetSession()->GetSessionDbcLocale(), name);
-                }
 
                 AddGossipItemFor(player, GOSSIP_ICON_MONEY_BAG, name, GOSSIP_SENDER_MAIN, (1000 * category) + (100 * counter) + i);
-                //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: AddingGossipItem with action {}", (1000 * category) + (100 * counter) + i);
             }
         }
         else if (action < 100000)
@@ -880,12 +864,8 @@ public:
             // Check if the player has enough score in the respective category.
             uint32 availableScore = 0;
             if (sZoneDifficulty->MythicmodeScore.find(player->GetGUID().GetCounter()) != sZoneDifficulty->MythicmodeScore.end())
-            {
                 if (sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()].find(category) != sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()].end())
-                {
                     availableScore = sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()][category];
-                }
-            }
 
             if (availableScore < sZoneDifficulty->Rewards[category][itemType][counter].Price)
             {
@@ -906,10 +886,10 @@ public:
             ItemTemplate const* proto = sObjectMgr->GetItemTemplate(sZoneDifficulty->Rewards[category][itemType][counter].Entry);
             std::string gossip;
             std::string name = proto->Name1;
+
             if (ItemLocale const* leftIl = sObjectMgr->GetItemLocale(sZoneDifficulty->Rewards[category][itemType][counter].Entry))
-            {
                 ObjectMgr::GetLocaleString(leftIl->Name, player->GetSession()->GetSessionDbcLocale(), name);
-            }
+
             gossip.append("Yes, ").append(name).append(" is the item i want.");
             AddGossipItemFor(player, GOSSIP_ICON_CHAT, "No!", GOSSIP_SENDER_MAIN, 999998);
             AddGossipItemFor(player, GOSSIP_ICON_VENDOR, gossip, GOSSIP_SENDER_MAIN, 100000 + (1000 * category) + (100 * itemType) + counter);
@@ -936,16 +916,11 @@ public:
             // Check (again) if the player has enough score in the respective category.
             uint32 availableScore = 0;
             if (sZoneDifficulty->MythicmodeScore.find(player->GetGUID().GetCounter()) != sZoneDifficulty->MythicmodeScore.end())
-            {
                 if (sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()].find(category) != sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()].end())
-                {
                     availableScore = sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()][category];
-                }
-            }
+
             if (availableScore < sZoneDifficulty->Rewards[category][itemType][counter].Price)
-            {
                 return true;
-            }
 
             // Check if the player has the neccesary achievement
             if (sZoneDifficulty->Rewards[category][itemType][counter].Achievement != 0)
@@ -1082,7 +1057,6 @@ public:
             {
                 if (player->GetInstanceScript()->GetBossState(0) == DONE)
                 {
-                    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Mythicmode is not Possible for instanceId {}", instanceId);
                     canTurnOn = false;
                     creature->Whisper("I am sorry, time-traveler. You can not return to this version of the time-line anymore. You have already completed one of the lessons.", LANG_UNIVERSAL, player);
                     sZoneDifficulty->SaveMythicmodeInstanceData(instanceId);
@@ -1091,16 +1065,12 @@ public:
             // ... if there is an encounter in progress
             if (player->GetInstanceScript()->IsEncounterInProgress())
             {
-                //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: IsEncounterInProgress");
                 canTurnOn = false;
                 creature->Whisper("I am sorry, time-traveler. You can not return to this version of the time-line currently. There is already a battle in progress.", LANG_UNIVERSAL, player);
             }
 
             if (player->IsGameMaster())
-            {
-                LOG_ERROR("module", "MOD-ZONE-DIFFICULTY: GM {} has allowed Mythicmode for instance {}", player->GetName(), instanceId);
                 canTurnOn = true;
-            }
 
             if (canTurnOn)
             {
@@ -1169,14 +1139,8 @@ public:
             AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Please Chromie, let us re-experience how all the things really happened back then. (Mythic Mode)", GOSSIP_SENDER_MAIN, 100);
             AddGossipItemFor(player, GOSSIP_ICON_CHAT, "I think we will be fine with the cinematic version from here. (Normal mode)", GOSSIP_SENDER_MAIN, 101);
 
-            if (sZoneDifficulty->MythicmodeInstanceData[player->GetMap()->GetInstanceId()])
-            {
-                npcText = NPC_TEXT_LEADER_HARD;
-            }
-            else
-            {
-                npcText = NPC_TEXT_LEADER_NORMAL;
-            }
+            npcText = sZoneDifficulty->MythicmodeInstanceData[player->GetMap()->GetInstanceId()] ?
+                NPC_TEXT_LEADER_HARD : NPC_TEXT_LEADER_NORMAL;
         }
         else
         {
@@ -1195,56 +1159,41 @@ public:
     void OnAllCreatureUpdate(Creature* creature, uint32 /*diff*/) override
     {
         if (!sZoneDifficulty->MythicmodeEnable)
-        {
             return;
-        }
+
         // Heavily inspired by https://github.com/azerothcore/mod-autobalance/blob/1d82080237e62376b9a030502264c90b5b8f272b/src/AutoBalance.cpp
         Map* map = creature->GetMap();
         if (!creature || !map)
-        {
             return;
-        }
 
-        if (!map->IsRaid() &&
-            (!(map->IsHeroic() && map->IsDungeon())))
-        {
+        if (!map->IsRaid() && (!(map->IsHeroic() && map->IsDungeon())))
             return;
-        }
 
         uint32 mapId = creature->GetMapId();
         if (sZoneDifficulty->NerfInfo.find(mapId) == sZoneDifficulty->NerfInfo.end())
-        {
             return;
-        }
 
         if ((creature->IsHunterPet() || creature->IsPet() || creature->IsSummon()) && creature->IsControlledByPlayer())
-        {
             return;
-        }
 
         if (!creature->IsAlive())
-        {
             return;
-        }
 
         CreatureTemplate const* creatureTemplate = creature->GetCreatureTemplate();
         //skip critters and special creatures (spell summons etc.) in instances
         if (creatureTemplate->maxlevel <= 1)
-        {
             return;
-        }
 
         CreatureBaseStats const* origCreatureStats = sObjectMgr->GetCreatureBaseStats(creature->GetLevel(), creatureTemplate->unit_class);
         uint32 baseHealth = origCreatureStats->GenerateHealth(creatureTemplate);
         uint32 newHp;
         uint32 entry = creature->GetEntry();
-        //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Checking hp for creature with entry {}.", entry);
+
         if (sZoneDifficulty->CreatureOverrides.find(entry) == sZoneDifficulty->CreatureOverrides.end())
         {
             if (creature->IsDungeonBoss())
-            {
                 return;
-            }
+
             newHp = round(baseHealth * sZoneDifficulty->MythicmodeHpModifier);
         }
         else
@@ -1260,25 +1209,18 @@ public:
             if (sZoneDifficulty->HasMythicmode(mode) && sZoneDifficulty->MythicmodeInstanceData[creature->GetMap()->GetInstanceId()])
             {
                 if (creature->GetMaxHealth() == newHp)
-                {
                     return;
-                }
-                //if (sZoneDifficulty->IsDebugInfoEnabled)
-                //{
-                    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Modify creature hp for Mythic Mode: {} to {}", baseHealth, newHp);
-                //}
+
                 bool hpIsFull = false;
+
                 if (creature->GetHealthPct() >= 100)
-                {
                     hpIsFull = true;
-                }
+
                 creature->SetMaxHealth(newHp);
                 creature->SetCreateHealth(newHp);
                 creature->SetModifierValue(UNIT_MOD_HEALTH, BASE_VALUE, (float)newHp);
                 if (hpIsFull)
-                {
                     creature->SetHealth(newHp);
-                }
                 creature->UpdateAllStats();
                 creature->ResetPlayerDamageReq();
                 return;
@@ -1288,22 +1230,14 @@ public:
             {
                 if (creature->GetMaxHealth() == newHp)
                 {
-                    //if (sZoneDifficulty->IsDebugInfoEnabled)
-                    //{
-                    //    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Modify creature hp for normal mode: {} to {}", baseHealth, baseHealth);
-                    //}
                     bool hpIsFull = false;
                     if (creature->GetHealthPct() >= 100)
-                    {
                         hpIsFull = true;
-                    }
                     creature->SetMaxHealth(baseHealth);
                     creature->SetCreateHealth(baseHealth);
                     creature->SetModifierValue(UNIT_MOD_HEALTH, BASE_VALUE, (float)baseHealth);
                     if (hpIsFull)
-                    {
                         creature->SetHealth(baseHealth);
-                    }
                     creature->UpdateAllStats();
                     creature->ResetPlayerDamageReq();
                     return;
