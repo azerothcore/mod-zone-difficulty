@@ -113,8 +113,7 @@ public:
                             if (sZoneDifficulty->IsDebugInfoEnabled && target)
                             {
                                 if (Player* player = target->ToPlayer()) // Pointless check? Perhaps.
-                                    if (player->GetSession())
-                                        ChatHandler(player->GetSession()).PSendSysMessage("Spell: {} ({}) Post Nerf Value: {}", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, eff->GetAmount());
+                                    ChatHandler(player->GetSession()).PSendSysMessage("Spell: {} ({}) Post Nerf Value: {}", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, eff->GetAmount());
                             }
                         }
                     }
@@ -247,12 +246,7 @@ public:
             if (sZoneDifficulty->IsDebugInfoEnabled && attacker)
             {
                 if (Player* player = attacker->ToPlayer())
-                {
-                    if (player->GetSession())
-                    {
-                        ChatHandler(player->GetSession()).PSendSysMessage("A dot tick will be altered. Pre Nerf Value: %i", damage);
-                    }
-                }
+                    ChatHandler(player->GetSession()).PSendSysMessage("A dot tick will be altered. Pre Nerf Value: {}", damage);
             }
 
             if (sZoneDifficulty->ShouldNerfMap(mapId) && matchingPhase != -1)
@@ -283,12 +277,7 @@ public:
             if (sZoneDifficulty->IsDebugInfoEnabled && attacker)
             {
                 if (Player* player = attacker->ToPlayer())
-                {
-                    if (player->GetSession())
-                    {
-                        ChatHandler(player->GetSession()).PSendSysMessage("A dot tick was altered. Post Nerf Value: %i", damage);
-                    }
-                }
+                    ChatHandler(player->GetSession()).PSendSysMessage("A dot tick was altered. Post Nerf Value: {}", damage);
             }
         }
     }
