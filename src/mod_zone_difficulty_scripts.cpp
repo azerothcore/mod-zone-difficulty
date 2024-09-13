@@ -1020,25 +1020,31 @@ public:
     {
         mod_zone_difficulty_dungeonmasterAI(Creature* creature) : ScriptedAI(creature) { }
 
+        bool CanBeSeen(Player const* /*seer*/) override
+        {
+            if (me->GetMap() && me->GetMap()->IsHeroic() && !me->GetMap()->IsRaid())
+                if (!sZoneDifficulty->MythicmodeInNormalDungeons)
+                    return false;
+
+            if (!sZoneDifficulty->MythicmodeEnable)
+                return false;
+
+            return true;
+        }
+
         void Reset() override
         {
-            //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: mod_zone_difficulty_dungeonmasterAI: Reset happens.");
             if (me->GetMap() && me->GetMap()->IsHeroic() && !me->GetMap()->IsRaid())
             {
                 if (!sZoneDifficulty->MythicmodeEnable)
-                {
                     return;
-                }
-                //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: We're inside a heroic 5man now.");
+
                 //todo: add the list for the wotlk heroic dungeons quests
                 for (auto& quest : sZoneDifficulty->DailyHeroicQuests)
                 {
-                    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Checking quest {} and MapId {}", quest, me->GetMapId());
                     if (sPoolMgr->IsSpawnedObject<Quest>(quest))
-                    {
                         if (sZoneDifficulty->HeroicTBCQuestMapList[me->GetMapId()] == quest)
                         {
-                            //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: mod_zone_difficulty_dungeonmasterAI: Quest with id {} is active.", quest);
                             me->SetPhaseMask(1, true);
 
                             _scheduler.Schedule(15s, [this](TaskContext /*context*/)
@@ -1055,7 +1061,6 @@ public:
                                 });
                             break;
                         }
-                    }
                 }
             }
         }
