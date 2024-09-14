@@ -57,11 +57,8 @@ public:
                                 continue;
 
                             if (sZoneDifficulty->IsDebugInfoEnabled && target)
-                            {
                                 if (Player* player = target->ToPlayer()) // Pointless check? Perhaps.
-                                    if (player->GetSession())
-                                        ChatHandler(player->GetSession()).PSendSysMessage("Spell: {} ({}) Base Value: {}", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, eff->GetAmount());
-                            }
+                                    ChatHandler(player->GetSession()).PSendSysMessage("Spell: {} ({}) Base Value: {}", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, eff->GetAmount());
 
                             int32 absorb = eff->GetAmount();
                             uint32 phaseMask = target->GetPhaseMask();
@@ -71,16 +68,12 @@ public:
                             {
                                 Map* map = target->GetMap();
                                 if (sZoneDifficulty->HasNormalMode(mode))
-                                {
                                     absorb = eff->GetAmount() * sZoneDifficulty->NerfInfo[mapId][matchingPhase].AbsorbNerfPct;
-                                }
+
                                 if (sZoneDifficulty->HasMythicmode(mode) && sZoneDifficulty->MythicmodeInstanceData[target->GetMap()->GetInstanceId()])
                                 {
-                                    if (map->IsRaid() ||
-                                        (map->IsHeroic() && map->IsDungeon()))
-                                    {
+                                    if (map->IsRaid() || (map->IsHeroic() && map->IsDungeon()))
                                         absorb = eff->GetAmount() * sZoneDifficulty->NerfInfo[mapId][matchingPhase].AbsorbNerfPctHard;
-                                    }
                                 }
                             }
                             else if (sZoneDifficulty->NerfInfo[DUEL_INDEX][0].Enabled > 0 && nerfInDuel)
@@ -95,16 +88,12 @@ public:
                                 {
                                     // Check if the mode of instance and SpellNerfOverride match 
                                     if (sZoneDifficulty->OverrideModeMatches(target->GetMap()->GetInstanceId(), spellInfo->Id, mapId))
-                                    {
                                         absorb = eff->GetAmount() * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id][mapId].NerfPct;
-                                    }
                                 }
                                 else if (sZoneDifficulty->SpellNerfOverrides[spellInfo->Id].find(0) != sZoneDifficulty->SpellNerfOverrides[spellInfo->Id].end())
                                 {
                                     if (sZoneDifficulty->OverrideModeMatches(target->GetMap()->GetInstanceId(), spellInfo->Id, mapId))
-                                    {
                                         absorb = eff->GetAmount() * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id][0].NerfPct;
-                                    }
                                 }
                             }
 
@@ -184,17 +173,11 @@ public:
                 {
                     Map* map = target->GetMap();
                     if (sZoneDifficulty->HasNormalMode(mode))
-                    {
                         heal = heal * sZoneDifficulty->NerfInfo[mapId][matchingPhase].HealingNerfPct;
-                    }
+
                     if (sZoneDifficulty->HasMythicmode(mode) && sZoneDifficulty->MythicmodeInstanceData[map->GetInstanceId()])
-                    {
-                        if (map->IsRaid() ||
-                            (map->IsHeroic() && map->IsDungeon()))
-                        {
+                        if (map->IsRaid() || (map->IsHeroic() && map->IsDungeon()))
                             heal = heal * sZoneDifficulty->NerfInfo[mapId][matchingPhase].HealingNerfPctHard;
-                        }
-                    }
                 }
                 else if (sZoneDifficulty->NerfInfo[DUEL_INDEX][0].Enabled > 0 && nerfInDuel)
                 {
@@ -210,9 +193,7 @@ public:
             return;
 
         if (!sZoneDifficulty->MythicmodeInNormalDungeons && !target->GetMap()->IsRaidOrHeroicDungeon())
-        {
             return;
-        }
 
         bool isDot = false;
 
@@ -221,9 +202,7 @@ public:
             for (auto const& eff : spellInfo->GetEffects())
             {
                 if (eff.ApplyAuraName == SPELL_AURA_PERIODIC_DAMAGE || eff.ApplyAuraName == SPELL_AURA_PERIODIC_DAMAGE_PERCENT)
-                {
                     isDot = true;
-                }
             }
         }
 
@@ -232,10 +211,8 @@ public:
 
         // Disclaimer: also affects disables boss adds buff.
         if (sConfigMgr->GetOption<bool>("ModZoneDifficulty.SpellBuff.OnlyBosses", false))
-        {
             if (attacker->ToCreature() && !attacker->ToCreature()->IsDungeonBoss())
                 return;
-        }
 
         if (sZoneDifficulty->IsValidNerfTarget(target))
         {
@@ -244,63 +221,45 @@ public:
             int32 matchingPhase = sZoneDifficulty->GetLowestMatchingPhase(mapId, phaseMask);
 
             if (sZoneDifficulty->IsDebugInfoEnabled && attacker)
-            {
                 if (Player* player = attacker->ToPlayer())
                     ChatHandler(player->GetSession()).PSendSysMessage("A dot tick will be altered. Pre Nerf Value: {}", damage);
-            }
 
             if (sZoneDifficulty->ShouldNerfMap(mapId) && matchingPhase != -1)
             {
                 int8 mode = sZoneDifficulty->NerfInfo[mapId][matchingPhase].Enabled;
                 Map* map = target->GetMap();
+
                 if (sZoneDifficulty->HasNormalMode(mode))
-                {
                     damage = damage * sZoneDifficulty->NerfInfo[mapId][matchingPhase].SpellDamageBuffPct;
-                }
+
                 if (sZoneDifficulty->HasMythicmode(mode) && sZoneDifficulty->MythicmodeInstanceData[map->GetInstanceId()])
-                {
-                    if (map->IsRaid() ||
-                        (map->IsHeroic() && map->IsDungeon()))
-                    {
+                    if (map->IsRaid() || (map->IsHeroic() && map->IsDungeon()))
                         damage = damage * sZoneDifficulty->NerfInfo[mapId][matchingPhase].SpellDamageBuffPctHard;
-                    }
-                }
             }
             else if (sZoneDifficulty->ShouldNerfInDuels(target))
             {
                 if (sZoneDifficulty->NerfInfo[DUEL_INDEX][0].Enabled > 0)
-                {
                     damage = damage * sZoneDifficulty->NerfInfo[DUEL_INDEX][0].SpellDamageBuffPct;
-                }
             }
 
             if (sZoneDifficulty->IsDebugInfoEnabled && attacker)
-            {
                 if (Player* player = attacker->ToPlayer())
                     ChatHandler(player->GetSession()).PSendSysMessage("A dot tick was altered. Post Nerf Value: {}", damage);
-            }
         }
     }
 
     void ModifySpellDamageTaken(Unit* target, Unit* attacker, int32& damage, SpellInfo const* spellInfo) override
     {
         if (!sZoneDifficulty->IsEnabled)
-        {
             return;
-        }
+
         if (!sZoneDifficulty->MythicmodeInNormalDungeons && !target->GetMap()->IsRaidOrHeroicDungeon())
-        {
             return;
-        }
 
         // Disclaimer: also affects disables boss adds buff.
         if (sConfigMgr->GetOption<bool>("ModZoneDifficulty.SpellBuff.OnlyBosses", false))
-        {
             if (attacker->ToCreature() && !attacker->ToCreature()->IsDungeonBoss())
-            {
                 return;
-            }
-        }
 
         if (sZoneDifficulty->IsValidNerfTarget(target))
         {
@@ -334,11 +293,8 @@ public:
                 {
                     if (Player* player = target->ToPlayer()) // Pointless check? Perhaps.
                     {
-                        if (player->GetSession())
-                        {
-                            ChatHandler(player->GetSession()).PSendSysMessage("Spell: {} ({}) Before Nerf Value: {} ({} Normal Mode)", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, damage, sZoneDifficulty->NerfInfo[mapId][matchingPhase].SpellDamageBuffPct);
-                            ChatHandler(player->GetSession()).PSendSysMessage("Spell: {} ({}) Before Nerf Value: {} ({} Mythic Mode)", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, damage, sZoneDifficulty->NerfInfo[mapId][matchingPhase].SpellDamageBuffPctHard);
-                        }
+                        ChatHandler(player->GetSession()).PSendSysMessage("Spell: {} ({}) Before Nerf Value: {} ({} Normal Mode)", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, damage, sZoneDifficulty->NerfInfo[mapId][matchingPhase].SpellDamageBuffPct);
+                        ChatHandler(player->GetSession()).PSendSysMessage("Spell: {} ({}) Before Nerf Value: {} ({} Mythic Mode)", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, damage, sZoneDifficulty->NerfInfo[mapId][matchingPhase].SpellDamageBuffPctHard);
                     }
                 }
             }
@@ -347,59 +303,38 @@ public:
             {
                 int8 mode = sZoneDifficulty->NerfInfo[mapId][matchingPhase].Enabled;
                 Map* map = target->GetMap();
+
                 if (sZoneDifficulty->HasNormalMode(mode))
-                {
                     damage = damage * sZoneDifficulty->NerfInfo[mapId][matchingPhase].SpellDamageBuffPct;
-                }
+
                 if (sZoneDifficulty->HasMythicmode(mode) && sZoneDifficulty->MythicmodeInstanceData[map->GetInstanceId()])
-                {
-                    if (map->IsRaid() ||
-                        (map->IsHeroic() && map->IsDungeon()))
-                    {
+                    if (map->IsRaid() || (map->IsHeroic() && map->IsDungeon()))
                         damage = damage * sZoneDifficulty->NerfInfo[mapId][matchingPhase].SpellDamageBuffPctHard;
-                    }
-                }
             }
             else if (sZoneDifficulty->ShouldNerfInDuels(target))
             {
                 if (sZoneDifficulty->NerfInfo[DUEL_INDEX][0].Enabled > 0)
-                {
                     damage = damage * sZoneDifficulty->NerfInfo[DUEL_INDEX][0].SpellDamageBuffPct;
-                }
             }
 
             if (sZoneDifficulty->IsDebugInfoEnabled && target)
-            {
                 if (Player* player = target->ToPlayer()) // Pointless check? Perhaps.
-                {
-                    if (player->GetSession())
-                    {
-                        ChatHandler(player->GetSession()).PSendSysMessage("Spell: {} ({}) Post Nerf Value: {}", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, damage);
-                    }
-                }
-            }
+                    ChatHandler(player->GetSession()).PSendSysMessage("Spell: {} ({}) Post Nerf Value: {}", spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()], spellInfo->Id, damage);
         }
     }
 
     void ModifyMeleeDamage(Unit* target, Unit* attacker, uint32& damage) override
     {
         if (!sZoneDifficulty->IsEnabled)
-        {
             return;
-        }
+
         if (!sZoneDifficulty->MythicmodeInNormalDungeons && !target->GetMap()->IsRaidOrHeroicDungeon())
-        {
             return;
-        }
 
         // Disclaimer: also affects disables boss adds buff.
         if (sConfigMgr->GetOption<bool>("ModZoneDifficulty.MeleeBuff.OnlyBosses", false))
-        {
             if (attacker->ToCreature() && !attacker->ToCreature()->IsDungeonBoss())
-            {
                 return;
-            }
-        }
 
         if (sZoneDifficulty->IsValidNerfTarget(target))
         {
@@ -410,25 +345,18 @@ public:
             {
                 int8 mode = sZoneDifficulty->NerfInfo[mapId][matchingPhase].Enabled;
                 Map* map = target->GetMap();
+
                 if (sZoneDifficulty->HasNormalMode(mode))
-                {
                     damage = damage * sZoneDifficulty->NerfInfo[mapId][matchingPhase].MeleeDamageBuffPct;
-                }
+
                 if (sZoneDifficulty->HasMythicmode(mode) && sZoneDifficulty->MythicmodeInstanceData[target->GetMap()->GetInstanceId()])
-                {
-                    if (map->IsRaid() ||
-                        (map->IsHeroic() && map->IsDungeon()))
-                    {
+                    if (map->IsRaid() || (map->IsHeroic() && map->IsDungeon()))
                         damage = damage * sZoneDifficulty->NerfInfo[mapId][matchingPhase].MeleeDamageBuffPctHard;
-                    }
-                }
             }
             else if (sZoneDifficulty->ShouldNerfInDuels(target))
             {
                 if (sZoneDifficulty->NerfInfo[DUEL_INDEX][0].Enabled > 0)
-                {
                     damage = damage * sZoneDifficulty->NerfInfo[DUEL_INDEX][0].MeleeDamageBuffPct;
-                }
             }
         }
     }
@@ -438,36 +366,21 @@ public:
      */
     void OnUnitEnterCombat(Unit* unit, Unit* /*victim*/) override
     {
-        //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnUnitEnterCombat for unit {}", unit->GetEntry());
         if (sZoneDifficulty->MythicmodeInstanceData.find(unit->GetInstanceId()) == sZoneDifficulty->MythicmodeInstanceData.end())
-        {
-            //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Instance is not in mythic mode.");
             return;
-        }
+
         if (!sZoneDifficulty->MythicmodeInstanceData[unit->GetInstanceId()])
-        {
-            //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: InstanceId not found in mythic mode list.");
             return;
-        }
 
         if (Creature* creature = unit->ToCreature())
-        {
             if (creature->IsTrigger())
-            {
-                //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Creature is a trigger.");
                 return;
-            }
-        }
 
         uint32 entry = unit->GetEntry();
         if (sZoneDifficulty->MythicmodeAI.find(entry) == sZoneDifficulty->MythicmodeAI.end())
-        {
-            //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: No HarmodeAI found for creature with entry {}", entry);
             return;
-        }
 
         unit->m_Events.CancelEventGroup(EVENT_GROUP);
-        //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: OnUnitEnterCombat checks passed for unit {}", unit->GetEntry());
 
         uint32 i = 0;
         for (ZoneDifficultyHAI& data : sZoneDifficulty->MythicmodeAI[entry])
