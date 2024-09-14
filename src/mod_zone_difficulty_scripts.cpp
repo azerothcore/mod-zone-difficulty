@@ -767,28 +767,23 @@ public:
                 {
                     npcText = NPC_TEXT_DENIED;
                     SendGossipMenuFor(player, npcText, creature);
-                    std::string whisper;
-                    whisper.append("I am sorry, time-traveler. This reward costs ");
-                    whisper.append(std::to_string(sZoneDifficulty->TierRewards[category].Price));
-                    whisper.append(" score but you only have ");
-                    whisper.append(std::to_string(availableScore));
-                    whisper.append(" ");
-                    whisper.append(sZoneDifficulty->GetContentTypeString(category));
+                    std::string whisper = Acore::StringFormat("I am sorry, time-traveler. This reward costs {} score but you only have {} {}",
+                        sZoneDifficulty->TierRewards[category].Price,
+                        availableScore,
+                        sZoneDifficulty->GetContentTypeString(category));
+
                     creature->Whisper(whisper, LANG_UNIVERSAL, player);
                     return true;
                 }
                 npcText = NPC_TEXT_CONFIRM;
                 ItemTemplate const* proto = sObjectMgr->GetItemTemplate(sZoneDifficulty->TierRewards[category].Entry);
-                std::string gossip;
                 std::string name = proto->Name1;
 
                 if (ItemLocale const* leftIl = sObjectMgr->GetItemLocale(sZoneDifficulty->TierRewards[category].Entry))
                     ObjectMgr::GetLocaleString(leftIl->Name, player->GetSession()->GetSessionDbcLocale(), name);
 
-                gossip.append("Yes, ").append(name).append(" is the item i want.");
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, "No!", GOSSIP_SENDER_MAIN, 999998);
-                AddGossipItemFor(player, GOSSIP_ICON_VENDOR, gossip, GOSSIP_SENDER_MAIN, 99001000 + category);
-                //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: AddingGossipItem with action {}", 99001000 + category);
+                AddGossipItemFor(player, GOSSIP_ICON_VENDOR, Acore::StringFormat("Yes, {} is the item I want.", name), GOSSIP_SENDER_MAIN, 99001000 + category);
                 SendGossipMenuFor(player, npcText, creature);
                 return true;
             }
@@ -800,24 +795,16 @@ public:
         {
             npcText = NPC_TEXT_CATEGORY;
             if (sZoneDifficulty->HasCompletedFullTier(action, player->GetGUID().GetCounter()))
-            {
-                std::string gossip = "I want to redeem the ultimate Mythicmode reward ";
-                gossip.append(sZoneDifficulty->GetContentTypeString(action));
-                AddGossipItemFor(player, GOSSIP_ICON_MONEY_BAG, gossip, GOSSIP_SENDER_MAIN, 99000000 + action);
-            }
+                AddGossipItemFor(player, GOSSIP_ICON_MONEY_BAG, Acore::StringFormat("I want to redeem the ultimate Mythicmode reward {}", sZoneDifficulty->GetContentTypeString(action)), GOSSIP_SENDER_MAIN, 99000000 + action);
 
             uint32 i = 1;
             for (auto& itemType : sZoneDifficulty->Rewards[action])
             {
-                //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: typedata.first is {}", itemType.first);
-                std::string gossip;
                 std::string typestring = sZoneDifficulty->GetItemTypeString(itemType.first);
                 if (sZoneDifficulty->ItemIcons.find(i) != sZoneDifficulty->ItemIcons.end())
-                {
-                    gossip.append(sZoneDifficulty->ItemIcons[i]);
-                }
-                gossip.append("I am interested in items from the ").append(typestring).append(" category.");
-                AddGossipItemFor(player, GOSSIP_ICON_CHAT, gossip, GOSSIP_SENDER_MAIN, itemType.first + (action * 100));
+                    AddGossipItemFor(player, GOSSIP_ICON_CHAT, Acore::StringFormat("{} I am interested in items from the {} category.", sZoneDifficulty->ItemIcons[i], typestring), GOSSIP_SENDER_MAIN, itemType.first + (action * 100));
+                else
+                    AddGossipItemFor(player, GOSSIP_ICON_CHAT, Acore::StringFormat("I am interested in items from the {} category.", typestring), GOSSIP_SENDER_MAIN, itemType.first + (action * 100));
                 ++i;
             }
         }
@@ -871,29 +858,23 @@ public:
             {
                 npcText = NPC_TEXT_DENIED;
                 SendGossipMenuFor(player, npcText, creature);
-                std::string whisper;
-                whisper.append("I am sorry, time-traveler. This item costs ");
-                whisper.append(std::to_string(sZoneDifficulty->Rewards[category][itemType][counter].Price));
-                whisper.append(" score but you only have ");
-                whisper.append(std::to_string(sZoneDifficulty->MythicmodeScore[category][player->GetGUID().GetCounter()]));
-                whisper.append(" ");
-                whisper.append(sZoneDifficulty->GetContentTypeString(category));
+                std::string whisper = Acore::StringFormat("I am sorry, time-traveler. This item costs {} but you only have {} {}",
+                    sZoneDifficulty->Rewards[category][itemType][counter].Price,
+                    sZoneDifficulty->MythicmodeScore[category][player->GetGUID().GetCounter()],
+                    sZoneDifficulty->GetContentTypeString(category));
                 creature->Whisper(whisper, LANG_UNIVERSAL, player);
                 return true;
             }
 
             npcText = NPC_TEXT_CONFIRM;
             ItemTemplate const* proto = sObjectMgr->GetItemTemplate(sZoneDifficulty->Rewards[category][itemType][counter].Entry);
-            std::string gossip;
             std::string name = proto->Name1;
 
             if (ItemLocale const* leftIl = sObjectMgr->GetItemLocale(sZoneDifficulty->Rewards[category][itemType][counter].Entry))
                 ObjectMgr::GetLocaleString(leftIl->Name, player->GetSession()->GetSessionDbcLocale(), name);
 
-            gossip.append("Yes, ").append(name).append(" is the item i want.");
             AddGossipItemFor(player, GOSSIP_ICON_CHAT, "No!", GOSSIP_SENDER_MAIN, 999998);
-            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, gossip, GOSSIP_SENDER_MAIN, 100000 + (1000 * category) + (100 * itemType) + counter);
-            //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: AddingGossipItem with action {}", 100000 + (1000 * category) + (100 * itemType) + counter);
+            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, Acore::StringFormat("Yes, {} is the item I want.", name), GOSSIP_SENDER_MAIN, 100000 + (1000 * category) + (100 * itemType) + counter);
         }
         else if (action > 100000)
         {
@@ -923,7 +904,7 @@ public:
                 return true;
 
             // Check if the player has the neccesary achievement
-            if (sZoneDifficulty->Rewards[category][itemType][counter].Achievement != 0)
+            if (sZoneDifficulty->Rewards[category][itemType][counter].Achievement)
             {
                 if (!player->HasAchieved(sZoneDifficulty->Rewards[category][itemType][counter].Achievement))
                 {
@@ -931,11 +912,6 @@ public:
                     gossip.append(std::to_string(sZoneDifficulty->Rewards[category][itemType][counter].Achievement));
                     gossip.append(" to receive this item. Before i can give it to you, you need to complete the whole dungeon where it can be obtained.");
                     creature->Whisper(gossip, LANG_UNIVERSAL, player);
-                    /* debug
-                     * LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Player missing achiement with ID {} to obtain item with category {}, itemType {}, counter {}",
-                     *    sZoneDifficulty->Rewards[category][itemType][counter].Achievement, category, itemType, counter);
-                     * end debug
-                     */
                     CloseGossipMenuFor(player);
                     return true;
                 }
@@ -958,15 +934,10 @@ public:
 
         for (auto& typedata : sZoneDifficulty->Rewards)
         {
-            //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: typedata.first is {}", typedata.first);
             if (typedata.first != 0)
             {
-                std::string gossip;
-                std::string typestring = sZoneDifficulty->GetContentTypeString(typedata.first);
-                gossip.append("I want to redeem rewards ").append(typestring);
-                //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: typestring is: {} gossip is: {}", typestring, gossip);
                 // typedata.first is the ContentType
-                AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, gossip, GOSSIP_SENDER_MAIN, typedata.first);
+                AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, Acore::StringFormat("I want to redeem rewards {}", sZoneDifficulty->GetContentTypeString(typedata.first)), GOSSIP_SENDER_MAIN, typedata.first);
             }
         }
 
