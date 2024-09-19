@@ -79,23 +79,6 @@ int32 const MODE_HARD = 64;
 // EVENT_GROUP is used for unit->m_Events.AddEventAtOffset
 uint8 const EVENT_GROUP = 64;
 
-int32 const TYPE_VANILLA = 1;
-int32 const TYPE_RAID_MC = 2;
-int32 const TYPE_RAID_ONY = 3;
-int32 const TYPE_RAID_BWL = 4;
-int32 const TYPE_RAID_ZG = 5;
-int32 const TYPE_RAID_AQ20 = 6;
-int32 const TYPE_RAID_AQ40 = 7;
-int32 const TYPE_HEROIC_TBC = 8;
-int32 const TYPE_RAID_T4 = 9;
-int32 const TYPE_RAID_T5 = 10;
-int32 const TYPE_RAID_T6 = 11;
-int32 const TYPE_HEROIC_WOTLK = 12;
-int32 const TYPE_RAID_T7 = 13;
-int32 const TYPE_RAID_T8 = 14;
-int32 const TYPE_RAID_T9 = 15;
-int32 const TYPE_RAID_T10 = 16;
-
 uint32 const ITEMTYPE_MISC = 1;
 uint32 const ITEMTYPE_CLOTH = 2;
 uint32 const ITEMTYPE_LEATHER = 3;
@@ -114,6 +97,30 @@ uint32 const TARGET_PLAYER_DISTANCE = 18;            // a random player within T
 
 const std::string REWARD_MAIL_SUBJECT = "Chromie's Reward for you";
 const std::string REWARD_MAIL_BODY = "Enjoy your new item!";
+
+const std::string ModZoneDifficultyString = "mod-zone-difficulty#";
+
+enum ZoneDifficultySettings
+{
+    // Score settings
+    TYPE_NONE         = 0,
+    TYPE_VANILLA      = 1,
+    TYPE_RAID_MC      = 2,
+    TYPE_RAID_ONY     = 3,
+    TYPE_RAID_BWL     = 4,
+    TYPE_RAID_ZG      = 5,
+    TYPE_RAID_AQ20    = 6,
+    TYPE_RAID_AQ40    = 7,
+    TYPE_HEROIC_TBC   = 8,
+    TYPE_RAID_T4      = 9,
+    TYPE_RAID_T5      = 10,
+    TYPE_RAID_T6      = 11,
+    TYPE_HEROIC_WOTLK = 12,
+    TYPE_RAID_T7      = 13,
+    TYPE_RAID_T8      = 14,
+    TYPE_RAID_T9      = 15,
+    TYPE_RAID_T10     = 16
+};
 
 class ZoneDifficulty
 {
@@ -168,7 +175,7 @@ public:
     typedef std::map<uint32, std::vector<ZoneDifficultyMythicmodeMapData> > ZoneDifficultyMythicmodeLootMap;
     ZoneDifficultyMythicmodeLootMap MythicmodeLoot;
     typedef std::map<uint32, std::map<uint32, uint32> > ZoneDifficultyDualUintMap;
-    ZoneDifficultyDualUintMap MythicmodeScore;
+    ZoneDifficultyDualUintMap MythicmodeScore; // Deprecated, to be removed.
     typedef std::map<uint32, std::map<uint32, std::vector<ZoneDifficultyRewardData> > > ZoneDifficultyRewardMap;
     ZoneDifficultyRewardMap Rewards;
     typedef std::map<uint32, std::vector<ZoneDifficultyHAI> > ZoneDifficultyHAIMap;

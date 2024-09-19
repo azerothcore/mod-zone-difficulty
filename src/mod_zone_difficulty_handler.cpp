@@ -29,9 +29,7 @@ ZoneDifficulty* ZoneDifficulty::instance()
 void ZoneDifficulty::LoadMapDifficultySettings()
 {
     if (!sZoneDifficulty->IsEnabled)
-    {
         return;
-    }
 
     sZoneDifficulty->Rewards.clear();
     sZoneDifficulty->MythicmodeAI.clear();
@@ -155,7 +153,7 @@ void ZoneDifficulty::LoadMapDifficultySettings()
         do
         {
             std::vector<uint32> debuffs;
-            uint32 mapId;
+            uint32 mapId = 0;
             if ((*result)[2].Get<bool>())
             {
                 std::string spellString = (*result)[1].Get<std::string>();
@@ -165,19 +163,13 @@ void ZoneDifficulty::LoadMapDifficultySettings()
                 for (auto token : tokens)
                 {
                     if (token.empty())
-                    {
                         continue;
-                    }
 
-                    uint32 spell;
+                    uint32 spell = 0;
                     if ((spell = Acore::StringTo<uint32>(token).value()))
-                    {
                         debuffs.push_back(spell);
-                    }
                     else
-                    {
                         LOG_ERROR("module", "MOD-ZONE-DIFFICULTY: Disabling buffs for spell '{}' is invalid, skipped.", spell);
-                    }
                 }
                 sZoneDifficulty->DisallowedBuffs[mapId] = debuffs;
             }
@@ -402,6 +394,7 @@ void ZoneDifficulty::LoadMythicmodeScoreData()
 
         } while (result->NextRow());
     }
+
     if (QueryResult result = CharacterDatabase.Query("SELECT `Map`, `BossId`, `PlayerGuid` FROM zone_difficulty_encounter_logs WHERE `Mode` = 64"))
     {
         do
@@ -440,9 +433,7 @@ void ZoneDifficulty::SendWhisperToRaid(std::string message, Creature* creature, 
             if (creature && player)
             {
                 if (mapPlayer->IsInSameGroupWith(player))
-                {
                     creature->Whisper(message, LANG_UNIVERSAL, mapPlayer);
-                }
             }
         });
     }
@@ -557,16 +548,10 @@ void ZoneDifficulty::AddMythicmodeScore(Map* map, uint32 type, uint32 score)
 
     map->DoForAllPlayers([&](Player* player)
     {
-        if (sZoneDifficulty->MythicmodeScore.find(player->GetGUID().GetCounter()) == sZoneDifficulty->MythicmodeScore.end())
-            sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()][type] = score;
-        else if (sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()].find(type) == sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()].end())
-            sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()][type] = score;
-        else
-            sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()][type] = sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()][type] + score;
-
+        uint32 previousScore = player->GetPlayerSetting(ModZoneDifficultyString + "score", type).value;
+        player->UpdatePlayerSetting(ModZoneDifficultyString + "score", type, previousScore + score);
         std::string typestring = sZoneDifficulty->GetContentTypeString(type);
-        ChatHandler(player->GetSession()).PSendSysMessage("You have received Mythicmode score {} New score: {}", typestring, sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()][type]);
-        CharacterDatabase.Execute("REPLACE INTO zone_difficulty_mythicmode_score VALUES({}, {}, {})", player->GetGUID().GetCounter(), type, sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()][type]);
+        ChatHandler(player->GetSession()).PSendSysMessage("You have received Mythicmode score {} New score: {}", typestring, previousScore + score);
     });
 }
 
@@ -583,8 +568,9 @@ void ZoneDifficulty::DeductMythicmodeScore(Player* player, uint32 type, uint32 s
     {
         LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Reducing score with type {} from player with guid {} by {}.", type, player->GetGUID().GetCounter(), score);
     }
-    sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()][type] = sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()][type] - score;
-    CharacterDatabase.Execute("REPLACE INTO zone_difficulty_mythicmode_score VALUES({}, {}, {})", player->GetGUID().GetCounter(), type, sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()][type]);
+
+    uint32 val = player->GetPlayerSetting(ModZoneDifficultyString + "score", type).value - score;
+    player->UpdatePlayerSetting(ModZoneDifficultyString + "score", type, val);
 }
 
 /**

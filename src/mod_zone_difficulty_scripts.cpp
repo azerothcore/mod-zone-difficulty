@@ -413,6 +413,28 @@ public:
             }
         }
     }
+
+    void OnLogin(Player* player) override
+    {
+        if (sZoneDifficulty->MythicmodeScore.empty())
+            return;
+
+        if (sZoneDifficulty->MythicmodeScore.find(player->GetGUID().GetCounter()) != sZoneDifficulty->MythicmodeScore.end())
+        {
+            for (int i = 1; i <= 16; ++i)
+            {
+                uint32 availableScore = 0;
+
+                if (sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()].find(i) != sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()].end())
+                    availableScore = sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()][i];
+
+                player->UpdatePlayerSetting(ModZoneDifficultyString + "score", i, availableScore);
+            }
+
+            sZoneDifficulty->MythicmodeScore.erase(player->GetGUID().GetCounter());
+            CharacterDatabase.Execute("DELETE FROM zone_difficulty_mythicmode_score WHERE GUID = {}", player->GetGUID().GetCounter());
+        }
+    }
 };
 
 class mod_zone_difficulty_petscript : public PetScript
@@ -607,25 +629,19 @@ public:
         if (action == 999999)
         {
             npcText = NPC_TEXT_SCORE;
+            bool hasAnyScore = false;
             for (int i = 1; i <= 16; ++i)
             {
-                std::string whisper;
-                whisper.append("Your score is ");
-                if (sZoneDifficulty->MythicmodeScore.find(player->GetGUID().GetCounter()) == sZoneDifficulty->MythicmodeScore.end())
+                if (uint32 score = player->GetPlayerSetting(ModZoneDifficultyString + "score", i).value)
                 {
-                    continue;
+                    creature->Whisper(Acore::StringFormat("Your score is {} {}", score, sZoneDifficulty->GetContentTypeString(i)), LANG_UNIVERSAL, player);
+                    hasAnyScore = true;
                 }
-                else if (sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()].find(i) == sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()].end())
-                {
-                    continue;
-                }
-                else
-                {
-                    whisper.append(std::to_string(sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()][i])).append(" ");
-                }
-                whisper.append(sZoneDifficulty->GetContentTypeString(i));
-                creature->Whisper(whisper, LANG_UNIVERSAL, player);
             }
+
+            if (!hasAnyScore)
+                creature->Whisper("You don't have any score in any category.", LANG_UNIVERSAL, player);
+
             return true;
         }
 
@@ -636,14 +652,8 @@ public:
             uint32 category = action - 99001000;
 
             // Check (again) if the player has enough score in the respective category.
-            uint32 availableScore = 0;
-            if (sZoneDifficulty->MythicmodeScore.find(player->GetGUID().GetCounter()) != sZoneDifficulty->MythicmodeScore.end())
-            {
-                if (sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()].find(category) != sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()].end())
-                {
-                    availableScore = sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()][category];
-                }
-            }
+            uint32 availableScore = player->GetPlayerSetting(ModZoneDifficultyString + "score", category).value;
+
             if (availableScore < sZoneDifficulty->TierRewards[category].Price)
             {
                 CloseGossipMenuFor(player);
@@ -671,10 +681,7 @@ public:
             if (sZoneDifficulty->HasCompletedFullTier(category, player->GetGUID().GetCounter()))
             {
                 // Check if the player has enough score in the respective category.
-                uint32 availableScore = 0;
-                if (sZoneDifficulty->MythicmodeScore.find(player->GetGUID().GetCounter()) != sZoneDifficulty->MythicmodeScore.end())
-                    if (sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()].find(category) != sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()].end())
-                        availableScore = sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()][category];
+                uint32 availableScore = player->GetPlayerSetting(ModZoneDifficultyString + "score", category).value;
 
                 if (availableScore < sZoneDifficulty->TierRewards[category].Price)
                 {
@@ -762,10 +769,7 @@ public:
             //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Handling item with category {}, itemType {}, counter {}", category, itemType, counter);
 
             // Check if the player has enough score in the respective category.
-            uint32 availableScore = 0;
-            if (sZoneDifficulty->MythicmodeScore.find(player->GetGUID().GetCounter()) != sZoneDifficulty->MythicmodeScore.end())
-                if (sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()].find(category) != sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()].end())
-                    availableScore = sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()][category];
+            uint32 availableScore = player->GetPlayerSetting(ModZoneDifficultyString + "score", category).value;
 
             if (availableScore < sZoneDifficulty->Rewards[category][itemType][counter].Price)
             {
@@ -773,7 +777,7 @@ public:
                 SendGossipMenuFor(player, npcText, creature);
                 std::string whisper = Acore::StringFormat("I am sorry, time-traveler. This item costs {} but you only have {} {}",
                     sZoneDifficulty->Rewards[category][itemType][counter].Price,
-                    sZoneDifficulty->MythicmodeScore[category][player->GetGUID().GetCounter()],
+                    availableScore,
                     sZoneDifficulty->GetContentTypeString(category));
                 creature->Whisper(whisper, LANG_UNIVERSAL, player);
                 return true;
@@ -808,10 +812,7 @@ public:
             }
 
             // Check (again) if the player has enough score in the respective category.
-            uint32 availableScore = 0;
-            if (sZoneDifficulty->MythicmodeScore.find(player->GetGUID().GetCounter()) != sZoneDifficulty->MythicmodeScore.end())
-                if (sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()].find(category) != sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()].end())
-                    availableScore = sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()][category];
+            uint32 availableScore = player->GetPlayerSetting(ModZoneDifficultyString + "score", category).value;
 
             if (availableScore < sZoneDifficulty->Rewards[category][itemType][counter].Price)
                 return true;
