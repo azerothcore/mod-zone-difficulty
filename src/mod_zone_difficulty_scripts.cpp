@@ -588,6 +588,15 @@ public:
                 else if (map->IsRaid())
                 {
                     sZoneDifficulty->AddMythicmodeScore(map, sZoneDifficulty->Expansion[mapId], score);
+
+                    if (source->GetEntry() == NPC_ILLIDAN_STORMRAGE)
+                    {
+                        map->DoForAllPlayers([&](Player* player)
+                        {
+                            player->UpdatePlayerSetting(ModZoneDifficultyString + "ct", SETTING_BLACK_TEMPLE, 1);
+                            ChatHandler(player->GetSession()).PSendSysMessage("Congratulations on completing the Black Temple!");
+                        });
+                    }
                 }
                 /* debug
                  * else
@@ -769,6 +778,17 @@ public:
             //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Handling item with category {}, itemType {}, counter {}", category, itemType, counter);
 
             // Check if the player has enough score in the respective category.
+
+            if (category == TYPE_RAID_T6)
+            {
+                if (!player->GetPlayerSetting(ModZoneDifficultyString + "ct", SETTING_BLACK_TEMPLE).value)
+                {
+                    creature->Whisper("Ah, hero! The threads of fate bring you to me. To claim the rewards you desire, you must first confront Illidan Stormrage on Mythic difficulty.",
+                        LANG_UNIVERSAL, player);
+                    return true;
+                }
+            }
+
             uint32 availableScore = player->GetPlayerSetting(ModZoneDifficultyString + "score", category).value;
 
             if (availableScore < sZoneDifficulty->Rewards[category][itemType][counter].Price)

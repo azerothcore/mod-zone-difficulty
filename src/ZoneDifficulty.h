@@ -119,7 +119,15 @@ enum ZoneDifficultySettings
     TYPE_RAID_T7      = 13,
     TYPE_RAID_T8      = 14,
     TYPE_RAID_T9      = 15,
-    TYPE_RAID_T10     = 16
+    TYPE_RAID_T10     = 16,
+
+    // Completed tiers settings
+    SETTING_BLACK_TEMPLE = 0
+};
+
+enum Misc
+{
+    NPC_ILLIDAN_STORMRAGE = 22917
 };
 
 class ZoneDifficulty
