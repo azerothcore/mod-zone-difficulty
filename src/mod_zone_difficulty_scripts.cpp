@@ -737,7 +737,7 @@ public:
                 ++i;
             }
         }
-        else if (action < 1000)
+        else if (action < 1200)
         {
             npcText = NPC_TEXT_ITEM;
             uint32 category = 0;
