@@ -87,6 +87,9 @@ void ZoneDifficulty::LoadMapDifficultySettings()
     EncounterCounter[544] = 1; // Magtheridon's Lair
     EncounterCounter[532] = 12; // Karazhan
 
+    // Category 11
+    EncounterCounter[564] = 9; // Black Temple
+
     // Icons
     sZoneDifficulty->ItemIcons[ITEMTYPE_MISC] = "|TInterface\\icons\\inv_misc_cape_17:15|t |TInterface\\icons\\inv_misc_gem_topaz_02:15|t |TInterface\\icons\\inv_jewelry_ring_51naxxramas:15|t ";
     sZoneDifficulty->ItemIcons[ITEMTYPE_CLOTH] = "|TInterface\\icons\\inv_chest_cloth_42:15|t ";
@@ -986,6 +989,9 @@ bool ZoneDifficulty::HasCompletedFullTier(uint32 category, uint32 playerGuid)
     case TYPE_RAID_T4:
         MapList = { 532, 544, 565};
         break;
+    case TYPE_RAID_T6:
+        MapList = { 564 };
+        break;
     default:
         LOG_ERROR("module", "MOD-ZONE-DIFFICULTY: Category without data requested in ZoneDifficulty::HasCompletedFullTier {}", category);
         return false;
@@ -1002,11 +1008,8 @@ bool ZoneDifficulty::HasCompletedFullTier(uint32 category, uint32 playerGuid)
         }
         for (uint8 i = 0; i < sZoneDifficulty->EncounterCounter[mapId]; ++i)
         {
-            //LOG_INFO("module", "MOD-ZONE-DIFFCULTY: Checking HasCompletedFullTier for BossId {}: {}.", i, sZoneDifficulty->Logs[playerGuid][mapId][i]);
             if (!sZoneDifficulty->Logs[playerGuid][mapId][i])
-            {
                 return false;
-            }
         }
     }
     return true;
