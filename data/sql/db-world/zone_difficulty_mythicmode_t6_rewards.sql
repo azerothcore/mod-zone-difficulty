@@ -15,6 +15,10 @@ INSERT INTO `zone_difficulty_mythicmode_rewards` (`ContentType`, `ItemType`, `En
 (11, 1, 32238, @PRICE, 0, 0, 697, 1, 'Ring of Calming Waves - Najentus'),
 (11, 1, 32497, @ILLIDANPRICE, 0, 0, 697, 1, 'Stormrage Signet - Illidan'),
 (11, 1, 32261, @PRICE, 0, 0, 697, 1, 'Band of the Abyssal - Supremus'),
+(11, 1, 32247, @PRICE, 0, 0, 697, 1, 'Ring of Captured Storms - Najentus'),
+(11, 1, 32266, @PRICE, 0, 0, 697, 1, 'Ring of Deceitful Intent - Akama'),
+(11, 1, 32362, @PRICE, 0, 0, 697, 1, 'Pendant of Titans - Reliquary'),
+(11, 1, 32331, @PRICE, 0, 0, 697, 1, 'Cloak of the Illidari Council - Council'),
 
 (11, 1, 32501, @PRICE, 0, 0, 697, 1, 'Shadowmoon Insignia - Gurtogg'),
 (11, 1, 32496, @ILLIDANPRICE, 0, 0, 697, 1, 'Memento of Tyrande - Illidan'),
@@ -31,6 +35,9 @@ INSERT INTO `zone_difficulty_mythicmode_rewards` (`ContentType`, `ItemType`, `En
 (11, 2, 32338, @PRICE, 0, 0, 697, 1, 'Blood-cursed Shoulderpads - Gurtogg'),
 (11, 2, 32273, @PRICE, 0, 0, 697, 1, 'Amice of Brilliant Light - Akama'),
 (11, 2, 32256, @PRICE, 0, 0, 697, 1, 'Waistwrap of Infinity - Supremus'),
+(11, 2, 32270, @PRICE, 0, 0, 697, 1, 'Focused Mana Bindings - Akama'),
+(11, 2, 32513, @PRICE, 0, 0, 697, 1, 'Wristbands of Divine Influence - Akama'),
+(11, 2, 32519, @PRICE, 0, 0, 697, 1, 'Belt of Divine Guidance - Council'),
 
 (11, 3, 32252, @PRICE, 0, 0, 697, 1, 'Nether Shadow Tunic - Supremus'),
 (11, 3, 32366, @PRICE, 0, 0, 697, 1, 'Shadowmaster Boots - Shahraz'),
@@ -44,6 +51,8 @@ INSERT INTO `zone_difficulty_mythicmode_rewards` (`ContentType`, `ItemType`, `En
 (11, 3, 32339, @PRICE, 0, 0, 697, 1, 'Belt of Primal Majesty - Gurtog'),
 (11, 3, 32265, @PRICE, 0, 0, 697, 1, 'Shadow-walker Cord - Akama'),
 (11, 3, 32324, @PRICE, 0, 0, 697, 1, 'Insidious Bands - Teron'),
+(11, 3, 32351, @PRICE, 0, 0, 697, 1, 'Elunite Empowered Bracers - Reliquary'),
+(11, 3, 32352, @PRICE, 0, 0, 697, 1, 'Naturewarden\'s Treads - Reliquary'),
 
 (11, 4, 32334, @PRICE, 0, 0, 697, 1, 'Vest of the Mounting Assault - Gurtog'),
 (11, 4, 32242, @PRICE, 0, 0, 697, 1, 'Boots of Oceanic Fury - Najentus'),
@@ -57,6 +66,8 @@ INSERT INTO `zone_difficulty_mythicmode_rewards` (`ContentType`, `ItemType`, `En
 (11, 4, 32258, @PRICE, 0, 0, 697, 1, 'Naturalist Preserving Cinch - Supremus'),
 (11, 4, 32259, @PRICE, 0, 0, 697, 1, 'Bands of the Coming Storm - Supremus'),
 (11, 4, 32251, @PRICE, 0, 0, 697, 1, 'Wraps of Precise Flight - Supremus'),
+(11, 4, 32346, @PRICE, 0, 0, 697, 1, 'Boneweave Girdle - Reliquary'),
+(11, 4, 32376, @PRICE, 0, 0, 697, 1, 'Forest Prowler\'s Helm - Council'),
 
 (11, 5, 32365, @PRICE, 0, 0, 697, 1, 'Heartshatter Breastplate - Shahraz'),
 (11, 5, 32243, @PRICE, 0, 0, 697, 1, 'Pearl Inlaid Boots - Najentus'),
@@ -75,6 +86,7 @@ INSERT INTO `zone_difficulty_mythicmode_rewards` (`ContentType`, `ItemType`, `En
 (11, 5, 32512, @PRICE, 0, 0, 697, 1, 'Girdle of Lordaeron Fall - Teron'),
 (11, 5, 32232, @PRICE, 0, 0, 697, 1, 'Eternium Shell Bracers - Najentus'),
 (11, 5, 32279, @PRICE, 0, 0, 697, 1, 'The Seeker Wristguards - Akama'),
+(11, 5, 32373, @PRICE, 0, 0, 697, 1, 'Helm of the Illidari Shatterer - Council'),
 
 (11, 6, 32236, @PRICE, 0, 0, 697, 1, 'Rising Tide - Najentus'),
 (11, 6, 32254, @PRICE, 0, 0, 697, 1, 'The Brutalizer - Supremus'),
