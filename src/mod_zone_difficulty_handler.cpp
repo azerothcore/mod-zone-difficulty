@@ -1031,6 +1031,16 @@ void ZoneDifficulty::RewardItem(Player* player, uint8 category, uint8 itemType, 
         }
     }
 
+    if (category == TYPE_RAID_T6)
+    {
+        if (!player->GetPlayerSetting(ModZoneDifficultyString + "ct", SETTING_BLACK_TEMPLE).value)
+        {
+            creature->Whisper("Ah, hero! The threads of fate bring you to me. To claim the rewards you desire, you must first confront Illidan Stormrage on Mythic difficulty.",
+                LANG_UNIVERSAL, player);
+            return;
+        }
+    }
+
     if (availableScore < reward.Price)
     {
         if (player->GetSession())
