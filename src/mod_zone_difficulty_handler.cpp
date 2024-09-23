@@ -1014,3 +1014,50 @@ bool ZoneDifficulty::HasCompletedFullTier(uint32 category, uint32 playerGuid)
     }
     return true;
 }
+
+void ZoneDifficulty::RewardItem(Player* player, uint8 category, uint8 itemType, uint8 counter, Creature* creature, uint32 itemEntry)
+{
+    // Check (again) if the player has enough score in the respective category.
+    uint32 availableScore = player->GetPlayerSetting(ModZoneDifficultyString + "score", category).value;
+
+    auto reward = sZoneDifficulty->Rewards[category][itemType][counter];
+
+    if (itemEntry)
+    {
+        for (auto const& item : sZoneDifficulty->Rewards[category][itemType])
+        {
+            if (item.Entry == itemEntry)
+                reward = item;
+        }
+    }
+
+    if (availableScore < reward.Price)
+    {
+        if (player->GetSession())
+            player->GetSession()->SendAreaTriggerMessage("Not enough points.");
+
+        return;
+    }
+
+    // Check if the player has the neccesary achievement
+    if (reward.Achievement)
+    {
+        if (!player->HasAchieved(reward.Achievement))
+        {
+            std::string gossip = "You do not have the required achievement with ID ";
+            gossip.append(std::to_string(reward.Achievement));
+            gossip.append(" to receive this item. Before i can give it to you, you need to complete the whole dungeon where it can be obtained.");
+            creature->Whisper(gossip, LANG_UNIVERSAL, player);
+            CloseGossipMenuFor(player);
+            return;
+        }
+    }
+
+    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Sending item with category {}, itemType {}, counter {}", category, itemType, counter);
+    sZoneDifficulty->DeductMythicmodeScore(player, category, reward.Price);
+    sZoneDifficulty->SendItem(player, category, itemType, counter);
+
+    if (player->GetSession())
+        if (ItemTemplate const* proto = sObjectMgr->GetItemTemplate(reward.Entry))
+            player->GetSession()->SendAreaTriggerMessage("You were rewarded %s for %u points.", proto->Name1.c_str(), reward.Price);
+};

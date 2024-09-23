@@ -58,6 +58,12 @@ struct ZoneDifficultyHAI
     bool TriggeredCast;
 };
 
+struct VendorSelectionData
+{
+    uint8 category;
+    uint8 slot;
+};
+
 int32 const DUEL_INDEX = 0x7FFFFFFF;
 int32 const DUEL_AREA = 2402;       // Forbidding Sea (Wetlands)
 
@@ -121,13 +127,16 @@ enum ZoneDifficultySettings
     TYPE_RAID_T9      = 15,
     TYPE_RAID_T10     = 16,
 
+    TYPE_MAX_TIERS,
+
     // Completed tiers settings
     SETTING_BLACK_TEMPLE = 0
 };
 
 enum Misc
 {
-    NPC_ILLIDAN_STORMRAGE = 22917
+    NPC_ILLIDAN_STORMRAGE = 22917,
+    NPC_REWARD_CHROMIE    = 1128002,
 };
 
 class ZoneDifficulty
@@ -157,12 +166,14 @@ public:
     [[nodiscard]] bool ShouldNerfInDuels(Unit* target);
     [[nodiscard]] bool ShouldNerfMap(uint32 mapId) { return NerfInfo.find(mapId) != NerfInfo.end(); };
     [[nodiscard]] int32 GetLowestMatchingPhase(uint32 mapId, uint32 phaseMask);
+    void RewardItem(Player* player, uint8 category, uint8 itemType, uint8 counter, Creature* creature, uint32 itemEntry);
 
     bool IsEnabled{ false };
     bool IsDebugInfoEnabled{ false };
     float MythicmodeHpModifier{ 2.0 };
     bool MythicmodeEnable{ false };
     bool MythicmodeInNormalDungeons{ false };
+    bool UseVendorInterface{ false };
     std::vector<uint32> DailyHeroicQuests;
     std::map<uint32, uint32> HeroicTBCQuestMapList;
     std::map<uint32, uint8> EncounterCounter;
@@ -190,6 +201,8 @@ public:
     ZoneDifficultyHAIMap MythicmodeAI;
     typedef std::map<uint32, std::map<uint32, std::map<uint32, bool> > > ZoneDifficultyEncounterLogMap;
     ZoneDifficultyEncounterLogMap Logs;
+    typedef std::unordered_map<ObjectGuid, VendorSelectionData> ZoneDifficultyVendorSelectionMap;
+    ZoneDifficultyVendorSelectionMap SelectionCache;
 };
 
 #define sZoneDifficulty ZoneDifficulty::instance()

@@ -26,6 +26,15 @@ ModZoneDifficulty.Enable = 1
 ModZoneDifficulty.DebugInfo = 0
 
 #
+#    ModZoneDifficulty.UseVendorInterface
+#        Description: Displays a vendor interface to claim rewards instead of gossips.
+#        Default:     0 - Disabled
+#                     1 - Enabled
+#
+
+ModZoneDifficulty.UseVendorInterface = 0
+
+#
 #    ModZoneDifficulty.SpellBuff.OnlyBosses
 #        Description: Spell damage buffs will only affect bosses.
 #        Default:     0 - Disabled

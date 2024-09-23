@@ -397,46 +397,6 @@ public:
     }
 };
 
-class mod_zone_difficulty_playerscript : public PlayerScript
-{
-public:
-    mod_zone_difficulty_playerscript() : PlayerScript("mod_zone_difficulty_playerscript") { }
-
-    void OnMapChanged(Player* player) override
-    {
-        uint32 mapId = player->GetMapId();
-        if (sZoneDifficulty->DisallowedBuffs.find(mapId) != sZoneDifficulty->DisallowedBuffs.end())
-        {
-            for (auto aura : sZoneDifficulty->DisallowedBuffs[mapId])
-            {
-                player->RemoveAura(aura);
-            }
-        }
-    }
-
-    void OnLogin(Player* player) override
-    {
-        if (sZoneDifficulty->MythicmodeScore.empty())
-            return;
-
-        if (sZoneDifficulty->MythicmodeScore.find(player->GetGUID().GetCounter()) != sZoneDifficulty->MythicmodeScore.end())
-        {
-            for (int i = 1; i <= 16; ++i)
-            {
-                uint32 availableScore = 0;
-
-                if (sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()].find(i) != sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()].end())
-                    availableScore = sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()][i];
-
-                player->UpdatePlayerSetting(ModZoneDifficultyString + "score", i, availableScore);
-            }
-
-            sZoneDifficulty->MythicmodeScore.erase(player->GetGUID().GetCounter());
-            CharacterDatabase.Execute("DELETE FROM zone_difficulty_mythicmode_score WHERE GUID = {}", player->GetGUID().GetCounter());
-        }
-    }
-};
-
 class mod_zone_difficulty_petscript : public PetScript
 {
 public:
@@ -470,6 +430,7 @@ public:
         sZoneDifficulty->MythicmodeHpModifier = sConfigMgr->GetOption<float>("ModZoneDifficulty.Mythicmode.HpModifier", 2);
         sZoneDifficulty->MythicmodeEnable = sConfigMgr->GetOption<bool>("ModZoneDifficulty.Mythicmode.Enable", false);
         sZoneDifficulty->MythicmodeInNormalDungeons = sConfigMgr->GetOption<bool>("ModZoneDifficulty.Mythicmode.InNormalDungeons", false);
+        sZoneDifficulty->UseVendorInterface = sConfigMgr->GetOption<bool>("ModZoneDifficulty.UseVendorInterface", false);
         sZoneDifficulty->LoadMapDifficultySettings();
     }
 
@@ -749,6 +710,12 @@ public:
             }
             //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Building gossip with category {} and counter {}", category, counter);
 
+            if (sZoneDifficulty->UseVendorInterface)
+            {
+                ShowItemsInFakeVendor(player, creature, category, counter);
+                return true;
+            }
+
             for (size_t i = 0; i < sZoneDifficulty->Rewards[category][counter].size(); ++i)
             {
                 //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Adding gossip option for entry {}", sZoneDifficulty->Rewards[category][counter][i].Entry);
@@ -831,29 +798,7 @@ public:
                 counter = counter - 100;
             }
 
-            // Check (again) if the player has enough score in the respective category.
-            uint32 availableScore = player->GetPlayerSetting(ModZoneDifficultyString + "score", category).value;
-
-            if (availableScore < sZoneDifficulty->Rewards[category][itemType][counter].Price)
-                return true;
-
-            // Check if the player has the neccesary achievement
-            if (sZoneDifficulty->Rewards[category][itemType][counter].Achievement)
-            {
-                if (!player->HasAchieved(sZoneDifficulty->Rewards[category][itemType][counter].Achievement))
-                {
-                    std::string gossip = "You do not have the required achievement with ID ";
-                    gossip.append(std::to_string(sZoneDifficulty->Rewards[category][itemType][counter].Achievement));
-                    gossip.append(" to receive this item. Before i can give it to you, you need to complete the whole dungeon where it can be obtained.");
-                    creature->Whisper(gossip, LANG_UNIVERSAL, player);
-                    CloseGossipMenuFor(player);
-                    return true;
-                }
-            }
-
-            //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Sending item with category {}, itemType {}, counter {}", category, itemType, counter);
-            sZoneDifficulty->DeductMythicmodeScore(player, category, sZoneDifficulty->Rewards[category][itemType][counter].Price);
-            sZoneDifficulty->SendItem(player, category, itemType, counter);
+            sZoneDifficulty->RewardItem(player, category, itemType, counter, creature, 0);
         }
 
         SendGossipMenuFor(player, npcText, creature);
@@ -877,6 +822,53 @@ public:
 
         SendGossipMenuFor(player, npcText, creature);
         return true;
+    }
+
+    static void ShowItemsInFakeVendor(Player* player, Creature* creature, uint8 category, uint8 slot)
+    {
+        auto const& itemList = sZoneDifficulty->Rewards[category][slot];
+
+        uint32 itemCount = itemList.size();
+
+        WorldPacket data(SMSG_LIST_INVENTORY, 8 + 1 + itemCount * 8 * 4);
+        data << uint64(creature->GetGUID().GetRawValue());
+
+        uint8 count = 0;
+        size_t count_pos = data.wpos();
+        data << uint8(count);
+
+        for (uint32 i = 0; i < itemCount && count < MAX_VENDOR_ITEMS; ++i)
+        {;
+            EncodeItemToPacket(
+                data, sObjectMgr->GetItemTemplate(itemList[i].Entry), count,
+                itemList[i].Price);
+        }
+
+        for (uint32 i = 0; i < itemCount && count < MAX_VENDOR_ITEMS; ++i)
+        {
+            if (ItemTemplate const* _proto = sObjectMgr->GetItemTemplate(itemList[i].Entry))
+                EncodeItemToPacket(data, _proto, count, itemList[i].Price);
+        }
+
+        data.put(count_pos, count);
+        player->GetSession()->SendPacket(&data);
+        VendorSelectionData vendorData;
+        vendorData.category = category;
+        vendorData.slot = slot;
+        sZoneDifficulty->SelectionCache[player->GetGUID()] = vendorData;
+    }
+
+    static void EncodeItemToPacket(WorldPacket& data, ItemTemplate const* proto, uint8& slot, uint32 price)
+    {
+        data << uint32(slot + 1);
+        data << uint32(proto->ItemId);
+        data << uint32(proto->DisplayInfoID);
+        data << int32(-1); //Infinite Stock
+        data << uint32(price);
+        data << uint32(proto->MaxDurability);
+        data << uint32(1);  //Buy Count of 1
+        data << uint32(0);
+        slot++;
     }
 };
 
@@ -1152,15 +1144,75 @@ public:
     }
 };
 
+class mod_zone_difficulty_playerscript : public PlayerScript
+{
+public:
+    mod_zone_difficulty_playerscript() : PlayerScript("mod_zone_difficulty_playerscript") { }
+
+    void OnMapChanged(Player* player) override
+    {
+        uint32 mapId = player->GetMapId();
+        if (sZoneDifficulty->DisallowedBuffs.find(mapId) != sZoneDifficulty->DisallowedBuffs.end())
+        {
+            for (auto aura : sZoneDifficulty->DisallowedBuffs[mapId])
+            {
+                player->RemoveAura(aura);
+            }
+        }
+    }
+
+    void OnLogin(Player* player) override
+    {
+        if (sZoneDifficulty->MythicmodeScore.empty())
+            return;
+
+        if (sZoneDifficulty->MythicmodeScore.find(player->GetGUID().GetCounter()) != sZoneDifficulty->MythicmodeScore.end())
+        {
+            for (int i = 1; i <= 16; ++i)
+            {
+                uint32 availableScore = 0;
+
+                if (sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()].find(i) != sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()].end())
+                    availableScore = sZoneDifficulty->MythicmodeScore[player->GetGUID().GetCounter()][i];
+
+                player->UpdatePlayerSetting(ModZoneDifficultyString + "score", i, availableScore);
+            }
+
+            sZoneDifficulty->MythicmodeScore.erase(player->GetGUID().GetCounter());
+            CharacterDatabase.Execute("DELETE FROM zone_difficulty_mythicmode_score WHERE GUID = {}", player->GetGUID().GetCounter());
+        }
+    }
+
+    void OnLogout(Player* player) override
+    {
+        sZoneDifficulty->SelectionCache.erase(player->GetGUID());
+    }
+
+    void OnBeforeBuyItemFromVendor(Player* player, ObjectGuid vendorguid, uint32 vendorslot, uint32& itemEntry, uint8 /*count*/, uint8 /*bag*/, uint8 /*slot*/) override
+    {
+        Creature* vendor = player->GetMap()->GetCreature(vendorguid);
+
+        if (!vendor)
+            return;
+        if (vendor->GetEntry() != NPC_REWARD_CHROMIE)
+            return;
+
+        auto const& data = sZoneDifficulty->SelectionCache[player->GetGUID()];
+
+        sZoneDifficulty->RewardItem(player, data.category, data.slot, 0, vendor, itemEntry);
+        itemEntry = 0; //Prevents the handler from proceeding to core vendor handling
+    }
+};
+
 // Add all scripts in one
 void AddModZoneDifficultyScripts()
 {
     new mod_zone_difficulty_unitscript();
-    new mod_zone_difficulty_playerscript();
     new mod_zone_difficulty_petscript();
     new mod_zone_difficulty_worldscript();
     new mod_zone_difficulty_globalscript();
     new mod_zone_difficulty_rewardnpc();
     new mod_zone_difficulty_dungeonmaster();
     new mod_zone_difficulty_allcreaturescript();
+    new mod_zone_difficulty_playerscript();
 }
