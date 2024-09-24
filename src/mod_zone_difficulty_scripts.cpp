@@ -838,13 +838,6 @@ public:
         data << uint8(count);
 
         for (uint32 i = 0; i < itemCount && count < MAX_VENDOR_ITEMS; ++i)
-        {;
-            EncodeItemToPacket(
-                data, sObjectMgr->GetItemTemplate(itemList[i].Entry), count,
-                itemList[i].Price);
-        }
-
-        for (uint32 i = 0; i < itemCount && count < MAX_VENDOR_ITEMS; ++i)
         {
             if (ItemTemplate const* _proto = sObjectMgr->GetItemTemplate(itemList[i].Entry))
                 EncodeItemToPacket(data, _proto, count, itemList[i].Price);
