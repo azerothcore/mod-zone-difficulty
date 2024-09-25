@@ -153,7 +153,7 @@ public:
     std::string GetContentTypeString(uint32 type);
     void AddMythicmodeScore(Map* map, uint32 type, uint32 score);
     void DeductMythicmodeScore(Player* player, uint32 type, uint32 score);
-    void SendItem(Player* player, uint32 category, uint32 itemType, uint32 id);
+    void SendItem(Player* player, ZoneDifficultyRewardData data);
     std::list<Unit*> GetTargetList(Unit* unit, uint32 entry, uint32 key);
     void MythicmodeEvent(Unit* unit, uint32 entry, uint32 key);
     bool HasNormalMode(int8 mode) { return (mode & MODE_NORMAL) == MODE_NORMAL; }

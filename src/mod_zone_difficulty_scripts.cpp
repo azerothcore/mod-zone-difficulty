@@ -639,7 +639,7 @@ public:
 
             //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Sending full tier clearance reward for category {}", category);
             sZoneDifficulty->DeductMythicmodeScore(player, category, sZoneDifficulty->TierRewards[category].Price);
-            sZoneDifficulty->SendItem(player, category, 99, 0);
+            sZoneDifficulty->SendItem(player, sZoneDifficulty->TierRewards[category]);
 
             return true;
         }

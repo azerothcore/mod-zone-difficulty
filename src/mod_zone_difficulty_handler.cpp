@@ -580,26 +580,16 @@ void ZoneDifficulty::DeductMythicmodeScore(Player* player, uint32 type, uint32 s
  * @brief Send and item to the player using the data from sZoneDifficulty->Rewards.
  *
  * @param player The recipient of the mail.
- * @param category The content level e.g. TYPE_HEROIC_TBC.
- * @param itemType The type of the item e.g. ITEMTYPE_CLOTH.
- * @param id the id in the vector.
+ * @param data The reward data e.g item entry, etc.
  */
-void ZoneDifficulty::SendItem(Player* player, uint32 category, uint32 itemType, uint32 id)
+void ZoneDifficulty::SendItem(Player* player, ZoneDifficultyRewardData data)
 {
     //Check if a full tier cleareance reward is meant (itemType 99)
-    ItemTemplate const* itemTemplate;
-    if (itemType == 99)
-    {
-        itemTemplate = sObjectMgr->GetItemTemplate(sZoneDifficulty->TierRewards[category].Entry);
-    }
-    else
-    {
-        itemTemplate = sObjectMgr->GetItemTemplate(sZoneDifficulty->Rewards[category][itemType][id].Entry);
-    }
+    ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(data.Entry);
 
     if (!itemTemplate)
     {
-        LOG_ERROR("module", "MOD-ZONE-DIFFICULTY: itemTemplate could not be constructed in sZoneDifficulty->SendItem for category {}, itemType {}, id {}.", category, itemType, id);
+        LOG_ERROR("module", "MOD-ZONE-DIFFICULTY: itemTemplate could not be constructed in sZoneDifficulty->SendItem for item {}.", data.Entry);
         return;
     }
 
@@ -609,32 +599,18 @@ void ZoneDifficulty::SendItem(Player* player, uint32 category, uint32 itemType, 
     MailDraft draft(REWARD_MAIL_SUBJECT, REWARD_MAIL_BODY);
     MailSender sender(MAIL_NORMAL, senderGuid, MAIL_STATIONERY_GM);
     CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
-    if (itemType == 99)
+
+    if (Item* item = Item::CreateItem(data.Entry, 1, player))
     {
-        if (Item* item = Item::CreateItem(sZoneDifficulty->TierRewards[category].Entry, 1, player))
+        if (data.EnchantSlot != 0 && data.Enchant != 0)
         {
-            if (sZoneDifficulty->TierRewards[category].EnchantSlot != 0 && sZoneDifficulty->TierRewards[category].Enchant != 0)
-            {
-                item->SetEnchantment(EnchantmentSlot(sZoneDifficulty->TierRewards[category].EnchantSlot), sZoneDifficulty->TierRewards[category].Enchant, 0, 0, player->GetGUID());
-                player->ApplyEnchantment(item, EnchantmentSlot(sZoneDifficulty->TierRewards[category].EnchantSlot), true, true, true);
-            }
-            item->SaveToDB(trans); // save for prevent lost at next mail load, if send fail then item will deleted
-            draft.AddItem(item);
+            item->SetEnchantment(EnchantmentSlot(data.EnchantSlot), data.Enchant, 0, 0, player->GetGUID());
+            player->ApplyEnchantment(item, EnchantmentSlot(data.EnchantSlot), true, true, true);
         }
+        item->SaveToDB(trans); // save for prevent lost at next mail load, if send fail then item will deleted
+        draft.AddItem(item);
     }
-    else
-    {
-        if (Item* item = Item::CreateItem(sZoneDifficulty->Rewards[category][itemType][id].Entry, 1, player))
-        {
-            if (sZoneDifficulty->Rewards[category][itemType][id].EnchantSlot != 0 && sZoneDifficulty->Rewards[category][itemType][id].Enchant != 0)
-            {
-                item->SetEnchantment(EnchantmentSlot(sZoneDifficulty->Rewards[category][itemType][id].EnchantSlot), sZoneDifficulty->Rewards[category][itemType][id].Enchant, 0, 0, player->GetGUID());
-                player->ApplyEnchantment(item, EnchantmentSlot(sZoneDifficulty->Rewards[category][itemType][id].EnchantSlot), true, true, true);
-            }
-            item->SaveToDB(trans); // save for prevent lost at next mail load, if send fail then item will deleted
-            draft.AddItem(item);
-        }
-    }
+
     draft.SendMailTo(trans, MailReceiver(player, senderGuid), sender);
     CharacterDatabase.CommitTransaction(trans);
 }
@@ -1065,7 +1041,7 @@ void ZoneDifficulty::RewardItem(Player* player, uint8 category, uint8 itemType, 
 
     //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Sending item with category {}, itemType {}, counter {}", category, itemType, counter);
     sZoneDifficulty->DeductMythicmodeScore(player, category, reward.Price);
-    sZoneDifficulty->SendItem(player, category, itemType, counter);
+    sZoneDifficulty->SendItem(player, reward);
 
     if (player->GetSession())
         if (ItemTemplate const* proto = sObjectMgr->GetItemTemplate(reward.Entry))
