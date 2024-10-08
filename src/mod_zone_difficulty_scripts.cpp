@@ -1181,7 +1181,7 @@ public:
         sZoneDifficulty->SelectionCache.erase(player->GetGUID());
     }
 
-    void OnBeforeBuyItemFromVendor(Player* player, ObjectGuid vendorguid, uint32 vendorslot, uint32& itemEntry, uint8 /*count*/, uint8 /*bag*/, uint8 /*slot*/) override
+    void OnBeforeBuyItemFromVendor(Player* player, ObjectGuid vendorguid, uint32 /*vendorslot*/, uint32& itemEntry, uint8 /*count*/, uint8 /*bag*/, uint8 /*slot*/) override
     {
         Creature* vendor = player->GetMap()->GetCreature(vendorguid);
 
