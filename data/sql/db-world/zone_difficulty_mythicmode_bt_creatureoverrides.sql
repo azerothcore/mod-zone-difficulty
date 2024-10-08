@@ -1,11 +1,3 @@
-DROP TABLE IF EXISTS `zone_difficulty_mythicmode_creatureoverrides`;
-CREATE TABLE `zone_difficulty_mythicmode_creatureoverrides` (
-    `CreatureEntry` INT NOT NULL DEFAULT 0,
-    `HPModifier` FLOAT NOT NULL DEFAULT 1,
-    `Enabled` TINYINT DEFAULT 1,
-	`Comment` TEXT
-);
-
 DELETE FROM `zone_difficulty_mythicmode_creatureoverrides` WHERE CreatureEntry IN (22887, 22898, 22841, 22871, 22948, 22856, 23418, 23419, 23420, 22947, 23426, 22949, 22950, 22951, 22952, 22917);
 INSERT INTO `zone_difficulty_mythicmode_creatureoverrides` (`CreatureEntry`, `HPModifier`, `Enabled`, `Comment`) VALUES
 (22887, 3.5, 1, 'Najentus, Black Temple HPx3.5'),
