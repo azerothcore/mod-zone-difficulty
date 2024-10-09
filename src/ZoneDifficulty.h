@@ -167,6 +167,7 @@ public:
     [[nodiscard]] bool ShouldNerfMap(uint32 mapId) { return NerfInfo.find(mapId) != NerfInfo.end(); };
     [[nodiscard]] int32 GetLowestMatchingPhase(uint32 mapId, uint32 phaseMask);
     void RewardItem(Player* player, uint8 category, uint8 itemType, uint8 counter, Creature* creature, uint32 itemEntry);
+    void LogAndAnnounceKill(Unit* creature, bool isMythic);
 
     bool IsEnabled{ false };
     bool IsDebugInfoEnabled{ false };
@@ -174,6 +175,7 @@ public:
     bool MythicmodeEnable{ false };
     bool MythicmodeInNormalDungeons{ false };
     bool UseVendorInterface{ false };
+    bool IsBlackTempleDone{ false };
     std::vector<uint32> DailyHeroicQuests;
     std::map<uint32, uint32> HeroicTBCQuestMapList;
     std::map<uint32, uint8> EncounterCounter;

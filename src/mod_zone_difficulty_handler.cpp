@@ -1047,3 +1047,26 @@ void ZoneDifficulty::RewardItem(Player* player, uint8 category, uint8 itemType, 
         if (ItemTemplate const* proto = sObjectMgr->GetItemTemplate(reward.Entry))
             player->GetSession()->SendAreaTriggerMessage("You were rewarded %s for %u points.", proto->Name1.c_str(), reward.Price);
 };
+
+void ZoneDifficulty::LogAndAnnounceKill(Unit* source, bool isMythic)
+{
+    // Just black temple supported for the time being
+    if (sZoneDifficulty->IsBlackTempleDone)
+        return;
+
+    sZoneDifficulty->IsBlackTempleDone = true;
+
+    ChatHandler(nullptr).SendWorldText("Congrats on conquering Black Temple ({}) and defeating Illidan Stormrage! Well done, champions!", isMythic ? "Mythic" : "Normal");
+
+    std::string names = "Realm first group: ";
+
+    if (Map* map = source->GetMap())
+    {
+        map->DoForAllPlayers([&](Player* mapPlayer) {
+            names.append(mapPlayer->GetName() + ", ");
+            CharacterDatabase.Execute("INSERT INTO zone_difficulty_completion_logs (guid, type, mode) VALUES ({}, {}, {})", mapPlayer->GetGUID().GetCounter(), TYPE_RAID_T6, 1);
+        });
+    }
+
+    ChatHandler(nullptr).SendWorldText(names.c_str());
+};

@@ -432,6 +432,9 @@ public:
         sZoneDifficulty->MythicmodeInNormalDungeons = sConfigMgr->GetOption<bool>("ModZoneDifficulty.Mythicmode.InNormalDungeons", false);
         sZoneDifficulty->UseVendorInterface = sConfigMgr->GetOption<bool>("ModZoneDifficulty.UseVendorInterface", false);
         sZoneDifficulty->LoadMapDifficultySettings();
+
+        if (CharacterDatabase.Query("SELECT 1 FROM zone_difficulty_completion_logs WHERE type = {}", TYPE_RAID_T6))
+            sZoneDifficulty->IsBlackTempleDone = true;
     }
 
     void OnStartup() override
@@ -557,6 +560,8 @@ public:
                             player->UpdatePlayerSetting(ModZoneDifficultyString + "ct", SETTING_BLACK_TEMPLE, 1);
                             ChatHandler(player->GetSession()).PSendSysMessage("Congratulations on completing the Black Temple!");
                         });
+
+                        sZoneDifficulty->LogAndAnnounceKill(source, true);
                     }
                 }
                 /* debug
