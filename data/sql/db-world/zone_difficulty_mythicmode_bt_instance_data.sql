@@ -7,6 +7,5 @@ INSERT INTO `zone_difficulty_mythicmode_instance_data` (`MapID`, `SourceEntry`, 
 (564, 22947, 0, 11), -- Mother Shahraz
 (564, 22856, 0, 11), -- Reliquary
 (564, 22948, 0, 11), -- Gurtogg
-(564, 22951, 0, 11), -- Lady Malande
 (564, 22917, 0, 11); -- Illidan
 

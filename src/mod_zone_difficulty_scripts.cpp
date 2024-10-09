@@ -476,6 +476,9 @@ public:
         {
             if (sZoneDifficulty->MythicmodeInstanceData[instanceId])
             {
+                if (id == 7 /* Illidari Council*/ && instance->GetId() == 564)
+                    sZoneDifficulty->AddMythicmodeScore(instance, TYPE_RAID_T6, 1);
+
                 //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Mythicmode is on.");
                 if (sZoneDifficulty->EncountersInProgress.find(instanceId) != sZoneDifficulty->EncountersInProgress.end() && sZoneDifficulty->EncountersInProgress[instanceId] != 0)
                 {

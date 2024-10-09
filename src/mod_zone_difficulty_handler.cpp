@@ -1063,8 +1063,11 @@ void ZoneDifficulty::LogAndAnnounceKill(Unit* source, bool isMythic)
     if (Map* map = source->GetMap())
     {
         map->DoForAllPlayers([&](Player* mapPlayer) {
-            names.append(mapPlayer->GetName() + ", ");
-            CharacterDatabase.Execute("INSERT INTO zone_difficulty_completion_logs (guid, type, mode) VALUES ({}, {}, {})", mapPlayer->GetGUID().GetCounter(), TYPE_RAID_T6, 1);
+            if (!mapPlayer->IsGameMaster())
+            {
+                names.append(mapPlayer->GetName() + ", ");
+                CharacterDatabase.Execute("INSERT INTO zone_difficulty_completion_logs (guid, type, mode) VALUES ({}, {}, {})", mapPlayer->GetGUID().GetCounter(), TYPE_RAID_T6, 1);
+            }
         });
     }
 
