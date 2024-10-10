@@ -1087,8 +1087,14 @@ public:
         uint32 newHp;
         uint32 entry = creature->GetEntry();
 
+        uint32 phaseMask = creature->GetPhaseMask();
+        int matchingPhase = sZoneDifficulty->GetLowestMatchingPhase(creature->GetMapId(), phaseMask);
+        int8 mode = sZoneDifficulty->NerfInfo[mapId][matchingPhase].Enabled;
+        bool isMythic = sZoneDifficulty->MythicmodeInstanceData[creature->GetMap()->GetInstanceId()];
+
         if (sZoneDifficulty->CreatureOverrides.find(entry) == sZoneDifficulty->CreatureOverrides.end())
         {
+            // Trash mobs. Apply generic tuning.
             if (creature->IsDungeonBoss())
                 return;
 
@@ -1096,51 +1102,32 @@ public:
         }
         else
         {
-            newHp = round(baseHealth * sZoneDifficulty->CreatureOverrides[entry]);
+            float multiplier = isMythic ? sZoneDifficulty->CreatureOverrides[entry].MythicOverride
+                : sZoneDifficulty->CreatureOverrides[entry].NormalOverride;
+
+            if (!multiplier)
+                multiplier = 1.0f; // never 0
+
+            newHp = round(baseHealth * multiplier);
         }
 
-        uint32 phaseMask = creature->GetPhaseMask();
-        int matchingPhase = sZoneDifficulty->GetLowestMatchingPhase(creature->GetMapId(), phaseMask);
-        int8 mode = sZoneDifficulty->NerfInfo[mapId][matchingPhase].Enabled;
         if (matchingPhase != -1)
         {
-            if (sZoneDifficulty->HasMythicmode(mode) && sZoneDifficulty->MythicmodeInstanceData[creature->GetMap()->GetInstanceId()])
-            {
-                if (creature->GetMaxHealth() == newHp)
-                    return;
-
-                bool hpIsFull = false;
-
-                if (creature->GetHealthPct() >= 100)
-                    hpIsFull = true;
-
-                creature->SetMaxHealth(newHp);
-                creature->SetCreateHealth(newHp);
-                creature->SetModifierValue(UNIT_MOD_HEALTH, BASE_VALUE, (float)newHp);
-                if (hpIsFull)
-                    creature->SetHealth(newHp);
-                creature->UpdateAllStats();
-                creature->ResetPlayerDamageReq();
+            if (creature->GetMaxHealth() == newHp)
                 return;
-            }
 
-            if (sZoneDifficulty->MythicmodeInstanceData[creature->GetMap()->GetInstanceId()] == false)
-            {
-                if (creature->GetMaxHealth() == newHp)
-                {
-                    bool hpIsFull = false;
-                    if (creature->GetHealthPct() >= 100)
-                        hpIsFull = true;
-                    creature->SetMaxHealth(baseHealth);
-                    creature->SetCreateHealth(baseHealth);
-                    creature->SetModifierValue(UNIT_MOD_HEALTH, BASE_VALUE, (float)baseHealth);
-                    if (hpIsFull)
-                        creature->SetHealth(baseHealth);
-                    creature->UpdateAllStats();
-                    creature->ResetPlayerDamageReq();
-                    return;
-                }
-            }
+            bool hpIsFull = false;
+
+            if (creature->GetHealthPct() >= 100)
+                hpIsFull = true;
+
+            creature->SetMaxHealth(newHp);
+            creature->SetCreateHealth(newHp);
+            creature->SetModifierValue(UNIT_MOD_HEALTH, BASE_VALUE, (float)newHp);
+            if (hpIsFull)
+                creature->SetHealth(newHp);
+            creature->UpdateAllStats();
+            creature->ResetPlayerDamageReq();
         }
     }
 };

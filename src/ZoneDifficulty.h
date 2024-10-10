@@ -64,6 +64,12 @@ struct VendorSelectionData
     uint8 slot;
 };
 
+struct CreatureOverrideData
+{
+    float NormalOverride;
+    float MythicOverride;
+};
+
 int32 const DUEL_INDEX = 0x7FFFFFFF;
 int32 const DUEL_AREA = 2402;       // Forbidding Sea (Wetlands)
 
@@ -180,7 +186,7 @@ public:
     std::map<uint32, uint32> HeroicTBCQuestMapList;
     std::map<uint32, uint8> EncounterCounter;
     std::map<uint32, uint8> Expansion;
-    std::map<uint32, float> CreatureOverrides;
+    std::map<uint32, CreatureOverrideData> CreatureOverrides;
     std::map<uint32, uint32> EncountersInProgress;
     std::map<uint32, std::string> ItemIcons;
     std::map<uint8, ZoneDifficultyRewardData> TierRewards;

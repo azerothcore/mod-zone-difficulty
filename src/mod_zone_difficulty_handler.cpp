@@ -220,14 +220,19 @@ void ZoneDifficulty::LoadMapDifficultySettings()
         {
             uint32 creatureEntry = (*result)[0].Get<uint32>();
             float hpModifier = (*result)[1].Get<float>();
-            bool enabled = (*result)[2].Get<bool>();
+            float hpModifierNormal = (*result)[2].Get<float>();
+            bool enabled = (*result)[3].Get<bool>();
 
             if (enabled)
             {
-                if (hpModifier != 0)
-                {
-                    sZoneDifficulty->CreatureOverrides[creatureEntry] = hpModifier;
-                }
+                CreatureOverrideData data;
+                if (hpModifier)
+                    data.MythicOverride = hpModifier;
+
+                if (hpModifierNormal)
+                    data.NormalOverride = hpModifierNormal;
+
+                sZoneDifficulty->CreatureOverrides[creatureEntry] = data;
                 //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: New creature with entry: {} has exception for hp: {}", creatureEntry, hpModifier);
             }
         } while (result->NextRow());
