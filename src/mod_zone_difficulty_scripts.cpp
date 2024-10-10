@@ -1089,7 +1089,6 @@ public:
 
         uint32 phaseMask = creature->GetPhaseMask();
         int matchingPhase = sZoneDifficulty->GetLowestMatchingPhase(creature->GetMapId(), phaseMask);
-        int8 mode = sZoneDifficulty->NerfInfo[mapId][matchingPhase].Enabled;
         bool isMythic = sZoneDifficulty->MythicmodeInstanceData[creature->GetMap()->GetInstanceId()];
 
         if (sZoneDifficulty->CreatureOverrides.find(entry) == sZoneDifficulty->CreatureOverrides.end())
