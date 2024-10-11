@@ -48,15 +48,15 @@ INSERT INTO `zone_difficulty_info` (`MapId`, `PhaseMask`, `HealingNerfValue`, `A
 (585, 0, '0.90', '0.90', '1.20', '1.10', 0, 'Heroic Mode Magister\'s Terrace Healing 90% / Absorb 90% Nerf / 20% physical & 10% spell damage buff'),
 (585, 0, '0.80', '0.80', '1.30', '1.20', 64, 'Mythic Mode Magister\'s Terrace Healing 80% / Absorb 80% Nerf / 30% physical & 20% spell damage buff'),
 -- Battlegrounds
-(30, 0, '0.80', '0.80', '0.70', '0.70', 1, 'AV Healing 20% / Absorb 20% / 30% physical & spell damage nerf'),
-(489, 0, '0.80', '0.80', '0.70', '0.70', 1, 'WSG Healing 20% / Absorb 20% / 30% physical & spell damage nerf'),
-(529, 0, '0.80', '0.80', '0.70', '0.70', 1, 'AB Healing 20% / Absorb 20% / 30% physical & spell damage nerf'),
-(566, 0, '0.80', '0.80', '0.70', '0.70', 1, 'EotS Healing 20% / Absorb 20% / 30% physical & spell damage nerf'),
+(30, 0, '0.80', '0.80', '0.70', '0.70', 0, 'AV Healing 20% / Absorb 20% / 30% physical & spell damage nerf'),
+(489, 0, '0.80', '0.80', '0.70', '0.70', 0, 'WSG Healing 20% / Absorb 20% / 30% physical & spell damage nerf'),
+(529, 0, '0.80', '0.80', '0.70', '0.70', 0, 'AB Healing 20% / Absorb 20% / 30% physical & spell damage nerf'),
+(566, 0, '0.80', '0.80', '0.70', '0.70', 0, 'EotS Healing 20% / Absorb 20% / 30% physical & spell damage nerf'),
 -- arenas
-(559, 0, '0.80', '0.80', '0.70', '0.70', 1, 'Ring of Trials Healing 20% / Absorb 20% / 30% physical & spell damage nerf'),
-(562, 0, '0.80', '0.80', '0.70', '0.70', 1, 'Blades Edge Arena  Healing 20% / Absorb 20% / 30% physical & spell damage nerf'),
-(572, 0, '0.80', '0.80', '0.70', '0.70', 1, 'Ruins of Lordaeron Healing 20% / Absorb 20% / 30% physical & spell damage nerf'),
-(617, 0, '0.80', '0.80', '0.70', '0.70', 1, 'Dalaran Arena Healing 20% / Absorb 20% / 30% physical & spell damage nerf'),
-(618, 0, '0.80', '0.80', '0.70', '0.70', 1, 'Ring of Valor Healing 20% / Absorb 20% / 30% physical & spell damage nerf'),
+(559, 0, '0.80', '0.80', '0.70', '0.70', 0, 'Ring of Trials Healing 20% / Absorb 20% / 30% physical & spell damage nerf'),
+(562, 0, '0.80', '0.80', '0.70', '0.70', 0, 'Blades Edge Arena  Healing 20% / Absorb 20% / 30% physical & spell damage nerf'),
+(572, 0, '0.80', '0.80', '0.70', '0.70', 0, 'Ruins of Lordaeron Healing 20% / Absorb 20% / 30% physical & spell damage nerf'),
+(617, 0, '0.80', '0.80', '0.70', '0.70', 0, 'Dalaran Arena Healing 20% / Absorb 20% / 30% physical & spell damage nerf'),
+(618, 0, '0.80', '0.80', '0.70', '0.70', 0, 'Ring of Valor Healing 20% / Absorb 20% / 30% physical & spell damage nerf'),
 -- Duels in Forbidding Sea (Wetlands)
 (2147483647, 0, '0.80', '0.80', '0.70', '0.70', 1, 'Zone 2402 Duel Healing 20% / Absorb 20% Nerf / 30% physical & spell damage nerf');
