@@ -8,7 +8,7 @@ CREATE TABLE `zone_difficulty_spelloverrides` (
 );
 
 DELETE FROM `zone_difficulty_spelloverrides` WHERE `SpellID` IN (53652, 53654, 52752, 47753, 18562, 25516, 36240, 31850, 31851, 31852, 66235, 39878, 42052, 40314, 40175, 40175, 41303, 41360, 40827, 40869, 40870, 40871, 41001, 42005, 41078, 41131);
-INSERT INTO `zone_difficulty_spelloverrides` (`SpellID`, `MapId`, `NerfValue`, `Enabled`, `Comment`) VALUES
+INSERT INTO `zone_difficulty_spelloverrides` (`SpellID`, `MapId`, `NerfValue`, `ModeMask`, `Comment`) VALUES
 (53652, 0, 1, 65, 'Beacon of Light - Skip nerf.'),
 (53654, 0, 1, 65, 'Beacon of Light 2 (Flash of Light, Holy Shock) - Skip nerf.'),
 (52752, 0, 1, 65, 'Ancestral Awakening - Skip nerf.'),
