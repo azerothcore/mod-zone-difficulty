@@ -1084,7 +1084,7 @@ public:
 
         CreatureBaseStats const* origCreatureStats = sObjectMgr->GetCreatureBaseStats(creature->GetLevel(), creatureTemplate->unit_class);
         uint32 baseHealth = origCreatureStats->GenerateHealth(creatureTemplate);
-        uint32 newHp;
+        uint32 newHp = baseHealth;
         uint32 entry = creature->GetEntry();
 
         uint32 phaseMask = creature->GetPhaseMask();
@@ -1094,10 +1094,8 @@ public:
         if (sZoneDifficulty->CreatureOverrides.find(entry) == sZoneDifficulty->CreatureOverrides.end())
         {
             // Trash mobs. Apply generic tuning.
-            if (creature->IsDungeonBoss())
-                return;
-
-            newHp = round(baseHealth * sZoneDifficulty->MythicmodeHpModifier);
+            if (!creature->IsDungeonBoss() && isMythic)
+                newHp = round(baseHealth * sZoneDifficulty->MythicmodeHpModifier);
         }
         else
         {
