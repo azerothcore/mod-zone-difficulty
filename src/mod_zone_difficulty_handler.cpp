@@ -98,7 +98,7 @@ void ZoneDifficulty::LoadMapDifficultySettings()
     sZoneDifficulty->ItemIcons[ITEMTYPE_PLATE] = "|TInterface\\icons\\inv_chest_plate12:15|t ";
     sZoneDifficulty->ItemIcons[ITEMTYPE_WEAPONS] = "|TInterface\\icons\\inv_mace_25:15|t |TInterface\\icons\\inv_shield_27:15|t |TInterface\\icons\\inv_weapon_crossbow_04:15|t ";
 
-    if (QueryResult result = WorldDatabase.Query("SELECT * FROM zone_difficulty_info"))
+    if (QueryResult result = WorldDatabase.Query("SELECT * FROM zone_difficulty_info WHERE Enabled > 0"))
     {
         do
         {
@@ -106,6 +106,7 @@ void ZoneDifficulty::LoadMapDifficultySettings()
             uint32 phaseMask = (*result)[1].Get<uint32>();
             ZoneDifficultyNerfData data;
             int8 mode = (*result)[6].Get<int8>();
+
             if (sZoneDifficulty->HasNormalMode(mode))
             {
                 data.HealingNerfPct = (*result)[2].Get<float>();
