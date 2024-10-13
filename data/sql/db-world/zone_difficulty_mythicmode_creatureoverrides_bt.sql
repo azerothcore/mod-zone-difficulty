@@ -7,7 +7,7 @@ INSERT INTO `zone_difficulty_mythicmode_creatureoverrides` (`CreatureEntry`, `HP
 (22948, 3.2, 2.2, 1, 'Gurtogg Bloodboil, Black Temple HPx3.2'),
 (22856, 3, 2.2, 1, 'Reliquary of the Lost, Black Temple HPx3'),
 (23418, 3, 2.2, 1, 'Essence of Suffering, Black Temple HPx3'),
-(23419, 2, 2.2, 1, 'Essence of Desire, Black Temple HPx2'),
+(23419, 3, 2.2, 1, 'Essence of Desire, Black Temple HPx2'),
 (23420, 3, 2.2, 1, 'Essence of Anger, Black Temple HPx3'),
 (22947, 3.5, 2.3, 1, 'Mother Shahraz, Black Temple HPx3.5'),
 (23426, 3.5, 2.3, 1, 'Illidari Council, Black Temple HPx3.5'),
