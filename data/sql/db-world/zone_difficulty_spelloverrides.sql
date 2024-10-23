@@ -33,7 +33,7 @@ INSERT INTO `zone_difficulty_spelloverrides` (`SpellID`, `MapId`, `NerfValue`, `
 (31304, 534, 1, 65, 'The Battle For Mount Hyjal - Azgalor infernal - Immolation'),
 (31341, 534, 1, 65, 'The Battle For Mount Hyjal - Azgalor - Rain of Fire (effect)'),
 (31944, 534, 1, 65, 'The Battle For Mount Hyjal - Archimonde - Doomfire'),
-(31608, 534, 1, 65, 'The Battle For Mount Hyjal - Abomination - Disease Cloud (tick debuff)');
+(31608, 534, 1, 65, 'The Battle For Mount Hyjal - Abomination - Disease Cloud (tick debuff)'),
 (39878, 564, 1, 65, 'Black Temple - Najentus - Tidal Burst Effect'),
 (42052, 564, 1, 65, 'Black Temple - Supremus - Volcanic Geyser'),
 (40314, 564, 1, 65, 'Black Temple - Vengeful Spirit - Spirit Volley'),
