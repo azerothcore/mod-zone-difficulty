@@ -29,4 +29,10 @@ INSERT INTO `zone_difficulty_mythicmode_creatureoverrides` (`CreatureEntry`, `HP
 (22950, 3.5, 2.3, 1, 'Zerevor, Black Temple HPx3.5'),
 (22951, 3.5, 2.3, 1, 'Malande, Black Temple HPx3.5'),
 (22952, 3.5, 2.3, 1, 'Veras, Black Temple HPx3.5'),
-(22917, 3.2, 2.3, 1, 'Illidan, Black Temple HPx3.2');
+(22917, 3.2, 2.3, 1, 'Illidan, Black Temple HPx3.2'),
+-- Zul'aman
+(23578, 3.5, 2.3, 1, 'Janalai 3.5x mythic 2.3x normal hp'),
+(24239, 3.5, 2.3, 1, 'Hexlord 3.5x mythic 2.3x normal hp'),
+(23577, 3.5, 2.3, 1, 'Halazzi 3.5x mythic 2.3x normal hp'),
+(23576, 3.5, 2.3, 1, 'Narolakk 3.5x mythic 2.3x normal hp'),
+(23863, 3.5, 2.5, 1, 'Zuljin 3.5x mythic 2.5x normal hp');
