@@ -127,16 +127,18 @@ enum ZoneDifficultySettings
     TYPE_RAID_T4      = 9,
     TYPE_RAID_T5      = 10,
     TYPE_RAID_T6      = 11,
-    TYPE_HEROIC_WOTLK = 12,
-    TYPE_RAID_T7      = 13,
-    TYPE_RAID_T8      = 14,
-    TYPE_RAID_T9      = 15,
-    TYPE_RAID_T10     = 16,
+    TYPE_RAID_ZA      = 12,
+    TYPE_HEROIC_WOTLK = 13,
+    TYPE_RAID_T7      = 14,
+    TYPE_RAID_T8      = 15,
+    TYPE_RAID_T9      = 16,
+    TYPE_RAID_T10     = 17,
 
     TYPE_MAX_TIERS,
 
     // Completed tiers settings
-    SETTING_BLACK_TEMPLE = 0
+    SETTING_BLACK_TEMPLE = 0,
+    SETTING_ZULAMAN      = 1
 };
 
 enum Misc

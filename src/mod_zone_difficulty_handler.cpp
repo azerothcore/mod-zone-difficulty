@@ -515,6 +515,9 @@ std::string ZoneDifficulty::GetContentTypeString(uint32 type)
     case TYPE_RAID_T6:
         typestring = "for T6 Raids.";
         break;
+    case TYPE_RAID_ZA:
+        typestring = "for Zul'Aman.";
+        break;
     case TYPE_HEROIC_WOTLK:
         typestring = "for Heroic WotLK dungeons.";
         break;
@@ -974,6 +977,9 @@ bool ZoneDifficulty::HasCompletedFullTier(uint32 category, uint32 playerGuid)
     case TYPE_RAID_T6:
         MapList = { 564 };
         break;
+    case TYPE_RAID_ZA:
+        MapList = { 568 };
+        break;
     default:
         LOG_ERROR("module", "MOD-ZONE-DIFFICULTY: Category without data requested in ZoneDifficulty::HasCompletedFullTier {}", category);
         return false;
@@ -1021,6 +1027,14 @@ void ZoneDifficulty::RewardItem(Player* player, uint8 category, uint8 itemType, 
                 LANG_UNIVERSAL, player);
             return;
         }
+    } else if (category == TYPE_RAID_ZA)
+    {
+        if (!player->GetPlayerSetting(ModZoneDifficultyString + "ct", SETTING_ZULAMAN).value)
+        {
+            creature->Whisper("Ah, hero! The threads of fate bring you to me. To claim the rewards you desire, you must first confront Zul'jin on Mythic difficulty.",
+                LANG_UNIVERSAL, player);
+            return;
+        }
     }
 
     if (availableScore < reward.Price)
@@ -1056,26 +1070,28 @@ void ZoneDifficulty::RewardItem(Player* player, uint8 category, uint8 itemType, 
 
 void ZoneDifficulty::LogAndAnnounceKill(Unit* source, bool isMythic)
 {
-    // Just black temple supported for the time being
-    if (sZoneDifficulty->IsBlackTempleDone)
-        return;
-
-    sZoneDifficulty->IsBlackTempleDone = true;
-
-    ChatHandler(nullptr).SendWorldText("Congrats on conquering Black Temple ({}) and defeating Illidan Stormrage! Well done, champions!", isMythic ? "Mythic" : "Normal");
-
-    std::string names = "Realm first group: ";
-
-    if (Map* map = source->GetMap())
+    if (source->GetMap()->GetId() == 564)
     {
-        map->DoForAllPlayers([&](Player* mapPlayer) {
-            if (!mapPlayer->IsGameMaster())
-            {
-                names.append(mapPlayer->GetName() + ", ");
-                CharacterDatabase.Execute("INSERT INTO zone_difficulty_completion_logs (guid, type, mode) VALUES ({}, {}, {})", mapPlayer->GetGUID().GetCounter(), TYPE_RAID_T6, 1);
-            }
-        });
-    }
+        if (sZoneDifficulty->IsBlackTempleDone)
+            return;
 
-    ChatHandler(nullptr).SendWorldText(names.c_str());
+        sZoneDifficulty->IsBlackTempleDone = true;
+
+        ChatHandler(nullptr).SendWorldText("Congrats on conquering Black Temple ({}) and defeating Illidan Stormrage! Well done, champions!", isMythic ? "Mythic" : "Normal");
+
+        std::string names = "Realm first group: ";
+
+        if (Map* map = source->GetMap())
+        {
+            map->DoForAllPlayers([&](Player* mapPlayer) {
+                if (!mapPlayer->IsGameMaster())
+                {
+                    names.append(mapPlayer->GetName() + ", ");
+                    CharacterDatabase.Execute("INSERT INTO zone_difficulty_completion_logs (guid, type, mode) VALUES ({}, {}, {})", mapPlayer->GetGUID().GetCounter(), TYPE_RAID_T6, 1);
+                }
+            });
+        }
+
+        ChatHandler(nullptr).SendWorldText(names.c_str());
+    }
 };
