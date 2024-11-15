@@ -1084,7 +1084,7 @@ public:
 
         CreatureBaseStats const* origCreatureStats = sObjectMgr->GetCreatureBaseStats(creature->GetLevel(), creatureTemplate->unit_class);
         uint32 baseHealth = origCreatureStats->GenerateHealth(creatureTemplate);
-        uint32 scaledHealth = baseHealth;
+        uint32 newHp = baseHealth;
         uint32 entry = creature->GetEntry();
 
         uint32 phaseMask = creature->GetPhaseMask();
@@ -1095,7 +1095,7 @@ public:
         {
             // Trash mobs. Apply generic tuning.
             if (!creature->IsDungeonBoss() && isMythic)
-                scaledHealth = round(baseHealth * sZoneDifficulty->MythicmodeHpModifier);
+                newHp = round(baseHealth * sZoneDifficulty->MythicmodeHpModifier);
         }
         else
         {
@@ -1105,24 +1105,24 @@ public:
             if (!multiplier)
                 multiplier = 1.0f; // never 0
 
-            scaledHealth = round(baseHealth * multiplier);
+            newHp = round(baseHealth * multiplier);
         }
 
         if (matchingPhase != -1)
         {
-            if (creature->GetMaxHealth() == scaledHealth)
+            if (creature->GetMaxHealth() == newHp)
                 return;
 
-            uint32 prevMaxHealth = creature->GetMaxHealth();
-            uint32 prevHealth = creature->GetHealth();
+            bool hpIsFull = false;
 
-            creature->SetMaxHealth(scaledHealth);
-            creature->SetCreateHealth(scaledHealth);
-            creature->SetModifierValue(UNIT_MOD_HEALTH, BASE_VALUE, (float)scaledHealth);
+            if (creature->GetHealthPct() >= 100)
+                hpIsFull = true;
 
-            uint32 scaledCurHealth = prevHealth && prevMaxHealth ? float(scaledHealth)/float(prevMaxHealth)*float(prevHealth) : 0;
-            creature->SetHealth(scaledCurHealth);
-
+            creature->SetMaxHealth(newHp);
+            creature->SetCreateHealth(newHp);
+            creature->SetModifierValue(UNIT_MOD_HEALTH, BASE_VALUE, (float)newHp);
+            if (hpIsFull)
+                creature->SetHealth(newHp);
             creature->UpdateAllStats();
             creature->ResetPlayerDamageReq();
         }
