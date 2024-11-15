@@ -18,6 +18,7 @@ INSERT INTO `zone_difficulty_mythicmode_creatureoverrides` (`CreatureEntry`, `HP
 (22898, 3.5, 2.2, 1, 'Supremus, Black Temple HPx3.5'),
 (22841, 3.5, 2.2, 1, 'Shade of Akama, Black Temple HPx3.5'),
 (22871, 3.2, 2.2, 1, 'Teron Gorefiend, Black Temple HPx3.2'),
+(23111, 1, 1, 1, 'Shadowy Construct - prevent changing hp.'),
 (22948, 3.2, 2.2, 1, 'Gurtogg Bloodboil, Black Temple HPx3.2'),
 (22856, 3, 2.2, 1, 'Reliquary of the Lost, Black Temple HPx3'),
 (23418, 3, 2.2, 1, 'Essence of Suffering, Black Temple HPx3'),
