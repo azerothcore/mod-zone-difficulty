@@ -86,7 +86,7 @@ public:
                             {
                                 if (sZoneDifficulty->SpellNerfOverrides[spellInfo->Id].find(mapId) != sZoneDifficulty->SpellNerfOverrides[spellInfo->Id].end())
                                 {
-                                    // Check if the mode of instance and SpellNerfOverride match 
+                                    // Check if the mode of instance and SpellNerfOverride match
                                     if (sZoneDifficulty->OverrideModeMatches(target->GetMap()->GetInstanceId(), spellInfo->Id, mapId))
                                         absorb = eff->GetAmount() * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id][mapId].NerfPct;
                                 }
@@ -1084,7 +1084,7 @@ public:
 
         CreatureBaseStats const* origCreatureStats = sObjectMgr->GetCreatureBaseStats(creature->GetLevel(), creatureTemplate->unit_class);
         uint32 baseHealth = origCreatureStats->GenerateHealth(creatureTemplate);
-        uint32 newHp = baseHealth;
+        uint32 scaledBaseHealth = baseHealth;
         uint32 entry = creature->GetEntry();
 
         uint32 phaseMask = creature->GetPhaseMask();
@@ -1095,7 +1095,7 @@ public:
         {
             // Trash mobs. Apply generic tuning.
             if (!creature->IsDungeonBoss() && isMythic)
-                newHp = round(baseHealth * sZoneDifficulty->MythicmodeHpModifier);
+                scaledBaseHealth = round(baseHealth * sZoneDifficulty->MythicmodeHpModifier);
         }
         else
         {
@@ -1105,21 +1105,21 @@ public:
             if (!multiplier)
                 multiplier = 1.0f; // never 0
 
-            newHp = round(baseHealth * multiplier);
+            scaledBaseHealth = round(baseHealth * multiplier);
         }
-
-        float value = newHp;
-        value *= creature->GetModifierValue(UNIT_MOD_HEALTH, BASE_PCT);
-        value += creature->GetModifierValue(UNIT_MOD_HEALTH, TOTAL_VALUE);
-        value *= creature->GetModifierValue(UNIT_MOD_HEALTH, TOTAL_PCT);
 
         if (matchingPhase != -1)
         {
-            if (creature->GetMaxHealth() == value)
+            float scaledHealth = scaledBaseHealth;
+            scaledHealth *= creature->GetModifierValue(UNIT_MOD_HEALTH, BASE_PCT);
+            scaledHealth += creature->GetModifierValue(UNIT_MOD_HEALTH, TOTAL_VALUE);
+            scaledHealth *= creature->GetModifierValue(UNIT_MOD_HEALTH, TOTAL_PCT);
+
+            if (creature->GetMaxHealth() == scaledHealth)
                 return;
 
             float percent = creature->GetHealthPct();
-            creature->SetModifierValue(UNIT_MOD_HEALTH, BASE_VALUE, (float)newHp);
+            creature->SetModifierValue(UNIT_MOD_HEALTH, BASE_VALUE, (float)scaledBaseHealth);
             creature->UpdateMaxHealth();
             if (creature->IsAlive())
             {
