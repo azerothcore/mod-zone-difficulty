@@ -1108,22 +1108,24 @@ public:
             newHp = round(baseHealth * multiplier);
         }
 
+        float value = newHp;
+        value *= creature->GetModifierValue(UNIT_MOD_HEALTH, BASE_PCT);
+        value += creature->GetModifierValue(UNIT_MOD_HEALTH, TOTAL_VALUE);
+        value *= creature->GetModifierValue(UNIT_MOD_HEALTH, TOTAL_PCT);
+
         if (matchingPhase != -1)
         {
-            if (creature->GetMaxHealth() == newHp)
+            if (creature->GetMaxHealth() == value)
                 return;
 
-            bool hpIsFull = false;
-
-            if (creature->GetHealthPct() >= 100)
-                hpIsFull = true;
-
-            creature->SetMaxHealth(newHp);
-            creature->SetCreateHealth(newHp);
+            float percent = creature->GetHealthPct();
             creature->SetModifierValue(UNIT_MOD_HEALTH, BASE_VALUE, (float)newHp);
-            if (hpIsFull)
-                creature->SetHealth(newHp);
-            creature->UpdateAllStats();
+            creature->UpdateMaxHealth();
+            if (creature->IsAlive())
+            {
+                uint32 scaledCurHealth = creature->CountPctFromMaxHealth(percent);
+                creature->SetHealth(scaledCurHealth);
+            }
             creature->ResetPlayerDamageReq();
         }
     }
