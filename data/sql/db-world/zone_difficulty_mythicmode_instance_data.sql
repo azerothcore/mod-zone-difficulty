@@ -42,6 +42,7 @@ INSERT INTO `zone_difficulty_mythicmode_instance_data` (`MapID`, `SourceEntry`, 
 (564, 22948, 0, 11), -- Gurtogg
 (564, 22917, 0, 11), -- Illidan
 -- ZA
+(568, 23574, 0, 12), -- Akilzon
 (568, 23578, 0, 12), -- Janalai
 (568, 24239, 0, 12), -- Hexlord
 (568, 23577, 0, 12), -- Halazzi
