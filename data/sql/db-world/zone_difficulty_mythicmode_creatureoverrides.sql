@@ -35,7 +35,9 @@ INSERT INTO `zone_difficulty_mythicmode_creatureoverrides` (`CreatureEntry`, `HP
 (23574, 3.5, 2.3, 1, 'Akilzon 3.5x mythic 2.3x normal hp'),
 (23578, 3.5, 2.3, 1, 'Janalai 3.5x mythic 2.3x normal hp'),
 (24239, 3.5, 2.3, 1, 'Hexlord 3.5x mythic 2.3x normal hp'),
-(23577, 3.5, 2.3, 1, 'Halazzi 3.5x mythic 2.3x normal hp'),
+(23577, 3.5, 2.3, 1, 'Halazzi (lynx) 3.5x mythic 2.3x normal hp'),
+(24144, 3.5, 2.3, 1, 'Halazzi (troll) 3.5x mythic 2.3x normal hp'),
+(24143, 3.5, 2.3, 1, 'Spirit of the Lynx 3.5x mythic 2.3x normal hp'),
 (23576, 3.5, 2.3, 1, 'Narolakk 3.5x mythic 2.3x normal hp'),
 (23863, 3.5, 2.5, 1, 'Zuljin 3.5x mythic 2.5x normal hp'),
 -- Sunwell Plateau
