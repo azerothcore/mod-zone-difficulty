@@ -14,6 +14,17 @@ INSERT INTO `zone_difficulty_mythicmode_creatureoverrides` (`CreatureEntry`, `HP
 (19044, 1.8, 1, 1, 'Gruul, Gruul\'s Lair HPx1.8'),
 (17257, 1.8, 1, 1, 'Magtheridon, Magtheridon\'s Lair HPx1.8'),
 (17881, 3.2, 1, 1, 'Aeonus, Black Morass HPx3.2'),
+-- Serpentshrine Cavern
+(21216, 3.5, 2.3, 1, 'Hydross, SSC HPx3.5'),
+(21217, 3.5, 2.3, 1, 'Lurker, SSC HPx3.5'),
+(21215, 3.5, 2.3, 1, 'Leotheras, SSC HPx3.5'),
+(21213, 3.5, 2.3, 1, 'Morogrim, SSC HPx3.5'),
+(21214, 3.5, 2.3, 1, 'Karathress, SSC HPx3.5'),
+(21964, 2.5, 1.5, 1, 'Caribdis, SSC HPx2.5'),
+(21966, 2.5, 1.5, 1, 'Sharkkis, SSC HPx2.5'),
+(21965, 2.5, 1.5, 1, 'Tidalvess, SSC HPx2.5'),
+(21212, 3.5, 2.3, 1, 'Vashj, SSC HPx3.5'),
+-- Black Temple
 (22887, 3.5, 2.2, 1, 'Najentus, Black Temple HPx3.5'),
 (22898, 3.5, 2.2, 1, 'Supremus, Black Temple HPx3.5'),
 (22841, 3.5, 2.2, 1, 'Shade of Akama, Black Temple HPx3.5'),
@@ -51,3 +62,4 @@ INSERT INTO `zone_difficulty_mythicmode_creatureoverrides` (`CreatureEntry`, `HP
 (25741, 3.5, 2.5, 1, 'Muru 3.5x mythic 2.5x normal hp'),
 (25840, 3.5, 2.5, 1, 'Entropius 3.5x mythic 2.5x normal hp'),
 (25315, 3.5, 2.5, 1, 'Kiljaeden 3.5x mythic 2.5x normal hp');
+
