@@ -13,7 +13,8 @@ INSERT INTO `zone_difficulty_info` (`MapId`, `PhaseMask`, `HealingNerfValue`, `A
 (544, 0, 0.90, 0.90, 1.10, 1.10, 1, 'Normal Mode Magtheridon Healing 90% / Absorb 90% Nerf / 10% physical & 10% spell damage buff'),
 (544, 0, 0.80, 0.80, 1.20, 1.20, 64, 'Mythic Mode Magtheridon Healing 80% / Absorb 80% Nerf / 20% physical & 20% spell damage buff'),
 (532, 0, 0.75, 0.75, 1.15, 1.15, 1, 'Karazhan'),
-(548, 0, 0.75, 0.75, 1.30, 1.30, 1, 'Serpentshrine Cavern'),
+(548, 0, 0.75, 0.75, 1.20, 1.15, 1, 'Normal SSC Healing 75% / Absorb 75% Nerf / 20% physical & 15% spell damage buff'),
+(548, 0, 0.75, 0.75, 1.34, 1.32, 64, 'Mythic SSC Healing 75% / Absorb 75% Nerf / 34% physical & 32% spell damage buff'),
 (534, 0, 0.85, 0.85, 1.35, 1.2, 1, 'The Battle For Mount Hyjal'),
 (550, 0, 0.75, 0.75, 1.30, 1.30, 1, 'Tempest Keep'),
 (564, 0, 0.75, 0.75, 1.20, 1.15, 1, 'Normal Mode Black Temple Healing 75% / Absorb 75% Nerf / 20% physical & 15% spell damage buff'),
@@ -22,6 +23,7 @@ INSERT INTO `zone_difficulty_info` (`MapId`, `PhaseMask`, `HealingNerfValue`, `A
 (568, 0, 0.75, 0.75, 1.34, 1.32, 64, 'Mythic ZA Healing 75% / Absorb 75% Nerf / 34% physical & 32% spell damage buff'),
 (580, 0, 0.75, 0.75, 1.20, 1.15, 1, 'Normal SWP Healing 75% / Absorb 75% Nerf / 20% physical & 15% spell damage buff'),
 (580, 0, 0.75, 0.75, 1.34, 1.32, 64, 'Mythic SWP Healing 75% / Absorb 75% Nerf / 34% physical & 32% spell damage buff'),
+
 -- TBC Heroics
 (269, 0, '0.90', '0.90', '1.20', '1.10', 0, 'Heroic Mode Black Morass Healing 90% / Absorb 90% Nerf / 20% physical & 10% spell damage buff'),
 -- (269, 0, '0.80', '0.80', '1.30', '1.20', 64, 'Mythic Mode Black Morass Healing 80% / Absorb 80% Nerf / 30% physical & 20% spell damage buff'),
