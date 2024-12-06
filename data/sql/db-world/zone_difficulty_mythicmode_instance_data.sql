@@ -33,6 +33,13 @@ INSERT INTO `zone_difficulty_mythicmode_instance_data` (`MapID`, `SourceEntry`, 
 (544, 17257, 0, 9),    -- Magtheridon, Magtheridon's Lair
 (565, 18831, 0, 9),    -- High King Maulgar, Gruul's Lair
 (565, 19044, 0, 9),    -- Gruul, Gruul's Lair
+-- SSC
+(548, 21216, 0, 10), -- Hydross
+(548, 21217, 0, 10), -- Lurker
+(548, 21215, 0, 10), -- Leotheras
+(548, 21213, 0, 10), -- Morogrim
+(548, 21214, 0, 10), -- Karathress
+(548, 21212, 0, 10), -- Vashj
 -- Black Temple
 (564, 22887, 0, 11), -- Najentus
 (564, 22898, 0, 11), -- Supremus
