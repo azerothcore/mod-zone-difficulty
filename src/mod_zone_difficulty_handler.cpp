@@ -695,34 +695,22 @@ bool ZoneDifficulty::VectorContainsUint32(std::vector<uint32> vec, uint32 elemen
 bool ZoneDifficulty::ShouldNerfInDuels(Unit* target)
 {
     if (target->GetAreaId() != DUEL_AREA)
-    {
         return false;
-    }
 
     if (target->ToTempSummon() && target->ToTempSummon()->GetSummoner())
-    {
         target = target->ToTempSummon()->GetSummoner()->ToUnit();
-    }
 
     if (!target->GetAffectingPlayer())
-    {
         return false;
-    }
 
     if (!target->GetAffectingPlayer()->duel)
-    {
         return false;
-    }
 
     if (target->GetAffectingPlayer()->duel->State != DUEL_STATE_IN_PROGRESS)
-    {
         return false;
-    }
 
     if (!target->GetAffectingPlayer()->duel->Opponent)
-    {
         return false;
-    }
 
     return true;
 }
@@ -750,7 +738,6 @@ int32 ZoneDifficulty::GetLowestMatchingPhase(uint32 mapId, uint32 phaseMask)
             return 0;
         }
 
-        // Check all $key in [mapId][$key] if they match the target's visible phases
         for (auto const& [key, value] : sZoneDifficulty->NerfInfo[mapId])
         {
             if (key & phaseMask)
@@ -767,22 +754,18 @@ int32 ZoneDifficulty::GetLowestMatchingPhase(uint32 mapId, uint32 phaseMask)
  *  zone_difficulty_instance_saves is used to store the data.
  *
  *  @param InstanceID INT NOT NULL DEFAULT 0,
- *  @param MythicmodeOn TINYINT NOT NULL DEFAULT 0,
  */
 void ZoneDifficulty::SaveMythicmodeInstanceData(uint32 instanceId)
 {
     if (sZoneDifficulty->MythicmodeInstanceData.find(instanceId) == sZoneDifficulty->MythicmodeInstanceData.end())
     {
-        //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: ZoneDifficulty::SaveMythicmodeInstanceData: InstanceId {} not found in MythicmodeInstanceData.", instanceId);
         return;
     }
-    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: ZoneDifficulty::SaveMythicmodeInstanceData: Saving instanceId {} with MythicmodeOn {}", instanceId, sZoneDifficulty->MythicmodeInstanceData[instanceId]);
     CharacterDatabase.Execute("REPLACE INTO zone_difficulty_instance_saves (InstanceID, MythicmodeOn) VALUES ({}, {})", instanceId, sZoneDifficulty->MythicmodeInstanceData[instanceId]);
 }
 
 void ZoneDifficulty::MythicmodeEvent(Unit* unit, uint32 entry, uint32 key)
 {
-    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: MythicmodeEvent for entry {} with key {}", entry, key);
     if (unit && unit->IsAlive())
     {
         if (!unit->IsInCombat())
@@ -790,11 +773,10 @@ void ZoneDifficulty::MythicmodeEvent(Unit* unit, uint32 entry, uint32 key)
             unit->m_Events.CancelEventGroup(EVENT_GROUP);
             return;
         }
-        //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: MythicmodeEvent IsInCombat for entry {} with key {}", entry, key);
+
         // Try again in 1s if the unit is currently casting
         if (unit->HasUnitState(UNIT_STATE_CASTING))
         {
-            //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: MythicmodeEvent Re-schedule AI event in 1s because unit is casting for entry {} with key {}", entry, key);
             unit->m_Events.AddEventAtOffset([unit, entry, key]()
                 {
                     sZoneDifficulty->MythicmodeEvent(unit, entry, key);
@@ -802,7 +784,6 @@ void ZoneDifficulty::MythicmodeEvent(Unit* unit, uint32 entry, uint32 key)
             return;
         }
 
-        //Re-schedule the event
         if (sZoneDifficulty->MythicmodeAI[entry][key].Repetitions == 0)
         {
             unit->m_Events.AddEventAtOffset([unit, entry, key]()
@@ -816,7 +797,6 @@ void ZoneDifficulty::MythicmodeEvent(Unit* unit, uint32 entry, uint32 key)
         bool has_bp1 = mythicAI.Spellbp1;
         bool has_bp2 = mythicAI.Spellbp2;
 
-        //Multiple targets
         if (mythicAI.Target == TARGET_PLAYER_DISTANCE)
         {
             auto const& threatlist = unit->GetThreatMgr().GetThreatList();
@@ -825,16 +805,11 @@ void ZoneDifficulty::MythicmodeEvent(Unit* unit, uint32 entry, uint32 key)
             {
                 Unit* target = (*itr)->getTarget();
                 if (!unit->IsWithinDist(target, mythicAI.TargetArg))
-                {
                     continue;
-                }
 
                 std::string targetName = target ? target->GetName() : "NoTarget";
                 if (!has_bp0 && !has_bp1 && !has_bp2)
-                {
                     unit->CastSpell(target, mythicAI.Spell, mythicAI.TriggeredCast);
-                    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Creature casting MythicmodeAI spell: {} at target {}", mythicAI.Spell, targetName);
-                }
                 else
                 {
                     unit->CastCustomSpell(target, mythicAI.Spell,
@@ -842,7 +817,6 @@ void ZoneDifficulty::MythicmodeEvent(Unit* unit, uint32 entry, uint32 key)
                         has_bp1 ? &mythicAI.Spellbp1 : NULL,
                         has_bp2 ? &mythicAI.Spellbp2 : NULL,
                         mythicAI.TriggeredCast);
-                    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Creature casting MythicmodeAI spell: {} at target {} with custom values.", mythicAI.Spell, targetName);
                 }
             }
             return;
@@ -851,13 +825,9 @@ void ZoneDifficulty::MythicmodeEvent(Unit* unit, uint32 entry, uint32 key)
         // Select target
         Unit* target = nullptr;
         if (mythicAI.Target == TARGET_SELF)
-        {
             target = unit;
-        }
         else if (mythicAI.Target == TARGET_VICTIM)
-        {
             target = unit->GetVictim();
-        }
         else
         {
             switch (mythicAI.Target)
@@ -866,46 +836,36 @@ void ZoneDifficulty::MythicmodeEvent(Unit* unit, uint32 entry, uint32 key)
                 {
                     float range = 200.0f;
                     if (mythicAI.TargetArg > 0)
-                    {
                         range = mythicAI.TargetArg;
-                    }
+
                     target = unit->GetAI()->SelectTarget(SelectTargetMethod::MaxThreat, mythicAI.TargetArg2, range, true);
 
                     if (!target)
-                    {
-                        //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Fall-back to GetVictim()");
                         target = unit->GetVictim();
-                    }
-                    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Selecting target type TARGET_HOSTILE_AGGRO_FROM_TOP with range TargetArg {} and position on threat-list TargetArg2 {}.", mythicAI.TargetArg, range);
+
                     break;
                 }
                 case TARGET_HOSTILE_AGGRO_FROM_BOTTOM:
                 {
                     float range = 200.0f;
                     if (mythicAI.TargetArg2 > 0)
-                    {
                         range = mythicAI.TargetArg2;
-                    }
+
                     target = unit->GetAI()->SelectTarget(SelectTargetMethod::MinThreat, mythicAI.TargetArg, range, true);
 
                     if (!target)
-                    {
-                        //LOG_INFO("module", "Fall-back to GetVictim()");
                         target = unit->GetVictim();
-                    }
-                    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Selecting target type TARGET_HOSTILE_AGGRO_FROM_TOP with range TargetArg {} and position on threat-list TargetArg2 {}.", mythicAI.TargetArg, range);
+
                     break;
                 }
                 case TARGET_HOSTILE_RANDOM:
                 {
                     target = unit->GetAI()->SelectTarget(SelectTargetMethod::Random, 0, mythicAI.TargetArg, true);
-                    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Selecting target type TARGET_HOSTILE_RANDOM with max range {}.", mythicAI.TargetArg);
                     break;
-                    }
+                }
                 case TARGET_HOSTILE_RANDOM_NOT_TOP:
                 {
                     target = unit->GetAI()->SelectTarget(SelectTargetMethod::Random, 0, mythicAI.TargetArg, true, false);
-                    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Selecting target type TARGET_HOSTILE_RANDOM_NOT_TOP with max range {}.", mythicAI.TargetArg);
                     break;
                 }
                 default:
@@ -921,16 +881,12 @@ void ZoneDifficulty::MythicmodeEvent(Unit* unit, uint32 entry, uint32 key)
             if (mythicAI.TargetArg > 0)
             {
                 if (unit->IsInRange(victim, 0, mythicAI.TargetArg, true))
-                {
                     target = victim;
-                }
             }
             else if (mythicAI.TargetArg < 0)
             {
                 if (unit->IsInRange(victim, mythicAI.TargetArg, 0, true))
-                {
                     target = victim;
-                }
             }
 
         }
@@ -942,7 +898,6 @@ void ZoneDifficulty::MythicmodeEvent(Unit* unit, uint32 entry, uint32 key)
             if (!has_bp0 && !has_bp1 && !has_bp2)
             {
                 unit->CastSpell(target, mythicAI.Spell, mythicAI.TriggeredCast);
-                //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Creature casting MythicmodeAI spell: {} at target {}", mythicAI.Spell, targetName);
             }
             else
             {
@@ -951,7 +906,6 @@ void ZoneDifficulty::MythicmodeEvent(Unit* unit, uint32 entry, uint32 key)
                     has_bp1 ? &mythicAI.Spellbp1 : NULL,
                     has_bp2 ? &mythicAI.Spellbp2 : NULL,
                     mythicAI.TriggeredCast);
-                //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Creature casting MythicmodeAI spell: {} at target {} with custom values.", mythicAI.Spell, targetName);
             }
         }
         else
@@ -963,7 +917,6 @@ void ZoneDifficulty::MythicmodeEvent(Unit* unit, uint32 entry, uint32 key)
 
 bool ZoneDifficulty::HasCompletedFullTier(uint32 category, uint32 playerGuid)
 {
-    //LOG_INFO("module", "MOD-ZONE-DIFFCULTY: Executing HasCompletedFullTier for category {} playerGUID {}.", category, playerGuid);
     std::vector<uint32> MapList;
     switch (category)
     {
@@ -988,7 +941,6 @@ bool ZoneDifficulty::HasCompletedFullTier(uint32 category, uint32 playerGuid)
 
     for (uint32 mapId : MapList)
     {
-        //LOG_INFO("module", "MOD-ZONE-DIFFCULTY: Checking HasCompletedFullTier for mapId {}.", mapId);
         if (sZoneDifficulty->EncounterCounter.find(mapId) == sZoneDifficulty->EncounterCounter.end())
         {
             LOG_ERROR("module", "MOD-ZONE-DIFFICULTY: Map without data requested in ZoneDifficulty::HasCompletedFullTier {}", mapId);
@@ -1005,7 +957,6 @@ bool ZoneDifficulty::HasCompletedFullTier(uint32 category, uint32 playerGuid)
 
 void ZoneDifficulty::RewardItem(Player* player, uint8 category, uint8 itemType, uint8 counter, Creature* creature, uint32 itemEntry)
 {
-    // Check (again) if the player has enough score in the respective category.
     uint32 availableScore = player->GetPlayerSetting(ModZoneDifficultyString + "score", category).value;
 
     auto reward = sZoneDifficulty->Rewards[category][itemType][counter];
@@ -1045,7 +996,6 @@ void ZoneDifficulty::RewardItem(Player* player, uint8 category, uint8 itemType, 
         return;
     }
 
-    // Check if the player has the neccesary achievement
     if (reward.Achievement)
     {
         if (!player->HasAchieved(reward.Achievement))
@@ -1059,7 +1009,6 @@ void ZoneDifficulty::RewardItem(Player* player, uint8 category, uint8 itemType, 
         }
     }
 
-    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Sending item with category {}, itemType {}, counter {}", category, itemType, counter);
     sZoneDifficulty->DeductMythicmodeScore(player, category, reward.Price);
     sZoneDifficulty->SendItem(player, reward);
 
