@@ -509,8 +509,8 @@ std::string ZoneDifficulty::GetContentTypeString(uint32 type)
     case TYPE_RAID_T4:
         typestring = "for T4 Raids.";
         break;
-    case TYPE_RAID_T5:
-        typestring = "for T5 Raids.";
+    case TYPE_RAID_SSC:
+        typestring = "for Serpentshrine Cavern.";
         break;
     case TYPE_RAID_T6:
         typestring = "for T6 Raids.";
@@ -957,6 +957,9 @@ bool ZoneDifficulty::HasCompletedFullTier(uint32 category, uint32 playerGuid)
 
 void ZoneDifficulty::RewardItem(Player* player, uint8 category, uint8 itemType, uint8 counter, Creature* creature, uint32 itemEntry)
 {
+    if (!sZoneDifficulty->CheckCompletionStatus(creature, player, category))
+        return;
+
     uint32 availableScore = player->GetPlayerSetting(ModZoneDifficultyString + "score", category).value;
 
     auto reward = sZoneDifficulty->Rewards[category][itemType][counter];
@@ -967,24 +970,6 @@ void ZoneDifficulty::RewardItem(Player* player, uint8 category, uint8 itemType, 
         {
             if (item.Entry == itemEntry)
                 reward = item;
-        }
-    }
-
-    if (category == TYPE_RAID_T6)
-    {
-        if (!player->GetPlayerSetting(ModZoneDifficultyString + "ct", SETTING_BLACK_TEMPLE).value)
-        {
-            creature->Whisper("Ah, hero! The threads of fate bring you to me. To claim the rewards you desire, you must first confront Illidan Stormrage on Mythic difficulty.",
-                LANG_UNIVERSAL, player);
-            return;
-        }
-    } else if (category == TYPE_RAID_ZA)
-    {
-        if (!player->GetPlayerSetting(ModZoneDifficultyString + "ct", SETTING_ZULAMAN).value)
-        {
-            creature->Whisper("Ah, hero! The threads of fate bring you to me. To claim the rewards you desire, you must first confront Zul'jin on Mythic difficulty.",
-                LANG_UNIVERSAL, player);
-            return;
         }
     }
 
@@ -1017,9 +1002,9 @@ void ZoneDifficulty::RewardItem(Player* player, uint8 category, uint8 itemType, 
             player->GetSession()->SendAreaTriggerMessage("You were rewarded %s for %u points.", proto->Name1.c_str(), reward.Price);
 };
 
-void ZoneDifficulty::LogAndAnnounceKill(Unit* source, bool isMythic)
+void ZoneDifficulty::LogAndAnnounceKill(Map* map, bool isMythic)
 {
-    if (source->GetMap()->GetId() == 564)
+    if (map->GetId() == 564)
     {
         if (sZoneDifficulty->IsBlackTempleDone)
             return;
@@ -1030,17 +1015,53 @@ void ZoneDifficulty::LogAndAnnounceKill(Unit* source, bool isMythic)
 
         std::string names = "Realm first group: ";
 
-        if (Map* map = source->GetMap())
-        {
-            map->DoForAllPlayers([&](Player* mapPlayer) {
-                if (!mapPlayer->IsGameMaster())
-                {
-                    names.append(mapPlayer->GetName() + ", ");
-                    CharacterDatabase.Execute("INSERT INTO zone_difficulty_completion_logs (guid, type, mode) VALUES ({}, {}, {})", mapPlayer->GetGUID().GetCounter(), TYPE_RAID_T6, 1);
-                }
-            });
-        }
+        map->DoForAllPlayers([&](Player* mapPlayer) {
+            if (!mapPlayer->IsGameMaster())
+            {
+                names.append(mapPlayer->GetName() + ", ");
+                CharacterDatabase.Execute("INSERT INTO zone_difficulty_completion_logs (guid, type, mode) VALUES ({}, {}, {})", mapPlayer->GetGUID().GetCounter(), TYPE_RAID_T6, 1);
+            }
+        });
 
         ChatHandler(nullptr).SendWorldText(names.c_str());
     }
 };
+
+bool ZoneDifficulty::CheckCompletionStatus(Creature* creature, Player* player, uint32 category) const
+{
+    if (category == TYPE_RAID_T6)
+    {
+        if (!player->GetPlayerSetting(ModZoneDifficultyString + "ct", SETTING_BLACK_TEMPLE).value)
+        {
+            creature->Whisper("Ah, hero! The threads of fate bring you to me. To claim the rewards you desire, you must first confront Illidan Stormrage on Mythic difficulty.",
+                LANG_UNIVERSAL, player);
+            return false;
+        }
+    }
+    else if (category == TYPE_RAID_ZA)
+    {
+        if (!player->GetPlayerSetting(ModZoneDifficultyString + "ct", SETTING_ZULAMAN).value)
+        {
+            creature->Whisper("Ah, hero! The threads of fate bring you to me. To claim the rewards you desire, you must first confront Zul'jin on Mythic difficulty.",
+                LANG_UNIVERSAL, player);
+            return false;
+        }
+    }
+
+    return true;
+}
+
+void ZoneDifficulty::ProcessCreatureDeath(Map* map, uint32 entry)
+{
+    switch (entry)
+    {
+        case NPC_ILLIDAN_STORMRAGE:
+            map->DoForAllPlayers([&](Player* player)
+            {
+                player->UpdatePlayerSetting(ModZoneDifficultyString + "ct", SETTING_BLACK_TEMPLE, 1);
+                ChatHandler(player->GetSession()).PSendSysMessage("Congratulations on completing the Black Temple!");
+            });
+            sZoneDifficulty->LogAndAnnounceKill(map, true);
+            break;
+    }
+}

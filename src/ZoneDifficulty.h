@@ -125,7 +125,7 @@ enum ZoneDifficultySettings
     TYPE_RAID_AQ40    = 7,
     TYPE_HEROIC_TBC   = 8,
     TYPE_RAID_T4      = 9,
-    TYPE_RAID_T5      = 10,
+    TYPE_RAID_SSC     = 10,
     TYPE_RAID_T6      = 11,
     TYPE_RAID_ZA      = 12,
     TYPE_HEROIC_WOTLK = 13,
@@ -133,12 +133,15 @@ enum ZoneDifficultySettings
     TYPE_RAID_T8      = 15,
     TYPE_RAID_T9      = 16,
     TYPE_RAID_T10     = 17,
+    TYPE_RAID_HYJAL   = 18,
 
     TYPE_MAX_TIERS,
 
     // Completed tiers settings
     SETTING_BLACK_TEMPLE = 0,
-    SETTING_ZULAMAN      = 1
+    SETTING_ZULAMAN      = 1,
+    SETTING_SSC          = 2,
+    SETTING_HYJAL        = 3
 };
 
 enum Misc
@@ -168,6 +171,7 @@ public:
     bool HasMythicmode(int8 mode) { return (mode & MODE_HARD) == MODE_HARD; }
     bool HasCompletedFullTier(uint32 category, uint32 playerGUID);
     bool OverrideModeMatches(uint32 instanceId, uint32 spellId, uint32 mapId);
+    [[nodiscord]] bool CheckCompletionStatus(Creature* creature, Player* player, uint32 category) const;
     [[nodiscard]] bool IsValidNerfTarget(Unit* target);
     [[nodiscard]] bool VectorContainsUint32(std::vector<uint32> vec, uint32 element);
     [[nodiscard]] bool IsMythicmodeMap(uint32 mapid);
@@ -175,7 +179,8 @@ public:
     [[nodiscard]] bool ShouldNerfMap(uint32 mapId) { return NerfInfo.find(mapId) != NerfInfo.end(); };
     [[nodiscard]] int32 GetLowestMatchingPhase(uint32 mapId, uint32 phaseMask);
     void RewardItem(Player* player, uint8 category, uint8 itemType, uint8 counter, Creature* creature, uint32 itemEntry);
-    void LogAndAnnounceKill(Unit* creature, bool isMythic);
+    void LogAndAnnounceKill(Map* map, bool isMythic);
+    void ProcessCreatureDeath(Map* map, uint32 entry);
 
     bool IsEnabled{ false };
     bool IsDebugInfoEnabled{ false };

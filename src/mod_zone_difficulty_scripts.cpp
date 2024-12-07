@@ -555,17 +555,7 @@ public:
                 else if (map->IsRaid())
                 {
                     sZoneDifficulty->AddMythicmodeScore(map, sZoneDifficulty->Expansion[mapId], score);
-
-                    if (source->GetEntry() == NPC_ILLIDAN_STORMRAGE)
-                    {
-                        map->DoForAllPlayers([&](Player* player)
-                        {
-                            player->UpdatePlayerSetting(ModZoneDifficultyString + "ct", SETTING_BLACK_TEMPLE, 1);
-                            ChatHandler(player->GetSession()).PSendSysMessage("Congratulations on completing the Black Temple!");
-                        });
-
-                        sZoneDifficulty->LogAndAnnounceKill(source, true);
-                    }
+                    sZoneDifficulty->ProcessCreatureDeath(map, source->GetEntry());
                 }
                 /* debug
                  * else
