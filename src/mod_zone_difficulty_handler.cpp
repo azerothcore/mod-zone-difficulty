@@ -1059,7 +1059,31 @@ void ZoneDifficulty::ProcessCreatureDeath(Map* map, uint32 entry)
             map->DoForAllPlayers([&](Player* player)
             {
                 player->UpdatePlayerSetting(ModZoneDifficultyString + "ct", SETTING_BLACK_TEMPLE, 1);
-                ChatHandler(player->GetSession()).PSendSysMessage("Congratulations on completing the Black Temple!");
+                player->SendSystemMessage("Congratulations on completing the Black Temple!");
+            });
+            sZoneDifficulty->LogAndAnnounceKill(map, true);
+            break;
+        case NPC_ZULJIN:
+            map->DoForAllPlayers([&](Player* player)
+            {
+                player->UpdatePlayerSetting(ModZoneDifficultyString + "ct", SETTING_ZULAMAN, 1);
+                player->SendSystemMessage("Congratulations on completing Zul'Aman!");
+            });
+            sZoneDifficulty->LogAndAnnounceKill(map, true);
+            break;
+        case NPC_ARCHIMONDE:
+            map->DoForAllPlayers([&](Player* player)
+            {
+                player->UpdatePlayerSetting(ModZoneDifficultyString + "ct", SETTING_HYJAL, 1);
+                player->SendSystemMessage("Congratulations on completing Battle for Mount Hyjal!");
+            });
+            sZoneDifficulty->LogAndAnnounceKill(map, true);
+            break;
+        case NPC_LADY_VASHJ:
+            map->DoForAllPlayers([&](Player* player)
+            {
+                player->UpdatePlayerSetting(ModZoneDifficultyString + "ct", SETTING_SSC, 1);
+                player->SendSystemMessage("Congratulations on completing Serpentshrine Cavern!");
             });
             sZoneDifficulty->LogAndAnnounceKill(map, true);
             break;

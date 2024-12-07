@@ -147,6 +147,9 @@ enum ZoneDifficultySettings
 enum Misc
 {
     NPC_ILLIDAN_STORMRAGE = 22917,
+    NPC_LADY_VASHJ        = 21212,
+    NPC_ARCHIMONDE        = 17968,
+    NPC_ZULJIN            = 23863,
     NPC_REWARD_CHROMIE    = 1128002,
 };
 
