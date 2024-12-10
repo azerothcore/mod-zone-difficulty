@@ -533,6 +533,9 @@ std::string ZoneDifficulty::GetContentTypeString(uint32 type)
     case TYPE_RAID_T10:
         typestring = "for T10 Raids.";
         break;
+    case TYPE_RAID_HYJAL:
+        typestring = "for Battle for Mount Hyjal.";
+        break;
     default:
         typestring = "-";
     }
@@ -1029,23 +1032,40 @@ void ZoneDifficulty::LogAndAnnounceKill(Map* map, bool isMythic)
 
 bool ZoneDifficulty::CheckCompletionStatus(Creature* creature, Player* player, uint32 category) const
 {
-    if (category == TYPE_RAID_T6)
+    switch (category)
     {
-        if (!player->GetPlayerSetting(ModZoneDifficultyString + "ct", SETTING_BLACK_TEMPLE).value)
-        {
-            creature->Whisper("Ah, hero! The threads of fate bring you to me. To claim the rewards you desire, you must first confront Illidan Stormrage on Mythic difficulty.",
-                LANG_UNIVERSAL, player);
-            return false;
-        }
-    }
-    else if (category == TYPE_RAID_ZA)
-    {
-        if (!player->GetPlayerSetting(ModZoneDifficultyString + "ct", SETTING_ZULAMAN).value)
-        {
-            creature->Whisper("Ah, hero! The threads of fate bring you to me. To claim the rewards you desire, you must first confront Zul'jin on Mythic difficulty.",
-                LANG_UNIVERSAL, player);
-            return false;
-        }
+        case TYPE_RAID_SSC:
+            if (!player->GetPlayerSetting(ModZoneDifficultyString + "ct", SETTING_SSC).value)
+            {
+                creature->Whisper("Ah, hero! The threads of fate bring you to me. To claim the rewards you desire, you must first confront Lady Vashj on Mythic difficulty.",
+                    LANG_UNIVERSAL, player);
+                return false;
+            }
+            break;
+        case TYPE_RAID_T6:
+            if (!player->GetPlayerSetting(ModZoneDifficultyString + "ct", SETTING_BLACK_TEMPLE).value)
+            {
+                creature->Whisper("Ah, hero! The threads of fate bring you to me. To claim the rewards you desire, you must first confront Illidan Stormrage on Mythic difficulty.",
+                    LANG_UNIVERSAL, player);
+                return false;
+            }
+            break;
+        case TYPE_RAID_ZA:
+            if (!player->GetPlayerSetting(ModZoneDifficultyString + "ct", SETTING_ZULAMAN).value)
+            {
+                creature->Whisper("Ah, hero! The threads of fate bring you to me. To claim the rewards you desire, you must first confront Zul'jin on Mythic difficulty.",
+                    LANG_UNIVERSAL, player);
+                return false;
+            }
+            break;
+        case TYPE_RAID_HYJAL:
+            if (!player->GetPlayerSetting(ModZoneDifficultyString + "ct", SETTING_HYJAL).value)
+            {
+                creature->Whisper("Ah, hero! The threads of fate bring you to me. To claim the rewards you desire, you must first confront Archimonde on Mythic difficulty.",
+                    LANG_UNIVERSAL, player);
+                return false;
+            }
+            break;
     }
 
     return true;
