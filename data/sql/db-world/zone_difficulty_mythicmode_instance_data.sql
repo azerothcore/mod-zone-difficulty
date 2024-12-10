@@ -40,6 +40,12 @@ INSERT INTO `zone_difficulty_mythicmode_instance_data` (`MapID`, `SourceEntry`, 
 (548, 21213, 0, 10), -- Morogrim
 (548, 21214, 0, 10), -- Karathress
 (548, 21212, 0, 10), -- Vashj
+-- Hyjal
+(534, 17767, 0, 18), -- Rage Winterchill
+(534, 17808, 0, 18), -- Anetheron
+(534, 17888, 0, 18), -- Kazrogal
+(534, 17842, 0, 18), -- Azgalor
+(534, 17968, 0, 18), -- Archimonde
 -- Black Temple
 (564, 22887, 0, 11), -- Najentus
 (564, 22898, 0, 11), -- Supremus
