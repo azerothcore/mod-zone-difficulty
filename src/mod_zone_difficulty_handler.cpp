@@ -87,8 +87,14 @@ void ZoneDifficulty::LoadMapDifficultySettings()
     EncounterCounter[544] = 1; // Magtheridon's Lair
     EncounterCounter[532] = 12; // Karazhan
 
+    // Category 10
+    EncounterCounter[548] = 7; // Serpentshrine Cavern
+
     // Category 11
     EncounterCounter[564] = 9; // Black Temple
+
+    // Category 18
+    EncounterCounter[534] = 5; // Hyjal Summit
 
     // Icons
     sZoneDifficulty->ItemIcons[ITEMTYPE_MISC] = "|TInterface\\icons\\inv_misc_cape_17:15|t |TInterface\\icons\\inv_misc_gem_topaz_02:15|t |TInterface\\icons\\inv_jewelry_ring_51naxxramas:15|t ";
@@ -935,6 +941,12 @@ bool ZoneDifficulty::HasCompletedFullTier(uint32 category, uint32 playerGuid)
         break;
     case TYPE_RAID_ZA:
         MapList = { 568 };
+        break;
+    case TYPE_RAID_SSC:
+        MapList = { 548 };
+        break;
+    case TYPE_RAID_HYJAL:
+        MapList = { 534 };
         break;
     default:
         LOG_ERROR("module", "MOD-ZONE-DIFFICULTY: Category without data requested in ZoneDifficulty::HasCompletedFullTier {}", category);
