@@ -1,4 +1,5 @@
-SET @PRICE := 30;
+SET @PRICE := 18;
+SET @PRICE2 := 24;
 DELETE FROM `zone_difficulty_mythicmode_rewards` WHERE `ContentType` = 10;
 INSERT INTO `zone_difficulty_mythicmode_rewards` (`ContentType`, `ItemType`, `Entry`, `Price`, `Enchant`, `EnchantSlot`, `Achievement`, `Enabled`, `Comment`) VALUES
 (10, 1, 33055, @PRICE, 0, 0, 694, 1, 'Band of Vile Aggression - Hydross'),
@@ -9,8 +10,8 @@ INSERT INTO `zone_difficulty_mythicmode_rewards` (`ContentType`, `ItemType`, `En
 (10, 1, 30098, @PRICE, 0, 0, 694, 1, 'Razor-Scale Battlecloak - Morogrim'),
 (10, 1, 33058, @PRICE, 0, 0, 694, 1, 'Band of the Vigilant - Morogrim'),
 (10, 1, 30083, @PRICE, 0, 0, 694, 1, 'Ring of Sundered Souls - Morogrim'),
-(10, 1, 30110, @PRICE, 0, 0, 694, 1, 'Coral Band of the Revived - Vashj'),
-(10, 1, 30109, @PRICE, 0, 0, 694, 1, 'Ring of Endless Coils - Vashj'),
+(10, 1, 30110, @PRICE2, 0, 0, 694, 1, 'Coral Band of the Revived - Vashj'),
+(10, 1, 30109, @PRICE2, 0, 0, 694, 1, 'Ring of Endless Coils - Vashj'),
 
 (10, 1, 30664, @PRICE, 0, 0, 694, 1, 'Living Root of the Wildheart - Hydross'),
 (10, 1, 30629, @PRICE, 0, 0, 694, 1, 'Scarab of Displacement - Hydross'),
@@ -23,7 +24,7 @@ INSERT INTO `zone_difficulty_mythicmode_rewards` (`ContentType`, `ItemType`, `En
 (10, 1, 30099, @PRICE, 0, 0, 694, 1, 'Frayed Tether of the Drowned - Karathress'),
 (10, 1, 30663, @PRICE, 0, 0, 694, 1, 'Fathom-Brooch of the Tidewalker - Karathress'),
 (10, 1, 30626, @PRICE, 0, 0, 694, 1, 'Sextant of Unstable Currents - Karathress'),
-(10, 1, 30621, @PRICE, 0, 0, 694, 1, 'Prism of Inner Calm - Vashj'),
+(10, 1, 30621, @PRICE2, 0, 0, 694, 1, 'Prism of Inner Calm - Vashj'),
 
 (10, 2, 30056, @PRICE, 0, 0, 694, 1, 'Robe of Hateful Echoes - Hydross'),
 (10, 2, 30050, @PRICE, 0, 0, 694, 1, 'Boots of the Shifting Nightmare - Hydross'),
@@ -32,7 +33,7 @@ INSERT INTO `zone_difficulty_mythicmode_rewards` (`ContentType`, `ItemType`, `En
 (10, 2, 30067, @PRICE, 0, 0, 694, 1, 'Velvet Boots of the Guardian - Lurker'),
 (10, 2, 30079, @PRICE, 0, 0, 694, 1, 'Illidari Shoulderpads - Morogrim'),
 (10, 2, 30100, @PRICE, 0, 0, 694, 1, 'Soul-Strider Boots - Karathress'),
-(10, 2, 30107, @PRICE, 0, 0, 694, 1, 'Vestments of the Sea-Witch - Vashj'),
+(10, 2, 30107, @PRICE2, 0, 0, 694, 1, 'Vestments of the Sea-Witch - Vashj'),
 
 (10, 3, 30055, @PRICE, 0, 0, 694, 1, 'Shoulderpads of the Stranger - Hydross'),
 (10, 3, 30060, @PRICE, 0, 0, 694, 1, 'Boots of Effortless Striking - Lurker'),
@@ -40,8 +41,8 @@ INSERT INTO `zone_difficulty_mythicmode_rewards` (`ContentType`, `ItemType`, `En
 (10, 3, 30092, @PRICE, 0, 0, 694, 1, 'Orca-Hide Boots - Leotheras'),
 (10, 3, 30075, @PRICE, 0, 0, 694, 1, 'Gnarled Chestpiece of the Ancients - Morogrim'),
 (10, 3, 30101, @PRICE, 0, 0, 694, 1, 'Bloodsea Brigands Vest - Karathress'),
-(10, 3, 30106, @PRICE, 0, 0, 694, 1, 'Belt of One-Hundred Deaths - Vashj'),
-(10, 3, 30111, @PRICE, 0, 0, 694, 1, 'Runetotems Mantle - Vashj'),
+(10, 3, 30106, @PRICE2, 0, 0, 694, 1, 'Belt of One-Hundred Deaths - Vashj'),
+(10, 3, 30111, @PRICE2, 0, 0, 694, 1, 'Runetotems Mantle - Vashj'),
 
 (10, 4, 30054, @PRICE, 0, 0, 694, 1, 'Ranger-Generals Chestguard - Hydross'),
 (10, 4, 30047, @PRICE, 0, 0, 694, 1, 'Blackfathom Warbands - Hydross'),
@@ -50,7 +51,7 @@ INSERT INTO `zone_difficulty_mythicmode_rewards` (`ContentType`, `ItemType`, `En
 (10, 4, 30091, @PRICE, 0, 0, 694, 1, 'True-Aim Stalker Bands - Leotheras'),
 (10, 4, 30068, @PRICE, 0, 0, 694, 1, 'Girdle of the Tidal Call - Morogrim'),
 (10, 4, 30085, @PRICE, 0, 0, 694, 1, 'Mantle of the Tireless Tracker - Morogrim'),
-(10, 4, 30104, @PRICE, 0, 0, 694, 1, 'Cobra-Lash Boots - Vashj'),
+(10, 4, 30104, @PRICE2, 0, 0, 694, 1, 'Cobra-Lash Boots - Vashj'),
 
 (10, 5, 30048, @PRICE, 0, 0, 694, 1, 'Brighthelm of Justice - Hydross'),
 (10, 5, 30053, @PRICE, 0, 0, 694, 1, 'Pauldrons of the Wardancer - Hydross'),
@@ -59,8 +60,8 @@ INSERT INTO `zone_difficulty_mythicmode_rewards` (`ContentType`, `ItemType`, `En
 (10, 5, 30096, @PRICE, 0, 0, 694, 1, 'Girdle of the Invulnerable - Leotheras'),
 (10, 5, 30084, @PRICE, 0, 0, 694, 1, 'Pauldrons of the Argent Sentinel - Morogrim'),
 (10, 5, 30081, @PRICE, 0, 0, 694, 1, 'Warboots of Obliteration - Morogrim'),
-(10, 5, 30112, @PRICE, 0, 0, 694, 1, 'Glorious Gauntlets of Crestfall - Vashj'),
-(10, 5, 30102, @PRICE, 0, 0, 694, 1, 'Krakken-Heart Breastplate - Vashj'),
+(10, 5, 30112, @PRICE2, 0, 0, 694, 1, 'Glorious Gauntlets of Crestfall - Vashj'),
+(10, 5, 30102, @PRICE2, 0, 0, 694, 1, 'Krakken-Heart Breastplate - Vashj'),
 
 (10, 6, 30049, @PRICE, 0, 0, 694, 1, 'Fathomstone - Hydross'),
 (10, 6, 30058, @PRICE, 0, 0, 694, 1, 'Mallet of the Tides - Lurker'),
@@ -68,7 +69,7 @@ INSERT INTO `zone_difficulty_mythicmode_rewards` (`ContentType`, `ItemType`, `En
 (10, 6, 30080, @PRICE, 0, 0, 694, 1, 'Luminescent Rod of the Naaru - Morogrim'),
 (10, 6, 30082, @PRICE, 0, 0, 694, 1, 'Talon of Azshara - Morogrim'),
 (10, 6, 30090, @PRICE, 0, 0, 694, 1, 'World Breaker - Karathress'),
-(10, 6, 30108, @PRICE, 0, 0, 694, 1, 'Lightfathom Scepter - Vashj'),
-(10, 6, 30103, @PRICE, 0, 0, 694, 1, 'Fang of Vashj - Vashj'),
-(10, 6, 30105, @PRICE, 0, 0, 694, 1, 'Serpent Spine Longbow - Vashj');
+(10, 6, 30108, @PRICE2, 0, 0, 694, 1, 'Lightfathom Scepter - Vashj'),
+(10, 6, 30103, @PRICE2, 0, 0, 694, 1, 'Fang of Vashj - Vashj'),
+(10, 6, 30105, @PRICE2, 0, 0, 694, 1, 'Serpent Spine Longbow - Vashj');
 
