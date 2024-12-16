@@ -1080,6 +1080,10 @@ public:
 
         if (sZoneDifficulty->CreatureOverrides.find(entry) == sZoneDifficulty->CreatureOverrides.end())
         {
+            // TEMPORARY!!! It conflicts with CC normal mode tuning, dont apply trash tuning to hyjal and ssc
+            if (creature->GetMap()->GetId() == 534 || creature->GetMap()->GetId() == 548)
+                return;
+
             // Trash mobs. Apply generic tuning.
             if (!creature->IsDungeonBoss() && isMythic)
                 scaledBaseHealth = round(baseHealth * sZoneDifficulty->MythicmodeHpModifier);
