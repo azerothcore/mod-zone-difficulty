@@ -598,7 +598,7 @@ public:
         {
             npcText = NPC_TEXT_SCORE;
             bool hasAnyScore = false;
-            for (int i = 1; i <= 16; ++i)
+            for (int i = 1; i <= TYPE_MAX_TIERS; ++i)
             {
                 if (uint32 score = player->GetPlayerSetting(ModZoneDifficultyString + "score", i).value)
                 {
