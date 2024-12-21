@@ -15,7 +15,7 @@ INSERT INTO `zone_difficulty_info` (`MapId`, `PhaseMask`, `HealingNerfValue`, `A
 (532, 0, 0.75, 0.75, 1.15, 1.15, 1, 'Karazhan'),
 (548, 0, 0.75, 0.75, 1.20, 1.15, 1, 'Normal SSC Healing 75% / Absorb 75% Nerf / 20% physical & 15% spell damage buff'),
 (548, 0, 0.75, 0.75, 1.34, 1.32, 64, 'Mythic SSC Healing 75% / Absorb 75% Nerf / 34% physical & 32% spell damage buff'),
-(534, 0, 0.85, 0.85, 1.35, 1.2, 1, 'The Battle For Mount Hyjal'),
+(534, 0, 0.75, 0.75, 1.35, 1.2, 1, 'The Battle For Mount Hyjal'),
 (534, 0, 0.75, 0.75, 1.48, 1.35, 64, 'Mythic The Battle For Mount Hyjal'),
 (550, 0, 0.75, 0.75, 1.30, 1.30, 1, 'Tempest Keep'),
 (564, 0, 0.75, 0.75, 1.20, 1.15, 1, 'Normal Mode Black Temple Healing 75% / Absorb 75% Nerf / 20% physical & 15% spell damage buff'),
