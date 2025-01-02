@@ -25,6 +25,12 @@ class mod_zone_difficulty_unitscript : public UnitScript
 public:
     mod_zone_difficulty_unitscript() : UnitScript("mod_zone_difficulty_unitscript") { }
 
+    bool IsExcludedSpell(uint32 spellId)
+    {
+        static const std::unordered_set<uint32> excludedSpells = { 31852, 31851, 31850 };
+        return excludedSpells.find(spellId) != excludedSpells.end();
+    }
+
     void OnAuraApply(Unit* target, Aura* aura) override
     {
         if (!sZoneDifficulty->IsEnabled)
@@ -38,13 +44,17 @@ public:
             uint32 mapId = target->GetMapId();
             bool nerfInDuel = sZoneDifficulty->ShouldNerfInDuels(target);
 
-            //Check if the map of the target is subject of a nerf at all OR if the target is subject of a nerf in a duel
+            // Check if the map of the target is subject to a nerf at all OR if the target is subject to a nerf in a duel
             if (sZoneDifficulty->ShouldNerfMap(mapId) || nerfInDuel)
             {
                 if (SpellInfo const* spellInfo = aura->GetSpellInfo())
                 {
                     // Skip spells not affected by vulnerability (potions)
                     if (spellInfo->HasAttribute(SPELL_ATTR0_NO_IMMUNITIES))
+                        return;
+
+                    // Use the function to skip excluded spells
+                    if (IsExcludedSpell(spellInfo->Id))
                         return;
 
                     if (spellInfo->HasAura(SPELL_AURA_SCHOOL_ABSORB))
@@ -81,7 +91,7 @@ public:
                                 absorb = eff->GetAmount() * sZoneDifficulty->NerfInfo[DUEL_INDEX][0].AbsorbNerfPct;
                             }
 
-                            //This check must be last and override duel and map adjustments
+                            // This check must be last and override duel and map adjustments
                             if (sZoneDifficulty->SpellNerfOverrides.find(spellInfo->Id) != sZoneDifficulty->SpellNerfOverrides.end())
                             {
                                 if (sZoneDifficulty->SpellNerfOverrides[spellInfo->Id].find(mapId) != sZoneDifficulty->SpellNerfOverrides[spellInfo->Id].end())
