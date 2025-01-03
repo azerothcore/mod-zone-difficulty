@@ -64,22 +64,28 @@ public:
                             uint32 phaseMask = target->GetPhaseMask();
                             int matchingPhase = sZoneDifficulty->GetLowestMatchingPhase(mapId, phaseMask);
                             int8 mode = sZoneDifficulty->NerfInfo[mapId][matchingPhase].Enabled;
+
+                            // Ensure that negative values do not scale to 0
+                            auto scaleAbsorb = [](int32 amount, float pct) -> int32
+                            {
+                                float scaled = amount * pct;
+                                return (scaled < 0) ? static_cast<int32>(std::floor(scaled)) : static_cast<int32>(scaled);
+                            };
+
                             if (matchingPhase != -1)
                             {
                                 Map* map = target->GetMap();
                                 if (sZoneDifficulty->HasNormalMode(mode))
-                                    absorb = eff->GetAmount() * sZoneDifficulty->NerfInfo[mapId][matchingPhase].AbsorbNerfPct;
+                                    absorb = scaleAbsorb(absorb, sZoneDifficulty->NerfInfo[mapId][matchingPhase].AbsorbNerfPct);
 
                                 if (sZoneDifficulty->HasMythicmode(mode) && sZoneDifficulty->MythicmodeInstanceData[target->GetMap()->GetInstanceId()])
                                 {
                                     if (map->IsRaid() || (map->IsHeroic() && map->IsDungeon()))
-                                        absorb = eff->GetAmount() * sZoneDifficulty->NerfInfo[mapId][matchingPhase].AbsorbNerfPctHard;
+                                        absorb = scaleAbsorb(absorb, sZoneDifficulty->NerfInfo[mapId][matchingPhase].AbsorbNerfPctHard);
                                 }
                             }
                             else if (sZoneDifficulty->NerfInfo[DUEL_INDEX][0].Enabled > 0 && nerfInDuel)
-                            {
-                                absorb = eff->GetAmount() * sZoneDifficulty->NerfInfo[DUEL_INDEX][0].AbsorbNerfPct;
-                            }
+                                absorb = scaleAbsorb(absorb, sZoneDifficulty->NerfInfo[DUEL_INDEX][0].AbsorbNerfPct);
 
                             //This check must be last and override duel and map adjustments
                             if (sZoneDifficulty->SpellNerfOverrides.find(spellInfo->Id) != sZoneDifficulty->SpellNerfOverrides.end())
@@ -88,12 +94,12 @@ public:
                                 {
                                     // Check if the mode of instance and SpellNerfOverride match
                                     if (sZoneDifficulty->OverrideModeMatches(target->GetMap()->GetInstanceId(), spellInfo->Id, mapId))
-                                        absorb = eff->GetAmount() * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id][mapId].NerfPct;
+                                        absorb = scaleAbsorb(absorb, sZoneDifficulty->SpellNerfOverrides[spellInfo->Id][mapId].NerfPct);
                                 }
                                 else if (sZoneDifficulty->SpellNerfOverrides[spellInfo->Id].find(0) != sZoneDifficulty->SpellNerfOverrides[spellInfo->Id].end())
                                 {
                                     if (sZoneDifficulty->OverrideModeMatches(target->GetMap()->GetInstanceId(), spellInfo->Id, mapId))
-                                        absorb = eff->GetAmount() * sZoneDifficulty->SpellNerfOverrides[spellInfo->Id][0].NerfPct;
+                                        absorb = scaleAbsorb(absorb, sZoneDifficulty->SpellNerfOverrides[spellInfo->Id][0].NerfPct);
                                 }
                             }
 
