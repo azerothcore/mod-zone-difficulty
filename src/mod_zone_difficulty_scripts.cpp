@@ -25,12 +25,6 @@ class mod_zone_difficulty_unitscript : public UnitScript
 public:
     mod_zone_difficulty_unitscript() : UnitScript("mod_zone_difficulty_unitscript") { }
 
-    bool IsExcludedSpell(uint32 spellId)
-    {
-        static const std::unordered_set<uint32> excludedSpells = { 31852, 31851, 31850 };
-        return excludedSpells.find(spellId) != excludedSpells.end();
-    }
-
     void OnAuraApply(Unit* target, Aura* aura) override
     {
         if (!sZoneDifficulty->IsEnabled)
@@ -50,11 +44,8 @@ public:
                 if (SpellInfo const* spellInfo = aura->GetSpellInfo())
                 {
                     // Skip spells not affected by vulnerability (potions)
-                    if (spellInfo->HasAttribute(SPELL_ATTR0_NO_IMMUNITIES))
-                        return;
-
-                    // Use the function to skip excluded spells
-                    if (IsExcludedSpell(spellInfo->Id))
+                    static const std::unordered_set<uint32> excludedSpells = { 31852, 31851, 31850 };
+                    if (spellInfo->HasAttribute(SPELL_ATTR0_NO_IMMUNITIES) || excludedSpells.count(spellInfo->Id))
                         return;
 
                     if (spellInfo->HasAura(SPELL_AURA_SCHOOL_ABSORB))
