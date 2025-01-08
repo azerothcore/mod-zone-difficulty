@@ -49,4 +49,7 @@ INSERT INTO `zone_difficulty_spelloverrides` (`SpellID`, `MapId`, `NerfValue`, `
 (41001, 564, 1, 65, 'Black Temple - Mother Shahraz - Fatal Attraction'),
 (42005, 564, 1, 65, 'Black Temple - Gurtogg Bloodboil - Bloodboil'),
 (41078, 564, 1.1, 65, 'Black Temple - Illidan - Shadow Blast'),
-(41131, 564, 1.1, 65, 'Black Temple - Illidan - Flame Burst');
+(41131, 564, 1.1, 65, 'Black Temple - Illidan - Flame Burst'),
+(43137, 568, 1, 65, 'Zul Aman - Zuljin - Zap'),
+(43121, 568, 1, 65, 'Zul Aman - Zuljin - Cyclone'),
+(43140, 568, 1, 65, 'Zul Aman - Janalai - Flame Breath');
