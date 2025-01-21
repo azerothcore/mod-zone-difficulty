@@ -93,6 +93,9 @@ void ZoneDifficulty::LoadMapDifficultySettings()
     // Category 11
     EncounterCounter[564] = 9; // Black Temple
 
+    // Category 12
+    EncounterCounter[568] = 6; // Zul'Aman
+
     // Category 18
     EncounterCounter[534] = 5; // Hyjal Summit
 
