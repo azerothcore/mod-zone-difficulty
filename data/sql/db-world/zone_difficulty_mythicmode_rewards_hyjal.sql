@@ -58,5 +58,5 @@ INSERT INTO `zone_difficulty_mythicmode_rewards` (`ContentType`, `ItemType`, `En
 (18, 6, 30911, @PRICE2, 0, 0, 695, 1, 'Scepter of Purification - Archimonde'),
 (18, 6, 30872, @PRICE, 0, 0, 695, 1, 'Chronicle of Dark Secrets - Rage Winterchill'),
 (18, 6, 30882, @PRICE, 0, 0, 695, 1, 'Bastion of Light - Anetheron'),
-(18, 6, 30809, @PRICE2, 0, 0, 695, 1, 'Antonidas\'s Aegis of Rapt Concentration - Archimonde'),
+(18, 6, 30909, @PRICE2, 0, 0, 695, 1, 'Antonidas\'s Aegis of Rapt Concentration - Archimonde'),
 (18, 6, 30889, @PRICE, 0, 0, 695, 1, 'Kaz\'rogal\'s Hardened Heart - Kaz\'rogal');
