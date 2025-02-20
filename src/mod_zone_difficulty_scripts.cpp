@@ -1139,7 +1139,7 @@ class mod_zone_difficulty_playerscript : public PlayerScript
 public:
     mod_zone_difficulty_playerscript() : PlayerScript("mod_zone_difficulty_playerscript") { }
 
-    void OnMapChanged(Player* player) override
+    void OnPlayerMapChanged(Player* player) override
     {
         uint32 mapId = player->GetMapId();
         if (sZoneDifficulty->DisallowedBuffs.find(mapId) != sZoneDifficulty->DisallowedBuffs.end())
@@ -1151,7 +1151,7 @@ public:
         }
     }
 
-    void OnLogin(Player* player) override
+    void OnPlayerLogin(Player* player) override
     {
         if (sZoneDifficulty->MythicmodeScore.empty())
             return;
@@ -1173,12 +1173,12 @@ public:
         }
     }
 
-    void OnLogout(Player* player) override
+    void OnPlayerLogout(Player* player) override
     {
         sZoneDifficulty->SelectionCache.erase(player->GetGUID());
     }
 
-    void OnBeforeBuyItemFromVendor(Player* player, ObjectGuid vendorguid, uint32 /*vendorslot*/, uint32& itemEntry, uint8 /*count*/, uint8 /*bag*/, uint8 /*slot*/) override
+    void OnPlayerBeforeBuyItemFromVendor(Player* player, ObjectGuid vendorguid, uint32 /*vendorslot*/, uint32& itemEntry, uint8 /*count*/, uint8 /*bag*/, uint8 /*slot*/) override
     {
         Creature* vendor = player->GetMap()->GetCreature(vendorguid);
 
