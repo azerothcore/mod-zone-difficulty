@@ -23,7 +23,14 @@
 class mod_zone_difficulty_unitscript : public UnitScript
 {
 public:
-    mod_zone_difficulty_unitscript() : UnitScript("mod_zone_difficulty_unitscript") { }
+    mod_zone_difficulty_unitscript() : UnitScript("mod_zone_difficulty_unitscript", true, {
+        UNITHOOK_ON_AURA_APPLY,
+        UNITHOOK_MODIFY_HEAL_RECEIVED,
+        UNITHOOK_MODIFY_PERIODIC_DAMAGE_AURAS_TICK,
+        UNITHOOK_MODIFY_SPELL_DAMAGE_TAKEN,
+        UNITHOOK_MODIFY_MELEE_DAMAGE,
+        UNITHOOK_ON_UNIT_ENTER_COMBAT
+    }) { }
 
     void OnAuraApply(Unit* target, Aura* aura) override
     {
@@ -408,7 +415,9 @@ public:
 class mod_zone_difficulty_petscript : public PetScript
 {
 public:
-    mod_zone_difficulty_petscript() : PetScript("mod_zone_difficulty_petscript") { }
+    mod_zone_difficulty_petscript() : PetScript("mod_zone_difficulty_petscript", {
+        PETHOOK_ON_PET_ADD_TO_WORLD
+    }) { }
 
     void OnPetAddToWorld(Pet* pet) override
     {
@@ -429,7 +438,10 @@ public:
 class mod_zone_difficulty_worldscript : public WorldScript
 {
 public:
-    mod_zone_difficulty_worldscript() : WorldScript("mod_zone_difficulty_worldscript") { }
+    mod_zone_difficulty_worldscript() : WorldScript("mod_zone_difficulty_worldscript", {
+        WORLDHOOK_ON_AFTER_CONFIG_LOAD,
+        WORLDHOOK_ON_STARTUP
+    }) { }
 
     void OnAfterConfigLoad(bool /*reload*/) override
     {
@@ -455,7 +467,11 @@ public:
 class mod_zone_difficulty_globalscript : public GlobalScript
 {
 public:
-    mod_zone_difficulty_globalscript() : GlobalScript("mod_zone_difficulty_globalscript") { }
+    mod_zone_difficulty_globalscript() : GlobalScript("mod_zone_difficulty_globalscript", {
+        GLOBALHOOK_ON_BEFORE_SET_BOSS_STATE,
+        GLOBALHOOK_ON_INSTANCEID_REMOVED,
+        GLOBALHOOK_ON_AFTER_UPDATE_ENCOUNTER_STATE
+    }) { }
 
     void OnBeforeSetBossState(uint32 id, EncounterState newState, EncounterState oldState, Map* instance) override
     {
@@ -1137,7 +1153,12 @@ public:
 class mod_zone_difficulty_playerscript : public PlayerScript
 {
 public:
-    mod_zone_difficulty_playerscript() : PlayerScript("mod_zone_difficulty_playerscript") { }
+    mod_zone_difficulty_playerscript() : PlayerScript("mod_zone_difficulty_playerscript", {
+        PLAYERHOOK_ON_MAP_CHANGED,
+        PLAYERHOOK_ON_LOGIN,
+        PLAYERHOOK_ON_LOGOUT,
+        PLAYERHOOK_ON_BEFORE_BUY_ITEM_FROM_VENDOR
+    }) { }
 
     void OnPlayerMapChanged(Player* player) override
     {
