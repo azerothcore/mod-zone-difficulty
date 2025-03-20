@@ -552,6 +552,9 @@ std::string ZoneDifficulty::GetContentTypeString(uint32 type)
     case TYPE_RAID_HYJAL:
         typestring = "for Battle for Mount Hyjal.";
         break;
+    case TYPE_RAID_SWP:
+        typestring = "for Sunwell Plateau.";
+        break;
     default:
         typestring = "-";
     }

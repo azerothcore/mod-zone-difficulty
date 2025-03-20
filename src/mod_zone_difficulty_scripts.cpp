@@ -728,7 +728,7 @@ public:
             }
         }
         // Number is too low... ALWAYS remember to check if the number is too low when adding new bracket. Else enjoy crash <3
-        else if (action < 1900)
+        else if (action < TYPE_MAX_TIERS * 100)
         {
             npcText = NPC_TEXT_ITEM;
             uint32 category = 0;
