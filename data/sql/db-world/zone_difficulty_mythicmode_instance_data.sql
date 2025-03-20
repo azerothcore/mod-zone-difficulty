@@ -61,6 +61,9 @@ INSERT INTO `zone_difficulty_mythicmode_instance_data` (`MapID`, `SourceEntry`, 
 (568, 23577, 0, 12), -- Halazzi
 (568, 23576, 0, 12), -- Narolakk
 (568, 23863, 0, 12), -- Zuljin
+-- SWP
+(580, 24882, 0, 19), -- Brutallus
+(580, 25038, 0, 19), -- Felmyst
 -- TBC 5man Heroics
 (269, 17881, 0, 8),    -- Aeonus, The Black Morass
 (540, 16808, 0, 8),    -- Warchief Kargath Bladefist, Shattered Halls

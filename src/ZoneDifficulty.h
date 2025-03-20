@@ -134,6 +134,7 @@ enum ZoneDifficultySettings
     TYPE_RAID_T9      = 16,
     TYPE_RAID_T10     = 17,
     TYPE_RAID_HYJAL   = 18,
+    TYPE_RAID_SWP     = 19,
 
     TYPE_MAX_TIERS,
 

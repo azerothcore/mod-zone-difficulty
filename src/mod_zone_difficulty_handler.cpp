@@ -103,6 +103,9 @@ void ZoneDifficulty::LoadMapDifficultySettings()
     // Category 18
     EncounterCounter[534] = 5; // Hyjal Summit
 
+    // Category 19
+    EncounterCounter[580] = 6; // Sunwell Plateau
+
     // Icons
     sZoneDifficulty->ItemIcons[ITEMTYPE_MISC] = "|TInterface\\icons\\inv_misc_cape_17:15|t |TInterface\\icons\\inv_misc_gem_topaz_02:15|t |TInterface\\icons\\inv_jewelry_ring_51naxxramas:15|t ";
     sZoneDifficulty->ItemIcons[ITEMTYPE_CLOTH] = "|TInterface\\icons\\inv_chest_cloth_42:15|t ";
@@ -1081,6 +1084,14 @@ bool ZoneDifficulty::CheckCompletionStatus(Creature* creature, Player* player, u
             if (!player->GetPlayerSetting(ModZoneDifficultyString + "ct", SETTING_HYJAL).value)
             {
                 creature->Whisper("Ah, hero! The threads of fate bring you to me. To claim the rewards you desire, you must first confront Archimonde on Mythic difficulty.",
+                    LANG_UNIVERSAL, player);
+                return false;
+            }
+            break;
+        case TYPE_RAID_SWP:
+            if (!player->GetPlayerSetting(ModZoneDifficultyString + "ct", TYPE_RAID_SWP).value)
+            {
+                creature->Whisper("Ah, hero! The threads of fate bring you to me. To claim the rewards you desire, you must first confront Kil'jaeden on Mythic difficulty.",
                     LANG_UNIVERSAL, player);
                 return false;
             }
