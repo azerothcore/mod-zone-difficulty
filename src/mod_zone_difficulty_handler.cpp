@@ -958,6 +958,9 @@ bool ZoneDifficulty::HasCompletedFullTier(uint32 category, uint32 playerGuid)
     case TYPE_RAID_HYJAL:
         MapList = { 534 };
         break;
+    case TYPE_RAID_SWP:
+        MapList = { 580 };
+        break;
     default:
         LOG_ERROR("module", "MOD-ZONE-DIFFICULTY: Category without data requested in ZoneDifficulty::HasCompletedFullTier {}", category);
         return false;
