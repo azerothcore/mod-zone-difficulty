@@ -1092,7 +1092,7 @@ bool ZoneDifficulty::CheckCompletionStatus(Creature* creature, Player* player, u
             }
             break;
         case TYPE_RAID_SWP:
-            if (!player->GetPlayerSetting(ModZoneDifficultyString + "ct", TYPE_RAID_SWP).value)
+            if (!player->GetPlayerSetting(ModZoneDifficultyString + "ct", SETTING_SWP).value)
             {
                 creature->Whisper("Ah, hero! The threads of fate bring you to me. To claim the rewards you desire, you must first confront Kil'jaeden on Mythic difficulty.",
                     LANG_UNIVERSAL, player);
