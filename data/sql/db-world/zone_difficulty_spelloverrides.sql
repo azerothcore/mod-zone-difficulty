@@ -52,4 +52,5 @@ INSERT INTO `zone_difficulty_spelloverrides` (`SpellID`, `MapId`, `NerfValue`, `
 (41131, 564, 1.1, 65, 'Black Temple - Illidan - Flame Burst'),
 (43137, 568, 1, 65, 'Zul Aman - Zuljin - Zap'),
 (43121, 568, 1, 65, 'Zul Aman - Zuljin - Cyclone'),
-(43140, 568, 1, 65, 'Zul Aman - Janalai - Flame Breath');
+(43140, 568, 1, 65, 'Zul Aman - Janalai - Flame Breath'),
+(45662, 580, 1, 65, 'Felmyst - Encapsulate');
