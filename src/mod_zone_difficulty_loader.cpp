@@ -3,8 +3,10 @@
  */
 
 void AddModZoneDifficultyScripts();
+void AddSC_zone_difficulty_commandscript();
 
 void Addmod_zone_difficultyScripts()
 {
     AddModZoneDifficultyScripts();
+    AddSC_zone_difficulty_commandscript();
 }
