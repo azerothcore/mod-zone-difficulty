@@ -503,7 +503,7 @@ public:
                 if ((id == 7 /* Illidari Council*/ || id == 5 /* Reliquary of Souls*/) && instance->GetId() == 564)
                     sZoneDifficulty->AddMythicmodeScore(instance, TYPE_RAID_T6, 1);
 
-                if ((id == 0 /* Kalecgos */) && instance->GetId() == 580)
+                if ((id == 0 /* Kalecgos */ || id == 4 /* Twins*/) && instance->GetId() == 580)
                     sZoneDifficulty->AddMythicmodeScore(instance, TYPE_RAID_SWP, 1);
 
                 //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Mythicmode is on.");
