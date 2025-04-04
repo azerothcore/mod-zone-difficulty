@@ -130,7 +130,11 @@ void ZoneDifficulty::LoadMapDifficultySettings()
                 data.MeleeDamageBuffPct = (*result)[4].Get<float>();
                 data.SpellDamageBuffPct = (*result)[5].Get<float>();
                 data.Enabled = data.Enabled | mode;
-                sZoneDifficulty->NerfInfo[mapId][phaseMask] = data;
+                sZoneDifficulty->NerfInfo[mapId][phaseMask].HealingNerfPct = data.HealingNerfPct;
+                sZoneDifficulty->NerfInfo[mapId][phaseMask].AbsorbNerfPct = data.AbsorbNerfPct;
+                sZoneDifficulty->NerfInfo[mapId][phaseMask].MeleeDamageBuffPct = data.MeleeDamageBuffPct;
+                sZoneDifficulty->NerfInfo[mapId][phaseMask].SpellDamageBuffPct = data.SpellDamageBuffPct;
+                sZoneDifficulty->NerfInfo[mapId][phaseMask].Enabled |= mode;
             }
             if (sZoneDifficulty->HasMythicmode(mode) && sZoneDifficulty->MythicmodeEnable)
             {
@@ -139,7 +143,11 @@ void ZoneDifficulty::LoadMapDifficultySettings()
                 data.MeleeDamageBuffPctHard = (*result)[4].Get<float>();
                 data.SpellDamageBuffPctHard = (*result)[5].Get<float>();
                 data.Enabled = data.Enabled | mode;
-                sZoneDifficulty->NerfInfo[mapId][phaseMask] = data;
+                sZoneDifficulty->NerfInfo[mapId][phaseMask].HealingNerfPctHard = data.HealingNerfPctHard;
+                sZoneDifficulty->NerfInfo[mapId][phaseMask].AbsorbNerfPctHard = data.AbsorbNerfPctHard;
+                sZoneDifficulty->NerfInfo[mapId][phaseMask].MeleeDamageBuffPctHard = data.MeleeDamageBuffPctHard;
+                sZoneDifficulty->NerfInfo[mapId][phaseMask].SpellDamageBuffPctHard = data.SpellDamageBuffPctHard;
+                sZoneDifficulty->NerfInfo[mapId][phaseMask].Enabled |= mode;
             }
             if ((mode & MODE_HARD) != MODE_HARD && (mode & MODE_NORMAL) != MODE_NORMAL)
             {
