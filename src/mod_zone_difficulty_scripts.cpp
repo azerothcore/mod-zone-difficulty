@@ -455,6 +455,9 @@ public:
 
         if (CharacterDatabase.Query("SELECT 1 FROM zone_difficulty_completion_logs WHERE type = {}", TYPE_RAID_T6))
             sZoneDifficulty->IsBlackTempleDone = true;
+
+        if (CharacterDatabase.Query("SELECT 1 FROM zone_difficulty_completion_logs WHERE type = {}", TYPE_RAID_SWP))
+            sZoneDifficulty->IsSunwellPlateauDone = true;
     }
 
     void OnStartup() override

@@ -65,6 +65,7 @@ INSERT INTO `zone_difficulty_mythicmode_instance_data` (`MapID`, `SourceEntry`, 
 (580, 24882, 0, 19), -- Brutallus
 (580, 25038, 0, 19), -- Felmyst
 (580, 25840, 0, 19), -- Muru
+(580, 25315, 0, 19), -- Kiljaeden
 -- TBC 5man Heroics
 (269, 17881, 0, 8),    -- Aeonus, The Black Morass
 (540, 16808, 0, 8),    -- Warchief Kargath Bladefist, Shattered Halls

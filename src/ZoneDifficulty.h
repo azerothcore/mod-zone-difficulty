@@ -152,6 +152,7 @@ enum Misc
     NPC_LADY_VASHJ        = 21212,
     NPC_ARCHIMONDE        = 17968,
     NPC_ZULJIN            = 23863,
+    NPC_KILJAEDEN         = 25315,
     NPC_REWARD_CHROMIE    = 1128002,
 };
 
@@ -194,6 +195,7 @@ public:
     bool MythicmodeInNormalDungeons{ false };
     bool UseVendorInterface{ false };
     bool IsBlackTempleDone{ false };
+    bool IsSunwellPlateauDone{ false };
     std::vector<uint32> DailyHeroicQuests;
     std::map<uint32, uint32> HeroicTBCQuestMapList;
     std::map<uint32, uint8> EncounterCounter;

@@ -1063,6 +1063,26 @@ void ZoneDifficulty::LogAndAnnounceKill(Map* map, bool isMythic)
         });
 
         ChatHandler(nullptr).SendWorldText(names.c_str());
+    } else if (map->GetId() == 580)
+    {
+        if (sZoneDifficulty->IsSunwellPlateauDone)
+            return;
+
+        sZoneDifficulty->IsSunwellPlateauDone = true;
+
+        ChatHandler(nullptr).SendWorldText("Congrats on conquering Sunwell Plateau ({}) and defeating Kil'jaeden! Well done, champions!", isMythic ? "Mythic" : "Normal");
+
+        std::string names = "Realm first group: ";
+
+        map->DoForAllPlayers([&](Player* mapPlayer) {
+            if (!mapPlayer->IsGameMaster())
+            {
+                names.append(mapPlayer->GetName() + ", ");
+                CharacterDatabase.Execute("INSERT INTO zone_difficulty_completion_logs (guid, type, mode) VALUES ({}, {}, {})", mapPlayer->GetGUID().GetCounter(), TYPE_RAID_SWP, 1);
+            }
+        });
+
+        ChatHandler(nullptr).SendWorldText(names.c_str());
     }
 };
 
@@ -1148,6 +1168,14 @@ void ZoneDifficulty::ProcessCreatureDeath(Map* map, uint32 entry)
             {
                 player->UpdatePlayerSetting(ModZoneDifficultyString + "ct", SETTING_SSC, 1);
                 player->SendSystemMessage("Congratulations on completing Serpentshrine Cavern!");
+            });
+            sZoneDifficulty->LogAndAnnounceKill(map, true);
+            break;
+        case NPC_KILJAEDEN:
+            map->DoForAllPlayers([&](Player* player)
+            {
+                player->UpdatePlayerSetting(ModZoneDifficultyString + "ct", SETTING_SWP, 1);
+                player->SendSystemMessage("Congratulations on completing Sunwell Plateau!");
             });
             sZoneDifficulty->LogAndAnnounceKill(map, true);
             break;
