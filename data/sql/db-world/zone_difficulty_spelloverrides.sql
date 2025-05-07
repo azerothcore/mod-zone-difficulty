@@ -53,4 +53,7 @@ INSERT INTO `zone_difficulty_spelloverrides` (`SpellID`, `MapId`, `NerfValue`, `
 (43137, 568, 1, 65, 'Zul Aman - Zuljin - Zap'),
 (43121, 568, 1, 65, 'Zul Aman - Zuljin - Cyclone'),
 (43140, 568, 1, 65, 'Zul Aman - Janalai - Flame Breath'),
-(45662, 580, 1, 65, 'Felmyst - Encapsulate');
+(45662, 580, 1, 65, 'Felmyst - Encapsulate'),
+(45329, 580, 1, 65, 'Lady Sacrolash - Shadow Nova'),
+(45342, 580, 1, 65, 'Grand Warlock Alythess - Conflagration (Direct hit)'),
+(46768, 580, 1, 65, 'Grand Warlock Alythess - Conflagration (Area hit)');
