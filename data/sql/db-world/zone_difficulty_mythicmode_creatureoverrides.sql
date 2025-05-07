@@ -67,5 +67,5 @@ INSERT INTO `zone_difficulty_mythicmode_creatureoverrides` (`CreatureEntry`, `HP
 (25165, 3.5, 2.5, 1, 'Sacrolash 3.5x mythic 2.5x normal hp'),
 (25741, 3.5, 2.5, 1, 'Muru 3.5x mythic 2.5x normal hp'),
 (25840, 3.5, 2.5, 1, 'Entropius 3.5x mythic 2.5x normal hp'),
-(25315, 3.5, 2.5, 1, 'Kiljaeden 3.5x mythic 2.5x normal hp');
+(25315, 3, 2.1, 1, 'Kiljaeden 3x mythic 2.1x normal hp');
 
