@@ -1,5 +1,5 @@
-SET @PRICE := 36; -- placeholder
-SET @PRICE2 := 48; -- placeholder
+SET @PRICE := 24;
+SET @PRICE2 := 30;
 DELETE FROM `zone_difficulty_mythicmode_rewards` WHERE `ContentType` = 19;
 INSERT INTO `zone_difficulty_mythicmode_rewards` (`ContentType`, `ItemType`, `Entry`, `Price`, `Enchant`, `EnchantSlot`, `Achievement`, `Enabled`, `Comment`) VALUES
 (19, 1, 34166, @PRICE, 0, 0, 698, 1, 'Band of Lucent Beams - Sathrovarr'),
