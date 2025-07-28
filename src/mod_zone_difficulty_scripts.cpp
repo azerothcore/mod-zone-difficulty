@@ -56,7 +56,7 @@ public:
 
                     if (spellInfo->HasAura(SPELL_AURA_SCHOOL_ABSORB))
                     {
-                        std::list<AuraEffect*> AuraEffectList = target->GetAuraEffectsByType(SPELL_AURA_SCHOOL_ABSORB);
+                        Unit::AuraEffectList const& AuraEffectList = target->GetAuraEffectsByType(SPELL_AURA_SCHOOL_ABSORB);
 
                         for (AuraEffect* eff : AuraEffectList)
                         {
