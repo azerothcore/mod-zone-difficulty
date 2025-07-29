@@ -32,90 +32,91 @@ public:
         UNITHOOK_ON_UNIT_ENTER_COMBAT
     }) { }
 
-void OnAuraApply(Unit* target, Aura* aura) override
-{
-    if (!sZoneDifficulty->IsEnabled)
-        return;
-
-    if (!sZoneDifficulty->MythicmodeInNormalDungeons && !target->GetMap()->IsRaidOrHeroicDungeon())
-        return;
-
-    if (!sZoneDifficulty->IsValidNerfTarget(target))
-        return;
-
-    SpellInfo const* spellInfo = aura->GetSpellInfo();
-    if (!spellInfo || spellInfo->HasAttribute(SPELL_ATTR0_NO_IMMUNITIES))
-        return;
-
-    if (!spellInfo->HasAura(SPELL_AURA_SCHOOL_ABSORB))
-        return;
-
-    auto& absorbEffects = target->GetAuraEffectsByType(SPELL_AURA_SCHOOL_ABSORB);
-    for (AuraEffect* eff : absorbEffects)
+    void OnAuraApply(Unit* target, Aura* aura) override
     {
-        if (eff->GetAuraType() != SPELL_AURA_SCHOOL_ABSORB || eff->GetSpellInfo()->Id != spellInfo->Id)
-            continue;
+        if (!sZoneDifficulty->IsEnabled)
+            return;
+        
+        if (!sZoneDifficulty->MythicmodeInNormalDungeons && !target->GetMap()->IsRaidOrHeroicDungeon())
+            return;
 
-        int32 absorb = eff->GetAmount();
-        uint32 mapId = target->GetMapId();
-        uint32 instanceId = target->GetMap()->GetInstanceId();
-        uint32 phaseMask = target->GetPhaseMask();
-        int phase = sZoneDifficulty->GetLowestMatchingPhase(mapId, phaseMask);
-        bool isMythic = sZoneDifficulty->MythicmodeInstanceData[instanceId];
-        bool nerfInDuel = sZoneDifficulty->ShouldNerfInDuels(target);
+        if (!sZoneDifficulty->IsValidNerfTarget(target))
+            return;
 
-        // Lambda: scalable reduction
-        auto scaleAbsorb = [](int32 amount, float pct) -> int32 {
-            float scaled = amount * pct;
-            return (scaled < 0) ? static_cast<int32>(std::floor(scaled)) : static_cast<int32>(scaled);
-        };
+        if (!sZoneDifficulty->ShouldNerfMap(targett->GetMapId()) && !sZoneDifficulty->ShouldNerfInDuels(target))
+           return;
 
-        // Apply duel-based nerf if no valid map phase
-        if (phase == -1 && nerfInDuel && sZoneDifficulty->NerfInfo[DUEL_INDEX][0].Enabled > 0)
+        SpellInfo const* spellInfo = aura->GetSpellInfo();
+        if (!spellInfo || spellInfo->HasAttribute(SPELL_ATTR0_NO_IMMUNITIES))
+            return;
+
+        if (!spellInfo->HasAura(SPELL_AURA_SCHOOL_ABSORB))
+            return;
+
+        auto& absorbEffects = target->GetAuraEffectsByType(SPELL_AURA_SCHOOL_ABSORB);
+        for (AuraEffect* eff : absorbEffects)
         {
-            absorb = scaleAbsorb(absorb, sZoneDifficulty->NerfInfo[DUEL_INDEX][0].AbsorbNerfPct);
-        }
-        else if (phase != -1)
-        {
-            int8 mode = sZoneDifficulty->NerfInfo[mapId][phase].Enabled;
+            if (eff->GetAuraType() != SPELL_AURA_SCHOOL_ABSORB || eff->GetSpellInfo()->Id != spellInfo->Id)
+                continue;
 
-            if (!isMythic && sZoneDifficulty->HasNormalMode(mode))
-                absorb = scaleAbsorb(absorb, sZoneDifficulty->NerfInfo[mapId][phase].AbsorbNerfPct);
+            int32 absorb = eff->GetAmount();
+            uint32 mapId = target->GetMapId();
+            uint32 instanceId = target->GetMap()->GetInstanceId();
+            uint32 phaseMask = target->GetPhaseMask();
+            int phase = sZoneDifficulty->GetLowestMatchingPhase(mapId, phaseMask);
+            bool isMythic = sZoneDifficulty->MythicmodeInstanceData[instanceId];
+            bool nerfInDuel = sZoneDifficulty->ShouldNerfInDuels(target);
+            
+            auto scaleAbsorb = [](int32 amount, float pct) -> int32 {
+                float scaled = amount * pct;
+                return (scaled < 0) ? static_cast<int32>(std::floor(scaled)) : static_cast<int32>(scaled);
+            };
 
-            if (isMythic && sZoneDifficulty->HasMythicmode(mode))
+            // Apply duel-based nerf if no valid map phase
+            if (phase == -1 && nerfInDuel && sZoneDifficulty->NerfInfo[DUEL_INDEX][0].Enabled > 0)
             {
-                Map* map = target->GetMap();
-                if (map->IsRaid() || (map->IsHeroic() && map->IsDungeon()))
-                    absorb = scaleAbsorb(absorb, sZoneDifficulty->NerfInfo[mapId][phase].AbsorbNerfPctHard);
+                absorb = scaleAbsorb(absorb, sZoneDifficulty->NerfInfo[DUEL_INDEX][0].AbsorbNerfPct);
             }
-        }
-
-        // Overrides always apply last
-        auto const& overrideIt = sZoneDifficulty->SpellNerfOverrides.find(spellInfo->Id);
-        if (overrideIt != sZoneDifficulty->SpellNerfOverrides.end())
-        {
-            auto const& overrideMap = overrideIt->second;
-            if (sZoneDifficulty->OverrideModeMatches(instanceId, spellInfo->Id, mapId))
+            else if (phase != -1)
             {
-                if (overrideMap.count(mapId))
-                    absorb = scaleAbsorb(absorb, overrideMap.at(mapId).NerfPct);
-                else if (overrideMap.count(0))
-                    absorb = scaleAbsorb(absorb, overrideMap.at(0).NerfPct);
+                int8 mode = sZoneDifficulty->NerfInfo[mapId][phase].Enabled;
+
+                if (!isMythic && sZoneDifficulty->HasNormalMode(mode))
+                    absorb = scaleAbsorb(absorb, sZoneDifficulty->NerfInfo[mapId][phase].AbsorbNerfPct);
+
+                if (isMythic && sZoneDifficulty->HasMythicmode(mode))
+                {
+                    Map* map = target->GetMap();
+                    if (map->IsRaid() || (map->IsHeroic() && map->IsDungeon()))
+                        absorb = scaleAbsorb(absorb, sZoneDifficulty->NerfInfo[mapId][phase].AbsorbNerfPctHard);
+                }
             }
-        }
-
-        eff->SetAmount(absorb);
-
-        if (sZoneDifficulty->IsDebugInfoEnabled)
-        {
-            if (Player* player = target->ToPlayer())
+            
+            auto const& overrideIt = sZoneDifficulty->SpellNerfOverrides.find(spellInfo->Id);
+            if (overrideIt != sZoneDifficulty->SpellNerfOverrides.end())
             {
-                ChatHandler(player->GetSession()).PSendSysMessage(
-                    "Spell: {} ({}) Nerfed Value: {}",
-                    spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()],
-                    spellInfo->Id, absorb);
+                auto const& overrideMap = overrideIt->second;
+                if (sZoneDifficulty->OverrideModeMatches(instanceId, spellInfo->Id, mapId))
+                {
+                    if (overrideMap.count(mapId))
+                        absorb = scaleAbsorb(absorb, overrideMap.at(mapId).NerfPct);
+                    else if (overrideMap.count(0))
+                        absorb = scaleAbsorb(absorb, overrideMap.at(0).NerfPct);
+                }
             }
-        }
+
+            eff->SetAmount(absorb);
+
+            if (sZoneDifficulty->IsDebugInfoEnabled)
+            {
+                if (Player* player = target->ToPlayer())
+                {
+                    ChatHandler(player->GetSession()).PSendSysMessage(
+                        "Spell: {} ({}) Nerfed Value: {}",
+                        spellInfo->SpellName[player->GetSession()->GetSessionDbcLocale()],
+                        spellInfo->Id, absorb);
+                }
+            }
     }
 }
 
