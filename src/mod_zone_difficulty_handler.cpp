@@ -1092,7 +1092,7 @@ bool ZoneDifficulty::CheckCompletionStatus(Creature* creature, Player* player, u
     {
         uint32 category;
         uint32 setting;
-        std::string_view bossName;
+        const char* bossName;
     };
 
     static constexpr std::array<MythicRequirement, 5> requirements
