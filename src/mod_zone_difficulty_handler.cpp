@@ -1088,96 +1088,64 @@ void ZoneDifficulty::LogAndAnnounceKill(Map* map, bool isMythic)
 
 bool ZoneDifficulty::CheckCompletionStatus(Creature* creature, Player* player, uint32 category) const
 {
-    switch (category)
+    struct MythicRequirement
     {
-        case TYPE_RAID_SSC:
-            if (!player->GetPlayerSetting(ModZoneDifficultyString + "ct", SETTING_SSC).value)
-            {
-                creature->Whisper("Ah, hero! The threads of fate bring you to me. To claim the rewards you desire, you must first confront Lady Vashj on Mythic difficulty.",
-                    LANG_UNIVERSAL, player);
-                return false;
-            }
-            break;
-        case TYPE_RAID_T6:
-            if (!player->GetPlayerSetting(ModZoneDifficultyString + "ct", SETTING_BLACK_TEMPLE).value)
-            {
-                creature->Whisper("Ah, hero! The threads of fate bring you to me. To claim the rewards you desire, you must first confront Illidan Stormrage on Mythic difficulty.",
-                    LANG_UNIVERSAL, player);
-                return false;
-            }
-            break;
-        case TYPE_RAID_ZA:
-            if (!player->GetPlayerSetting(ModZoneDifficultyString + "ct", SETTING_ZULAMAN).value)
-            {
-                creature->Whisper("Ah, hero! The threads of fate bring you to me. To claim the rewards you desire, you must first confront Zul'jin on Mythic difficulty.",
-                    LANG_UNIVERSAL, player);
-                return false;
-            }
-            break;
-        case TYPE_RAID_HYJAL:
-            if (!player->GetPlayerSetting(ModZoneDifficultyString + "ct", SETTING_HYJAL).value)
-            {
-                creature->Whisper("Ah, hero! The threads of fate bring you to me. To claim the rewards you desire, you must first confront Archimonde on Mythic difficulty.",
-                    LANG_UNIVERSAL, player);
-                return false;
-            }
-            break;
-        case TYPE_RAID_SWP:
-            if (!player->GetPlayerSetting(ModZoneDifficultyString + "ct", SETTING_SWP).value)
-            {
-                creature->Whisper("Ah, hero! The threads of fate bring you to me. To claim the rewards you desire, you must first confront Kil'jaeden on Mythic difficulty.",
-                    LANG_UNIVERSAL, player);
-                return false;
-            }
-            break;
-    }
+        uint32 category;
+        uint32 setting;
+        char const* bossName;
+    };
 
+    static constexpr std::array<MythicRequirement, 5> requirements
+    {
+        MythicRequirement{ TYPE_RAID_SSC,   SETTING_SSC,          "Lady Vashj"        },
+        MythicRequirement{ TYPE_RAID_T6,    SETTING_BLACK_TEMPLE, "Illidan Stormrage" },
+        MythicRequirement{ TYPE_RAID_ZA,    SETTING_ZULAMAN,      "Zul'jin"           },
+        MythicRequirement{ TYPE_RAID_HYJAL, SETTING_HYJAL,        "Archimonde"        },
+        MythicRequirement{ TYPE_RAID_SWP,   SETTING_SWP,          "Kil'jaeden"        },
+    };
+
+    for (auto const& req : requirements)
+    {
+        if (req.category != category)
+            continue;
+
+        if (player->GetPlayerSetting(ModZoneDifficultyString + "ct", req.setting).value)
+            return true;
+
+        creature->Whisper(
+            Acore::StringFormat("Ah, hero! The threads of fate bring you to me. To claim the rewards you desire, you must first confront {} on Mythic difficulty.", req.bossName),
+            LANG_UNIVERSAL, player);
+        return false;
+    }
+    
     return true;
 }
 
 void ZoneDifficulty::ProcessCreatureDeath(Map* map, uint32 entry)
 {
-    switch (entry)
+    constexpr std::array<std::pair<uint32, std::tuple<uint32, const char*>>, 5> deathData =
     {
-        case NPC_ILLIDAN_STORMRAGE:
-            map->DoForAllPlayers([&](Player* player)
-            {
-                player->UpdatePlayerSetting(ModZoneDifficultyString + "ct", SETTING_BLACK_TEMPLE, 1);
-                player->SendSystemMessage("Congratulations on completing the Black Temple!");
-            });
-            sZoneDifficulty->LogAndAnnounceKill(map, true);
-            break;
-        case NPC_ZULJIN:
-            map->DoForAllPlayers([&](Player* player)
-            {
-                player->UpdatePlayerSetting(ModZoneDifficultyString + "ct", SETTING_ZULAMAN, 1);
-                player->SendSystemMessage("Congratulations on completing Zul'Aman!");
-            });
-            sZoneDifficulty->LogAndAnnounceKill(map, true);
-            break;
-        case NPC_ARCHIMONDE:
-            map->DoForAllPlayers([&](Player* player)
-            {
-                player->UpdatePlayerSetting(ModZoneDifficultyString + "ct", SETTING_HYJAL, 1);
-                player->SendSystemMessage("Congratulations on completing Battle for Mount Hyjal!");
-            });
-            sZoneDifficulty->LogAndAnnounceKill(map, true);
-            break;
-        case NPC_LADY_VASHJ:
-            map->DoForAllPlayers([&](Player* player)
-            {
-                player->UpdatePlayerSetting(ModZoneDifficultyString + "ct", SETTING_SSC, 1);
-                player->SendSystemMessage("Congratulations on completing Serpentshrine Cavern!");
-            });
-            sZoneDifficulty->LogAndAnnounceKill(map, true);
-            break;
-        case NPC_KILJAEDEN:
-            map->DoForAllPlayers([&](Player* player)
-            {
-                player->UpdatePlayerSetting(ModZoneDifficultyString + "ct", SETTING_SWP, 1);
-                player->SendSystemMessage("Congratulations on completing Sunwell Plateau!");
-            });
-            sZoneDifficulty->LogAndAnnounceKill(map, true);
-            break;
+        std::pair{ NPC_ILLIDAN_STORMRAGE, std::tuple{ SETTING_BLACK_TEMPLE, "Black Temple"           } },
+        std::pair{ NPC_ZULJIN,            std::tuple{ SETTING_ZULAMAN,      "Zul'Aman"               } },
+        std::pair{ NPC_ARCHIMONDE,        std::tuple{ SETTING_HYJAL,        "Battle for Mount Hyjal" } },
+        std::pair{ NPC_LADY_VASHJ,        std::tuple{ SETTING_SSC,          "Serpentshrine Cavern"   } },
+        std::pair{ NPC_KILJAEDEN,         std::tuple{ SETTING_SWP,          "Sunwell Plateau"        } }
+    };
+
+    for (auto const& [npcId, data] : deathData)
+    {
+        if (npcId != entry)
+            continue;
+
+        auto const& [setting, zoneName] = data;
+
+        map->DoForAllPlayers([&](Player* player)
+        {
+            player->UpdatePlayerSetting(ModZoneDifficultyString + "ct", setting, 1);
+            player->SendSystemMessage(Acore::StringFormat("Congratulations on completing {}!", zoneName));
+        });
+
+        sZoneDifficulty->LogAndAnnounceKill(map, true);
+        break;
     }
 }
