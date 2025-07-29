@@ -1123,7 +1123,7 @@ bool ZoneDifficulty::CheckCompletionStatus(Creature* creature, Player* player, u
 
 void ZoneDifficulty::ProcessCreatureDeath(Map* map, uint32 entry)
 {
-    constexpr std::array deathData =
+    constexpr std::array<std::pair<uint32, std::tuple<uint32, const char*>>, 5> deathData =
     {
         std::pair{ NPC_ILLIDAN_STORMRAGE, std::tuple{ SETTING_BLACK_TEMPLE, "Black Temple"           } },
         std::pair{ NPC_ZULJIN,            std::tuple{ SETTING_ZULAMAN,      "Zul'Aman"               } },
