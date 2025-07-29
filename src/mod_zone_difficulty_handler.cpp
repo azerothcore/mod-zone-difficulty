@@ -1092,7 +1092,7 @@ bool ZoneDifficulty::CheckCompletionStatus(Creature* creature, Player* player, u
     {
         uint32 category;
         uint32 setting;
-        const char* bossName;
+        char const* bossName;
     };
 
     static constexpr std::array<MythicRequirement, 5> requirements
@@ -1137,7 +1137,7 @@ void ZoneDifficulty::ProcessCreatureDeath(Map* map, uint32 entry)
         if (npcId != entry)
             continue;
 
-        const auto& [setting, zoneName] = data;
+        auto const& [setting, zoneName] = data;
 
         map->DoForAllPlayers([&](Player* player)
         {
