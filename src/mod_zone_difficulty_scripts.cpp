@@ -43,7 +43,7 @@ public:
         if (!sZoneDifficulty->IsValidNerfTarget(target))
             return;
 
-        if (!sZoneDifficulty->ShouldNerfMap(targett->GetMapId()) && !sZoneDifficulty->ShouldNerfInDuels(target))
+        if (!sZoneDifficulty->ShouldNerfMap(target->GetMapId()) && !sZoneDifficulty->ShouldNerfInDuels(target))
            return;
 
         SpellInfo const* spellInfo = aura->GetSpellInfo();
