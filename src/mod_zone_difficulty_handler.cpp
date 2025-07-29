@@ -1132,7 +1132,7 @@ void ZoneDifficulty::ProcessCreatureDeath(Map* map, uint32 entry)
         std::pair{ NPC_KILJAEDEN,         std::tuple{ SETTING_SWP,          "Sunwell Plateau"        } }
     };
 
-    for (const auto& [npcId, data] : deathData)
+    for (auto const& [npcId, data] : deathData)
     {
         if (npcId != entry)
             continue;
