@@ -1095,7 +1095,7 @@ bool ZoneDifficulty::CheckCompletionStatus(Creature* creature, Player* player, u
         std::string_view bossName;
     };
 
-    static constexpr std::array requirements
+    static constexpr std::array<MythicRequirement, 5> requirements
     {
         MythicRequirement{ TYPE_RAID_SSC,   SETTING_SSC,          "Lady Vashj"        },
         MythicRequirement{ TYPE_RAID_T6,    SETTING_BLACK_TEMPLE, "Illidan Stormrage" },
