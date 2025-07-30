@@ -1137,7 +1137,7 @@ void ZoneDifficulty::ProcessCreatureDeath(Map* map, uint32 entry)
         if (npcId != entry)
             continue;
 
-        auto const& [setting, zoneName] = data;
+        auto [setting, zoneName] = data;
 
         map->DoForAllPlayers([=](Player* player)
         {
