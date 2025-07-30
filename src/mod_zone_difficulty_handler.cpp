@@ -1139,7 +1139,7 @@ void ZoneDifficulty::ProcessCreatureDeath(Map* map, uint32 entry)
 
         auto const& [setting, zoneName] = data;
 
-        map->DoForAllPlayers([&](Player* player)
+        map->DoForAllPlayers([=](Player* player)
         {
             player->UpdatePlayerSetting(ModZoneDifficultyString + "ct", setting, 1);
             player->SendSystemMessage(Acore::StringFormat("Congratulations on completing {}!", zoneName));
