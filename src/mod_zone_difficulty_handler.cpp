@@ -1137,7 +1137,9 @@ void ZoneDifficulty::ProcessCreatureDeath(Map* map, uint32 entry)
         if (npcId != entry)
             continue;
 
-        auto [setting, zoneName] = data;
+        uint32 setting;
+        const char* zoneName;
+        std::tie(setting, zoneName) = data;
 
         map->DoForAllPlayers([setting, zoneName](Player* player)
         {
