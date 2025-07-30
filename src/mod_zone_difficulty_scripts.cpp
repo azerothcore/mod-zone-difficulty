@@ -117,8 +117,8 @@ public:
                         spellInfo->Id, absorb);
                 }
             }
+        }
     }
-}
 
     void ModifyHealReceived(Unit* target, Unit* /*healer*/, uint32& heal, SpellInfo const* spellInfo) override
     {
