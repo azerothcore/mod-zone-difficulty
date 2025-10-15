@@ -440,12 +440,8 @@ void ZoneDifficulty::LoadMythicmodeScoreData()
             if (sZoneDifficulty->Logs[PlayerGuid].find(MapId) == sZoneDifficulty->Logs[PlayerGuid].end())
             {
                 for (int i = 0; i < sZoneDifficulty->EncounterCounter[MapId]; ++i)
-                {
-                    LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Initializing player record for PlayerGuid {} in MapId {} for BossId {}: False", PlayerGuid, MapId, i);
                     sZoneDifficulty->Logs[PlayerGuid][MapId][i] = false;
-                }
             }
-            LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Setting player record for PlayerGuid {} in MapId {} for BossId {}: True", PlayerGuid, MapId, BossID);
             sZoneDifficulty->Logs[PlayerGuid][MapId][BossID] = true;
         } while (result->NextRow());
     }
