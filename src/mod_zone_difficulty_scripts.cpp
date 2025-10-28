@@ -1131,15 +1131,15 @@ public:
         if (matchingPhase != -1)
         {
             float scaledHealth = scaledBaseHealth;
-            scaledHealth *= creature->GetModifierValue(UNIT_MOD_HEALTH, BASE_PCT);
-            scaledHealth += creature->GetModifierValue(UNIT_MOD_HEALTH, TOTAL_VALUE);
-            scaledHealth *= creature->GetModifierValue(UNIT_MOD_HEALTH, TOTAL_PCT);
+            scaledHealth *= creature->GetPctModifierValue(UNIT_MOD_HEALTH, BASE_PCT);
+            scaledHealth += creature->GetFlatModifierValue(UNIT_MOD_HEALTH, TOTAL_VALUE);
+            scaledHealth *= creature->GetPctModifierValue(UNIT_MOD_HEALTH, TOTAL_PCT);
 
             if (creature->GetMaxHealth() == scaledHealth)
                 return;
 
             float percent = creature->GetHealthPct();
-            creature->SetModifierValue(UNIT_MOD_HEALTH, BASE_VALUE, (float)scaledBaseHealth);
+            creature->SetStatFlatModifier(UNIT_MOD_HEALTH, BASE_VALUE, (float)scaledBaseHealth);
             creature->UpdateMaxHealth();
             if (creature->IsAlive())
             {
