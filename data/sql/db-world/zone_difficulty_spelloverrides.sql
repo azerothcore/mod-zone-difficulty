@@ -56,4 +56,7 @@ INSERT INTO `zone_difficulty_spelloverrides` (`SpellID`, `MapId`, `NerfValue`, `
 (45662, 580, 1, 65, 'Felmyst - Encapsulate'),
 (45329, 580, 1, 65, 'Lady Sacrolash - Shadow Nova'),
 (45342, 580, 1, 65, 'Grand Warlock Alythess - Conflagration (Direct hit)'),
-(46768, 580, 1, 65, 'Grand Warlock Alythess - Conflagration (Area hit)');
+(46768, 580, 1, 65, 'Grand Warlock Alythess - Conflagration (Area hit)'),
+(28308, 580, 1, 65, 'Patchwerk Hateful strike'),
+(41926, 580, 1, 65, 'Patchwerk Hateful strike'),
+(29879, 580, 1, 65, 'KT Frost blast');
