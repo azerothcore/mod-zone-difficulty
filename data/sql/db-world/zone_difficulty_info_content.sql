@@ -72,4 +72,4 @@ INSERT INTO `zone_difficulty_info` (`MapId`, `PhaseMask`, `HealingNerfValue`, `A
 -- Duels in Forbidding Sea (Wetlands)
 -- (2147483647, 0, '0.80', '0.80', '0.70', '0.70', 1, 'Zone 2402 Duel Healing 20% / Absorb 20% Nerf / 30% physical & spell damage nerf');
 -- Naxxramas
-(533, 0, 1.0, 1.0, 1.20, 1.15, 1, 'Naxxramas 20% physical & 15% spell damage buff');
+(533, 0, 1.0, 1.0, 1.1, 1.1, 1, 'Naxxramas 10% physical & 10% spell damage buff');
