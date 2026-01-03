@@ -59,4 +59,5 @@ INSERT INTO `zone_difficulty_spelloverrides` (`SpellID`, `MapId`, `NerfValue`, `
 (46768, 580, 1, 65, 'Grand Warlock Alythess - Conflagration (Area hit)'),
 (28308, 533, 1, 65, 'Patchwerk Hateful strike'),
 (41926, 533, 1, 65, 'Patchwerk Hateful strike'),
+(28375, 533, 1, 65, 'Gluth - Decimate'),
 (29879, 533, 1, 65, 'KT Frost blast');
