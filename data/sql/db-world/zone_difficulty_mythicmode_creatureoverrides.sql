@@ -86,6 +86,7 @@ INSERT INTO `zone_difficulty_mythicmode_creatureoverrides` (`CreatureEntry`, `HP
 (16063, 0, 1.30, 1, 'Naxxramas – Sir Zeliek (Normal 10-man +30% HP)'),
 (16064, 0, 1.30, 1, 'Naxxramas – Thane Korth''azz (Normal 10-man +30% HP)'),
 (16065, 0, 1.30, 1, 'Naxxramas – Lady Blaumeux (Normal 10-man +30% HP)'),
+(30549, 0, 1.30, 1, 'Naxxramas – Baron Rivendare (Normal 10-man +30% HP)'),
 -- Naxxramas 25
 (29249, 0, 1.30, 1, 'Naxxramas – Anub''Rekhan (Normal 25-man +30% HP)'),
 (29268, 0, 1.30, 1, 'Naxxramas – Grand Widow Faerlina (Normal 25-man +30% HP)'),
@@ -102,6 +103,7 @@ INSERT INTO `zone_difficulty_mythicmode_creatureoverrides` (`CreatureEntry`, `HP
 (29991, 0, 1.30, 1, 'Naxxramas – Sapphiron (Normal 25-man +30% HP)'),
 (30061, 0, 1.30, 1, 'Naxxramas – Kel''Thuzad (Normal 25-man +30% HP)'),
 (30601, 0, 1.30, 1, 'Naxxramas – Lady Blaumeux (Normal 25-man +30% HP)'),
+(30600, 0, 1.30, 1, 'Naxxramas – Baron Rivendare (Normal 25-man +30% HP)'),
 (30602, 0, 1.30, 1, 'Naxxramas – Sir Zeliek (Normal 25-man +30% HP)'),
 (30603, 0, 1.30, 1, 'Naxxramas – Thane Korth''azz (Normal 25-man +30% HP)');
 
