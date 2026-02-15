@@ -825,11 +825,9 @@ void ZoneDifficulty::MythicmodeEvent(Unit* unit, uint32 entry, uint32 key)
 
         if (mythicAI.Target == TARGET_PLAYER_DISTANCE)
         {
-            auto const& threatlist = unit->GetThreatMgr().GetThreatList();
-
-            for (auto itr = threatlist.begin(); itr != threatlist.end(); ++itr)
+            for (ThreatReference const* ref : unit->GetThreatMgr().GetSortedThreatList())
             {
-                Unit* target = (*itr)->getTarget();
+                Unit* target = ref->GetVictim();
                 if (!unit->IsWithinDist(target, mythicAI.TargetArg))
                     continue;
 
