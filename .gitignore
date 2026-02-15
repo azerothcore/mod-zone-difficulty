@@ -47,3 +47,4 @@ local.properties
 .project
 .cproject
 .idea
+_codeql_detected_source_root
