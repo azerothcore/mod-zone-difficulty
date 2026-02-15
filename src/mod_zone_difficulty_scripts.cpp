@@ -1024,8 +1024,11 @@ public:
         if (!sZoneDifficulty->MythicmodeEnable)
             return;
 
+        if (!creature)
+            return;
+
         Map* map = creature->GetMap();
-        if (!creature || !map)
+        if (!map)
             return;
 
         if (!map->IsRaid() && !(map->IsHeroic() && map->IsDungeon()))
