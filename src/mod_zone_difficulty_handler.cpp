@@ -26,6 +26,12 @@ ZoneDifficulty* ZoneDifficulty::instance()
     return &instance;
 }
 
+bool ZoneDifficulty::IsInstanceMythic(uint32 instanceId) const
+{
+    auto it = MythicmodeInstanceData.find(instanceId);
+    return it != MythicmodeInstanceData.end() && it->second;
+}
+
 void ZoneDifficulty::LoadMapDifficultySettings()
 {
     if (!sZoneDifficulty->IsEnabled)
@@ -167,12 +173,15 @@ void ZoneDifficulty::LoadMapDifficultySettings()
     {
         do
         {
-            if ((*result)[3].Get<uint8>() > 0)
+            uint8 enabled = (*result)[3].Get<uint8>();
+            if (enabled > 0)
             {
-                sZoneDifficulty->SpellNerfOverrides[(*result)[0].Get<uint32>()][(*result)[1].Get<uint32>()].NerfPct = (*result)[2].Get<float>();
-                sZoneDifficulty->SpellNerfOverrides[(*result)[0].Get<uint32>()][(*result)[1].Get<uint32>()].ModeMask = (*result)[3].Get<uint32>();
+                uint32 spellId = (*result)[0].Get<uint32>();
+                uint32 mapId = (*result)[1].Get<uint32>();
+                auto& entry = sZoneDifficulty->SpellNerfOverrides[spellId][mapId];
+                entry.NerfPct = (*result)[2].Get<float>();
+                entry.ModeMask = (*result)[3].Get<uint32>();
             }
-
         } while (result->NextRow());
     }
 
@@ -215,7 +224,6 @@ void ZoneDifficulty::LoadMapDifficultySettings()
             data.RewardType = (*result)[3].Get<uint8>();
 
             sZoneDifficulty->MythicmodeLoot[MapID].push_back(data);
-            //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: New creature for map {} with entry: {}", MapID, data.EncounterEntry);
 
             Expansion[MapID] = data.RewardType;
 
@@ -231,7 +239,6 @@ void ZoneDifficulty::LoadMapDifficultySettings()
         do
         {
             sZoneDifficulty->DailyHeroicQuests.push_back((*result)[0].Get<uint32>());
-            //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Adding daily heroic quest with id {}.", (*result)[0].Get<uint32>());
         } while (result->NextRow());
     }
     else
@@ -258,7 +265,6 @@ void ZoneDifficulty::LoadMapDifficultySettings()
                     data.NormalOverride = hpModifierNormal;
 
                 sZoneDifficulty->CreatureOverrides[creatureEntry] = data;
-                //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: New creature with entry: {} has exception for hp: {}", creatureEntry, hpModifier);
             }
         } while (result->NextRow());
     }
@@ -299,7 +305,6 @@ void ZoneDifficulty::LoadMapDifficultySettings()
                 {
                     LOG_ERROR("module", "MOD-ZONE-DIFFICULTY: Unknown type for `Target`: {} in zone_difficulty_mythicmode_ai", data.Target);
                 }
-                //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: New creature with entry: {} has exception for hp: {}", creatureEntry, hpModifier);
             }
         } while (result->NextRow());
     }
@@ -308,19 +313,10 @@ void ZoneDifficulty::LoadMapDifficultySettings()
         LOG_ERROR("module", "MOD-ZONE-DIFFICULTY: Query failed: SELECT * FROM zone_difficulty_mythicmode_ai");
     }
 
-    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Starting load of rewards.");
     if (QueryResult result = WorldDatabase.Query("SELECT ContentType, ItemType, Entry, Price, Enchant, EnchantSlot, Achievement, Enabled FROM zone_difficulty_mythicmode_rewards"))
     {
-        /* debug
-         * uint32 i = 0;
-         * end debug
-         */
         do
         {
-            /* debug
-             * ++i;
-             * end debug
-             */
             ZoneDifficultyRewardData data;
             uint32 contentType = (*result)[0].Get<uint32>();
             uint32 itemType = (*result)[1].Get<uint32>();
@@ -334,17 +330,10 @@ void ZoneDifficulty::LoadMapDifficultySettings()
             if (enabled)
             {
                 if (data.Achievement >= 0)
-                {
                     sZoneDifficulty->Rewards[contentType][itemType].push_back(data);
-                    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Loading item with entry {} has enchant {} in slot {}. contentType: {} itemType: {}", data.Entry, data.Enchant, data.EnchantSlot, contentType, itemType);
-                }
                 else
-                {
                     sZoneDifficulty->TierRewards[contentType] = data;
-                    //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Loading tier reward with entry {} has enchant {} in slot {}. contentType: {} itemType: {}", data.Entry, data.Enchant, data.EnchantSlot, contentType, itemType);
-                }
             }
-            //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Total items in Rewards map: {}.", i);
         } while (result->NextRow());
     }
     else
@@ -365,13 +354,6 @@ void ZoneDifficulty::LoadMapDifficultySettings()
 void ZoneDifficulty::LoadMythicmodeInstanceData()
 {
     std::vector<bool> instanceIDs = sMapMgr->GetInstanceIDs();
-    /* debugging
-    * for (int i = 0; i < int(instanceIDs.size()); i++)
-    * {
-    *   LOG_INFO("module", "MOD-ZONE-DIFFICULTY: ZoneDifficulty::LoadMythicmodeInstanceData: id {} exists: {}:", i, instanceIDs[i]);
-    * }
-    * end debugging
-    */
     if (QueryResult result = CharacterDatabase.Query("SELECT * FROM zone_difficulty_instance_saves"))
     {
         do
@@ -388,8 +370,6 @@ void ZoneDifficulty::LoadMythicmodeInstanceData()
             {
                 CharacterDatabase.Execute("DELETE FROM zone_difficulty_instance_saves WHERE InstanceID = {}", InstanceId);
             }
-
-
         } while (result->NextRow());
     }
 }
@@ -422,9 +402,7 @@ void ZoneDifficulty::LoadMythicmodeScoreData()
             uint8 Type = (*result)[1].Get<uint8>();
             uint32 Score = (*result)[2].Get<uint32>();
 
-            //LOG_INFO("module", "MOD-ZONE-DIFFICULTY: Loading from DB for player with GUID {}: Type = {}, Score = {}", GUID, Type, Score);
             sZoneDifficulty->MythicmodeScore[GUID][Type] = Score;
-
         } while (result->NextRow());
     }
 
@@ -436,13 +414,17 @@ void ZoneDifficulty::LoadMythicmodeScoreData()
             uint8 BossID = (*result)[1].Get<uint32>();
             uint32 PlayerGuid = (*result)[2].Get<uint32>();
 
-            // Set all BossID which aren't true to false for that mapID
-            if (sZoneDifficulty->Logs[PlayerGuid].find(MapId) == sZoneDifficulty->Logs[PlayerGuid].end())
+            auto& playerLogs = sZoneDifficulty->Logs[PlayerGuid];
+            if (playerLogs.find(MapId) == playerLogs.end())
             {
-                for (int i = 0; i < sZoneDifficulty->EncounterCounter[MapId]; ++i)
-                    sZoneDifficulty->Logs[PlayerGuid][MapId][i] = false;
+                auto encounterIt = sZoneDifficulty->EncounterCounter.find(MapId);
+                if (encounterIt != sZoneDifficulty->EncounterCounter.end())
+                {
+                    for (int i = 0; i < encounterIt->second; ++i)
+                        playerLogs[MapId][i] = false;
+                }
             }
-            sZoneDifficulty->Logs[PlayerGuid][MapId][BossID] = true;
+            playerLogs[MapId][BossID] = true;
         } while (result->NextRow());
     }
 }
@@ -661,10 +643,7 @@ bool ZoneDifficulty::IsMythicmodeMap(uint32 mapId)
     if (!sZoneDifficulty->MythicmodeEnable)
         return false;
 
-    if (sZoneDifficulty->MythicmodeLoot.find(mapId) == sZoneDifficulty->MythicmodeLoot.end())
-        return false;
-
-    return true;
+    return sZoneDifficulty->MythicmodeLoot.count(mapId) > 0;
 }
 
 /**
@@ -685,7 +664,7 @@ bool ZoneDifficulty::IsValidNerfTarget(Unit* target)
  * @param element One element which can potentially be part of the values in the vector
  * @return The result as bool
  */
-bool ZoneDifficulty::VectorContainsUint32(std::vector<uint32> vec, uint32 element)
+bool ZoneDifficulty::VectorContainsUint32(const std::vector<uint32>& vec, uint32 element)
 {
     return find(vec.begin(), vec.end(), element) != vec.end();
 }
@@ -700,15 +679,19 @@ bool ZoneDifficulty::VectorContainsUint32(std::vector<uint32> vec, uint32 elemen
  */
  bool ZoneDifficulty::OverrideModeMatches(uint32 instanceId, uint32 spellId, uint32 mapId)
 {
-    if ((sZoneDifficulty->HasMythicmode(sZoneDifficulty->SpellNerfOverrides[spellId][mapId].ModeMask) && sZoneDifficulty->MythicmodeInstanceData[instanceId]) ||
-        (sZoneDifficulty->HasNormalMode(sZoneDifficulty->SpellNerfOverrides[spellId][mapId].ModeMask) && !sZoneDifficulty->MythicmodeInstanceData[instanceId]))
-    {
-        return true;
-    }
-    else
-    {
+    auto spellIt = sZoneDifficulty->SpellNerfOverrides.find(spellId);
+    if (spellIt == sZoneDifficulty->SpellNerfOverrides.end())
         return false;
-    }
+
+    auto mapIt = spellIt->second.find(mapId);
+    if (mapIt == spellIt->second.end())
+        return false;
+
+    uint32 modeMask = mapIt->second.ModeMask;
+    bool isMythic = sZoneDifficulty->IsInstanceMythic(instanceId);
+
+    return (sZoneDifficulty->HasMythicmode(modeMask) && isMythic) ||
+           (sZoneDifficulty->HasNormalMode(modeMask) && !isMythic);
 }
 
 /**
@@ -754,24 +737,22 @@ bool ZoneDifficulty::ShouldNerfInDuels(Unit* target)
  */
 int32 ZoneDifficulty::GetLowestMatchingPhase(uint32 mapId, uint32 phaseMask)
 {
-    // Check if there is an entry for the mapId at all
-    if (sZoneDifficulty->ShouldNerfMap(mapId))
+    auto mapIt = sZoneDifficulty->NerfInfo.find(mapId);
+    if (mapIt == sZoneDifficulty->NerfInfo.end())
+        return -1;
+
+    auto& phaseMap = mapIt->second;
+
+    // Check if 0 is assigned as a phase to cover all phases
+    if (phaseMap.count(0))
+        return 0;
+
+    for (auto const& [key, value] : phaseMap)
     {
-
-        // Check if 0 is assigned as a phase to cover all phases
-        if (sZoneDifficulty->NerfInfo[mapId].find(0) != sZoneDifficulty->NerfInfo[mapId].end())
-        {
-            return 0;
-        }
-
-        for (auto const& [key, value] : sZoneDifficulty->NerfInfo[mapId])
-        {
-            if (key & phaseMask)
-            {
-                return key;
-            }
-        }
+        if (key & phaseMask)
+            return key;
     }
+
     return -1;
 }
 
@@ -783,11 +764,11 @@ int32 ZoneDifficulty::GetLowestMatchingPhase(uint32 mapId, uint32 phaseMask)
  */
 void ZoneDifficulty::SaveMythicmodeInstanceData(uint32 instanceId)
 {
-    if (sZoneDifficulty->MythicmodeInstanceData.find(instanceId) == sZoneDifficulty->MythicmodeInstanceData.end())
-    {
+    auto it = sZoneDifficulty->MythicmodeInstanceData.find(instanceId);
+    if (it == sZoneDifficulty->MythicmodeInstanceData.end())
         return;
-    }
-    CharacterDatabase.Execute("REPLACE INTO zone_difficulty_instance_saves (InstanceID, MythicmodeOn) VALUES ({}, {})", instanceId, sZoneDifficulty->MythicmodeInstanceData[instanceId]);
+
+    CharacterDatabase.Execute("REPLACE INTO zone_difficulty_instance_saves (InstanceID, MythicmodeOn) VALUES ({}, {})", instanceId, it->second);
 }
 
 void ZoneDifficulty::MythicmodeEvent(Unit* unit, uint32 entry, uint32 key)
@@ -976,14 +957,25 @@ bool ZoneDifficulty::HasCompletedFullTier(uint32 category, uint32 playerGuid)
 
     for (uint32 mapId : MapList)
     {
-        if (sZoneDifficulty->EncounterCounter.find(mapId) == sZoneDifficulty->EncounterCounter.end())
+        auto encounterIt = sZoneDifficulty->EncounterCounter.find(mapId);
+        if (encounterIt == sZoneDifficulty->EncounterCounter.end())
         {
             LOG_ERROR("module", "MOD-ZONE-DIFFICULTY: Map without data requested in ZoneDifficulty::HasCompletedFullTier {}", mapId);
             return false;
         }
-        for (uint8 i = 0; i < sZoneDifficulty->EncounterCounter[mapId]; ++i)
+
+        auto playerLogIt = sZoneDifficulty->Logs.find(playerGuid);
+        if (playerLogIt == sZoneDifficulty->Logs.end())
+            return false;
+
+        auto mapLogIt = playerLogIt->second.find(mapId);
+        if (mapLogIt == playerLogIt->second.end())
+            return false;
+
+        for (uint8 i = 0; i < encounterIt->second; ++i)
         {
-            if (!sZoneDifficulty->Logs[playerGuid][mapId][i])
+            auto bossIt = mapLogIt->second.find(i);
+            if (bossIt == mapLogIt->second.end() || !bossIt->second)
                 return false;
         }
     }

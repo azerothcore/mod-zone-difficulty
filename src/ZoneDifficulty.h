@@ -175,14 +175,15 @@ public:
     void MythicmodeEvent(Unit* unit, uint32 entry, uint32 key);
     bool HasNormalMode(int8 mode) { return (mode & MODE_NORMAL) == MODE_NORMAL; }
     bool HasMythicmode(int8 mode) { return (mode & MODE_HARD) == MODE_HARD; }
+    [[nodiscard]] bool IsInstanceMythic(uint32 instanceId) const;
     bool HasCompletedFullTier(uint32 category, uint32 playerGUID);
     bool OverrideModeMatches(uint32 instanceId, uint32 spellId, uint32 mapId);
     [[nodiscard]] bool CheckCompletionStatus(Creature* creature, Player* player, uint32 category) const;
     [[nodiscard]] bool IsValidNerfTarget(Unit* target);
-    [[nodiscard]] bool VectorContainsUint32(std::vector<uint32> vec, uint32 element);
+    [[nodiscard]] bool VectorContainsUint32(const std::vector<uint32>& vec, uint32 element);
     [[nodiscard]] bool IsMythicmodeMap(uint32 mapid);
     [[nodiscard]] bool ShouldNerfInDuels(Unit* target);
-    [[nodiscard]] bool ShouldNerfMap(uint32 mapId) { return NerfInfo.find(mapId) != NerfInfo.end(); };
+    [[nodiscard]] bool ShouldNerfMap(uint32 mapId) { return NerfInfo.count(mapId) > 0; };
     [[nodiscard]] int32 GetLowestMatchingPhase(uint32 mapId, uint32 phaseMask);
     void RewardItem(Player* player, uint8 category, uint8 itemType, uint8 counter, Creature* creature, uint32 itemEntry);
     void LogAndAnnounceKill(Map* map, bool isMythic);
