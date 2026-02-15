@@ -96,12 +96,17 @@ public:
             if (overrideIt != sZoneDifficulty->SpellNerfOverrides.end())
             {
                 auto const& overrideMap = overrideIt->second;
-                if (sZoneDifficulty->OverrideModeMatches(instanceId, spellInfo->Id, mapId))
+
+                auto mapIt = overrideMap.find(mapId);
+                if (mapIt != overrideMap.end() && sZoneDifficulty->OverrideModeMatches(instanceId, mapIt->second.ModeMask))
                 {
-                    if (overrideMap.count(mapId))
-                        absorb = scaleAbsorb(absorb, overrideMap.at(mapId).NerfPct);
-                    else if (overrideMap.count(0))
-                        absorb = scaleAbsorb(absorb, overrideMap.at(0).NerfPct);
+                    absorb = scaleAbsorb(absorb, mapIt->second.NerfPct);
+                }
+                else
+                {
+                    auto globalIt = overrideMap.find(0);
+                    if (globalIt != overrideMap.end() && sZoneDifficulty->OverrideModeMatches(instanceId, globalIt->second.ModeMask))
+                        absorb = scaleAbsorb(absorb, globalIt->second.NerfPct);
                 }
             }
 
@@ -163,14 +168,14 @@ public:
                 auto& overrideMap = spellIt->second;
 
                 auto mapIt = overrideMap.find(mapId);
-                if (mapIt != overrideMap.end() && sZoneDifficulty->OverrideModeMatches(instanceId, spellInfo->Id, mapId))
+                if (mapIt != overrideMap.end() && sZoneDifficulty->OverrideModeMatches(instanceId, mapIt->second.ModeMask))
                 {
                     heal = heal * mapIt->second.NerfPct;
                     return;
                 }
 
                 auto globalIt = overrideMap.find(0);
-                if (globalIt != overrideMap.end() && sZoneDifficulty->OverrideModeMatches(instanceId, spellInfo->Id, mapId))
+                if (globalIt != overrideMap.end() && sZoneDifficulty->OverrideModeMatches(instanceId, globalIt->second.ModeMask))
                 {
                     heal = heal * globalIt->second.NerfPct;
                     return;
@@ -286,14 +291,14 @@ public:
                     auto& overrideMap = spellIt->second;
 
                     auto mapIt = overrideMap.find(mapId);
-                    if (mapIt != overrideMap.end() && sZoneDifficulty->OverrideModeMatches(instanceId, spellInfo->Id, mapId))
+                    if (mapIt != overrideMap.end() && sZoneDifficulty->OverrideModeMatches(instanceId, mapIt->second.ModeMask))
                     {
                         damage = damage * mapIt->second.NerfPct;
                         return;
                     }
 
                     auto globalIt = overrideMap.find(0);
-                    if (globalIt != overrideMap.end() && sZoneDifficulty->OverrideModeMatches(instanceId, spellInfo->Id, mapId))
+                    if (globalIt != overrideMap.end() && sZoneDifficulty->OverrideModeMatches(instanceId, globalIt->second.ModeMask))
                     {
                         damage = damage * globalIt->second.NerfPct;
                         return;
