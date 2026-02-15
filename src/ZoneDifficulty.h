@@ -177,7 +177,7 @@ public:
     bool HasMythicmode(int8 mode) { return (mode & MODE_HARD) == MODE_HARD; }
     [[nodiscard]] bool IsInstanceMythic(uint32 instanceId) const;
     bool HasCompletedFullTier(uint32 category, uint32 playerGUID);
-    bool OverrideModeMatches(uint32 instanceId, uint32 spellId, uint32 mapId);
+    bool OverrideModeMatches(uint32 instanceId, uint32 modeMask);
     [[nodiscard]] bool CheckCompletionStatus(Creature* creature, Player* player, uint32 category) const;
     [[nodiscard]] bool IsValidNerfTarget(Unit* target);
     [[nodiscard]] bool VectorContainsUint32(const std::vector<uint32>& vec, uint32 element);

@@ -411,7 +411,7 @@ void ZoneDifficulty::LoadMythicmodeScoreData()
         do
         {
             uint32 MapId = (*result)[0].Get<uint32>();
-            uint8 BossID = (*result)[1].Get<uint32>();
+            uint8 BossID = static_cast<uint8>((*result)[1].Get<uint32>());
             uint32 PlayerGuid = (*result)[2].Get<uint32>();
 
             auto& playerLogs = sZoneDifficulty->Logs[PlayerGuid];
@@ -670,24 +670,14 @@ bool ZoneDifficulty::VectorContainsUint32(const std::vector<uint32>& vec, uint32
 }
 
 /**
- * @brief Checks if the instance and spelloverride have matching modes
+ * @brief Checks if the instance mode matches the override's mode mask
  *
- * @param instanceId
- * @param spellId
- * @param mapId
+ * @param instanceId The instance ID to check mythic status
+ * @param modeMask The mode bitmask from the override entry
  * @return The result as bool
  */
- bool ZoneDifficulty::OverrideModeMatches(uint32 instanceId, uint32 spellId, uint32 mapId)
+ bool ZoneDifficulty::OverrideModeMatches(uint32 instanceId, uint32 modeMask)
 {
-    auto spellIt = sZoneDifficulty->SpellNerfOverrides.find(spellId);
-    if (spellIt == sZoneDifficulty->SpellNerfOverrides.end())
-        return false;
-
-    auto mapIt = spellIt->second.find(mapId);
-    if (mapIt == spellIt->second.end())
-        return false;
-
-    uint32 modeMask = mapIt->second.ModeMask;
     bool isMythic = sZoneDifficulty->IsInstanceMythic(instanceId);
 
     return (sZoneDifficulty->HasMythicmode(modeMask) && isMythic) ||
@@ -955,6 +945,10 @@ bool ZoneDifficulty::HasCompletedFullTier(uint32 category, uint32 playerGuid)
         break;
     }
 
+    auto playerLogIt = sZoneDifficulty->Logs.find(playerGuid);
+    if (playerLogIt == sZoneDifficulty->Logs.end())
+        return false;
+
     for (uint32 mapId : MapList)
     {
         auto encounterIt = sZoneDifficulty->EncounterCounter.find(mapId);
@@ -963,10 +957,6 @@ bool ZoneDifficulty::HasCompletedFullTier(uint32 category, uint32 playerGuid)
             LOG_ERROR("module", "MOD-ZONE-DIFFICULTY: Map without data requested in ZoneDifficulty::HasCompletedFullTier {}", mapId);
             return false;
         }
-
-        auto playerLogIt = sZoneDifficulty->Logs.find(playerGuid);
-        if (playerLogIt == sZoneDifficulty->Logs.end())
-            return false;
 
         auto mapLogIt = playerLogIt->second.find(mapId);
         if (mapLogIt == playerLogIt->second.end())
