@@ -194,25 +194,30 @@ public:
     float MythicmodeHpModifier{ 2.0 };
     bool MythicmodeEnable{ false };
     bool MythicmodeInNormalDungeons{ false };
+    bool MythicmodeAIEnable{ false };
     bool UseVendorInterface{ false };
+    bool SpellBuffOnlyBosses{ false };
+    bool MeleeBuffOnlyBosses{ false };
     bool IsBlackTempleDone{ false };
     bool IsSunwellPlateauDone{ false };
     std::vector<uint32> DailyHeroicQuests;
     std::map<uint32, uint32> HeroicTBCQuestMapList;
     std::map<uint32, uint8> EncounterCounter;
-    std::map<uint32, uint8> Expansion;
+    std::unordered_map<uint32, uint8> Expansion;
     std::map<uint32, CreatureOverrideData> CreatureOverrides;
     std::map<uint32, uint32> EncountersInProgress;
     std::map<uint32, std::string> ItemIcons;
     std::map<uint8, ZoneDifficultyRewardData> TierRewards;
 
-    typedef std::map<uint32, std::map<uint32, ZoneDifficultyNerfData> > ZoneDifficultyNerfDataMap;
+    // Inner phase map remains std::map: GetLowestMatchingPhase() iterates it
+    // and relies on ascending key order to return the lowest matching phase.
+    typedef std::unordered_map<uint32, std::map<uint32, ZoneDifficultyNerfData> > ZoneDifficultyNerfDataMap;
     ZoneDifficultyNerfDataMap NerfInfo;
-    typedef std::map<uint32, std::map<uint32, ZoneDifficulySpellOverrideData> > ZoneDifficultySpellNerfMap;
+    typedef std::unordered_map<uint32, std::unordered_map<uint32, ZoneDifficulySpellOverrideData> > ZoneDifficultySpellNerfMap;
     ZoneDifficultySpellNerfMap SpellNerfOverrides;
     typedef std::map<uint32, std::vector<uint32> > ZoneDifficultyDisablesMap;
     ZoneDifficultyDisablesMap DisallowedBuffs;
-    typedef std::map<uint32, bool> ZoneDifficultyMythicmodeInstDataMap;
+    typedef std::unordered_map<uint32, bool> ZoneDifficultyMythicmodeInstDataMap;
     ZoneDifficultyMythicmodeInstDataMap MythicmodeInstanceData;
     typedef std::map<uint32, std::vector<ZoneDifficultyMythicmodeMapData> > ZoneDifficultyMythicmodeLootMap;
     ZoneDifficultyMythicmodeLootMap MythicmodeLoot;

@@ -77,3 +77,13 @@ ModZoneDifficulty.Mythicmode.HpModifier = 2.0
 #                     1 - Enabled
 
 ModZoneDifficulty.Mythicmode.InNormalDungeons = 0
+
+#
+#    ModZoneDifficulty.MythicmodeAI.Enable
+#        Description: Enable scripted Mythic mode AI from `zone_difficulty_mythicmode_ai`.
+#                     When disabled, OnUnitEnterCombat skips the AI lookup entirely
+#                     for every unit that enters combat in a mythic instance.
+#        Default:     0 - Disabled
+#                     1 - Enabled
+
+ModZoneDifficulty.MythicmodeAI.Enable = 0
