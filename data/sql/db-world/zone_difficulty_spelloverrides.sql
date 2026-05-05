@@ -7,7 +7,7 @@ CREATE TABLE `zone_difficulty_spelloverrides` (
 	`Comment` TEXT
 );
 
-DELETE FROM `zone_difficulty_spelloverrides` WHERE `SpellID` IN (53652, 53654, 52752, 47753, 18562, 25516, 36240, 31850, 31851, 31852, 66235, 37641, 37036, 36132, 37120, 33031, 34121, 35181, 36971, 31249, 31250, 31304, 31341, 31944, 31608, 39878, 42052, 40314, 40175, 40175, 41303, 41360, 40827, 40869, 40870, 40871, 41001, 42005, 41078, 41131);
+DELETE FROM `zone_difficulty_spelloverrides` WHERE `SpellID` IN (37104, 36132, 53652, 53654, 52752, 47753, 18562, 25516, 36240, 31850, 31851, 31852, 66235, 37641, 37036, 36132, 37120, 33031, 34121, 35181, 36971, 31249, 31250, 31304, 31341, 31944, 31608, 39878, 42052, 40314, 40175, 40175, 41303, 41360, 40827, 40869, 40870, 40871, 41001, 42005, 41078, 41131);
 INSERT INTO `zone_difficulty_spelloverrides` (`SpellID`, `MapId`, `NerfValue`, `ModeMask`, `Comment`) VALUES
 (53652, 0, 1, 65, 'Beacon of Light - Skip nerf.'),
 (53654, 0, 1, 65, 'Beacon of Light 2 (Flash of Light, Holy Shock) - Skip nerf.'),
@@ -29,6 +29,8 @@ INSERT INTO `zone_difficulty_spelloverrides` (`SpellID`, `MapId`, `NerfValue`, `
 (34121, 550, 1, 65, 'Tempest Keep - Al\'ar Flame Buffet'),
 (35181, 550, 2, 65, 'Tempest Keep - Al\'ar Dive Bomb spread damage'),
 (36971, 550, 1, 65, 'Tempest Keep - Grand Astromancer Capernian - Fireball'),
+(37104, 550, 1, 65, 'Tempest Keep - Crystalcore Sentinel - Overcharge'),
+(36132, 550, 1, 65, 'Tempest Keep - Bloodwarder Marshal - Whirlwind'),
 (31249, 534, 1, 65, 'The Battle For Mount Hyjal - Rage Winterchill - Icebolt'),
 (31250, 534, 1, 65, 'The Battle For Mount Hyjal - Rage Winterchill - Frost Nova'),
 (31304, 534, 1, 65, 'The Battle For Mount Hyjal - Azgalor infernal - Immolation'),
